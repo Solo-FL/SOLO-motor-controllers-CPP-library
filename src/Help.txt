@@ -1,0 +1,18 @@
+
+NOTE: 
+when from DLL repository you want to make the C++ library:
+    1) remove below commands in .cpp and .h :
+        #ifdef SOLOLIBRARY_EXPORTS
+        #define SOLOLIBRARY_API __declspec(dllexport)
+        #else
+        #define SOLOLIBRARY_API __declspec(dllimport)
+        #endif
+
+    2)  remove all below commands:
+        extern "C" SOLOLIBRARY_API
+
+to create dllTest.exe run below command:
+    g++ -o dllTest.exe dllTest.cpp SoloDLL_CPP.cpp
+
+to test the library:
+    run the dllTest.exe

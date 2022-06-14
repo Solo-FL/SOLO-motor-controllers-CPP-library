@@ -17,7 +17,8 @@ Folders and Files Hierarchy
 
 src  = Source Files
 
-example = Examples Files (this examples compile thanks to the src files) 
+example = Examples Files (this examples compile thanks to the src files)
+
    .cpp = specific example code
    
    _exe.bat = this file generete the .exe file from the .cpp file  (double click to execute the .bat)

@@ -22,7 +22,7 @@ extern "C"
 {
 #endif
 
-class SOLODLLCPP {
+class SOLOMotorControllers {
 
 private:
 	UINT8 addr = 0;
@@ -43,11 +43,11 @@ private:
 
 public:
 
-	//SOLODLLCPP();
+	//SOLOMotorControllers();
 
-	SOLODLLCPP(unsigned char _addr = 0, long _baudrate = 115200, long _millisecondsTimeout = 50, int _packetFailureTrialAttempts = 3);
+	SOLOMotorControllers(unsigned char _addr = 0, long _baudrate = 115200, long _millisecondsTimeout = 50, int _packetFailureTrialAttempts = 3);
 
-	~SOLODLLCPP();
+	~SOLOMotorControllers();
 
 	enum SOLOMotorControllersError
 	{

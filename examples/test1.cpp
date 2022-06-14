@@ -27,13 +27,13 @@ int main(void)
 {
     bool status = FALSE;
     int error;
-    SOLODLLCPP solo1, solo2;
+    SOLOMotorControllers solo1, solo2;
 
     status = solo1.serialSetup(0, (char *)"COM3", 115200);
 
     if(status)
     {
-        std::cout << "solo1 Succesfully Conneced" << std::endl;
+        std::cout << "solo1 Succesfully Conneced! " << std::endl;
     }
 
     else

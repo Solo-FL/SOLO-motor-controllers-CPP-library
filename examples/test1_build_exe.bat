@@ -1,0 +1,1 @@
+g++ -o test1.exe test1.cpp ../src/SoloMotorControllers.cpp  -I../src

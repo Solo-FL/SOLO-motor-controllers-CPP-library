@@ -115,12 +115,12 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 #define ReadSpeedDecelerationValue          0xB5
 #define ReadEncoderIndexCounts              0xB8
 
-//SOLODLLCPP::SOLODLLCPP()
+//SOLOMotorControllers::SOLOMotorControllers()
 //{
 //
 //}
 
-SOLODLLCPP::SOLODLLCPP(unsigned char _addr, long _baudrate, long _millisecondsTimeout, int _packetFailureTrialAttempts)
+SOLOMotorControllers::SOLOMotorControllers(unsigned char _addr, long _baudrate, long _millisecondsTimeout, int _packetFailureTrialAttempts)
 	:addr(_addr)
 	, baudrate(_baudrate)
 	, millisecondsTimeout(_millisecondsTimeout)
@@ -129,13 +129,13 @@ SOLODLLCPP::SOLODLLCPP(unsigned char _addr, long _baudrate, long _millisecondsTi
 
 }
 
-SOLODLLCPP::~SOLODLLCPP() 
+SOLOMotorControllers::~SOLOMotorControllers() 
 {
 	Disconnect();
 	isConnected = false;
 }
 
-bool SOLODLLCPP::serialSetup(unsigned char _addr, char* _portName, long _baudrate, long _millisecondsTimeout, int _packetFailureTrialAttempts)
+bool SOLOMotorControllers::serialSetup(unsigned char _addr, char* _portName, long _baudrate, long _millisecondsTimeout, int _packetFailureTrialAttempts)
 {
 	addr = _addr;
 	sprintf_s(ComPortName, "\\\\.\\%s", _portName);
@@ -223,12 +223,12 @@ bool SOLODLLCPP::serialSetup(unsigned char _addr, char* _portName, long _baudrat
 	return true;
 }
 
-void SOLODLLCPP::Disconnect()
+void SOLOMotorControllers::Disconnect()
 {
 	CloseHandle(hComm);
 }
 
-bool SOLODLLCPP::Test()
+bool SOLOMotorControllers::Test()
 {
 
 	unsigned char cmd[] = { 0xFF,0xFF,65,66,67,68,69,70,0,0xFE };
@@ -238,7 +238,7 @@ bool SOLODLLCPP::Test()
 	else return false;
 }
 
-bool SOLODLLCPP::ExeCMD(unsigned char* cmd, int& error)
+bool SOLOMotorControllers::ExeCMD(unsigned char* cmd, int& error)
 {
 	//UINT8 _cmd[10] = { INITIATOR, INITIATOR, cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5], CRC, ENDING };
 	//UINT8 _readPacket[20];
@@ -364,7 +364,7 @@ bool SOLODLLCPP::ExeCMD(unsigned char* cmd, int& error)
 
 	if (isPacketFailureTrialAttemptsOverflow)
 	{
-		error = SOLODLLCPP::packetFailureTrialAttemptsOverflow;
+		error = SOLOMotorControllers::packetFailureTrialAttemptsOverflow;
 		return false;
 	}
 	else
@@ -398,7 +398,7 @@ bool SOLODLLCPP::ExeCMD(unsigned char* cmd, int& error)
 	}
 }
 
-float SOLODLLCPP::ConvertToFloat(unsigned char* data)
+float SOLOMotorControllers::ConvertToFloat(unsigned char* data)
 {
 	long dec = 0;
 	dec = (long)data[0] << 24;
@@ -417,7 +417,7 @@ float SOLODLLCPP::ConvertToFloat(unsigned char* data)
 	}
 }
 
-void SOLODLLCPP::ConvertToData(float f, unsigned char* data)
+void SOLOMotorControllers::ConvertToData(float f, unsigned char* data)
 {
 	long dec = (long)(f * 131072);
 	if (dec < 0)
@@ -433,7 +433,7 @@ void SOLODLLCPP::ConvertToData(float f, unsigned char* data)
 	data[3] = (UINT8)(dec % 256);
 }
 
-long SOLODLLCPP::ConvertToLong(unsigned char* data)
+long SOLOMotorControllers::ConvertToLong(unsigned char* data)
 {
 	long dec = 0;
 	dec = (long)data[0] << 24;
@@ -452,7 +452,7 @@ long SOLODLLCPP::ConvertToLong(unsigned char* data)
 	}
 }
 
-void SOLODLLCPP::ConvertToData(long l, unsigned char* data)
+void SOLOMotorControllers::ConvertToData(long l, unsigned char* data)
 {
 	long dec = l;
 	if (dec < 0)
@@ -468,7 +468,7 @@ void SOLODLLCPP::ConvertToData(long l, unsigned char* data)
 	data[3] = dec % 256;
 }
 
-void SOLODLLCPP::SplitData(unsigned char* data, unsigned char* cmd)
+void SOLOMotorControllers::SplitData(unsigned char* data, unsigned char* cmd)
 {
 	data[0] = cmd[2];
 	data[1] = cmd[3];
@@ -476,44 +476,44 @@ void SOLODLLCPP::SplitData(unsigned char* data, unsigned char* cmd)
 	data[3] = cmd[5];
 }
 
-bool SOLODLLCPP::SetDeviceAddress(unsigned char deviceAddress, int& error)
+bool SOLOMotorControllers::SetDeviceAddress(unsigned char deviceAddress, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,WriteDeviceAddres,0x00,0x00,0x00,deviceAddress };
 
 	if (deviceAddress < 0 || deviceAddress > 254)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
 
-bool SOLODLLCPP::SetDeviceAddress(unsigned char deviceAddress)
+bool SOLOMotorControllers::SetDeviceAddress(unsigned char deviceAddress)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetDeviceAddress(deviceAddress, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetDeviceAddress(deviceAddress, error);
 }
 
-bool SOLODLLCPP::SetCommandMode(CommandMode mode, int& error)
+bool SOLOMotorControllers::SetCommandMode(CommandMode mode, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,WriteCommandMode,0x00,0x00,0x00,mode };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetCommandMode(CommandMode mode)
+bool SOLOMotorControllers::SetCommandMode(CommandMode mode)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetCommandMode(mode, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetCommandMode(mode, error);
 }
-bool SOLODLLCPP::SetCurrentLimit(float currentLimit, int& error)
+bool SOLOMotorControllers::SetCurrentLimit(float currentLimit, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (currentLimit < 0 || currentLimit > 32)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -521,19 +521,19 @@ bool SOLODLLCPP::SetCurrentLimit(float currentLimit, int& error)
 	ConvertToData(currentLimit, data);
 	unsigned char cmd[] = { addr,WriteCurrentLimit,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetCurrentLimit(float currentLimit)
+bool SOLOMotorControllers::SetCurrentLimit(float currentLimit)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetCurrentLimit(currentLimit, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetCurrentLimit(currentLimit, error);
 }
-bool SOLODLLCPP::SetTorqueReferenceIq(float torqueReferenceIq, int& error)
+bool SOLOMotorControllers::SetTorqueReferenceIq(float torqueReferenceIq, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (torqueReferenceIq < 0 || torqueReferenceIq > 32)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -541,19 +541,19 @@ bool SOLODLLCPP::SetTorqueReferenceIq(float torqueReferenceIq, int& error)
 	ConvertToData(torqueReferenceIq, data);
 	unsigned char cmd[] = { addr,WriteTorqueReferenceIq,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetTorqueReferenceIq(float torqueReferenceIq)
+bool SOLOMotorControllers::SetTorqueReferenceIq(float torqueReferenceIq)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetTorqueReferenceIq(torqueReferenceIq, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetTorqueReferenceIq(torqueReferenceIq, error);
 }
-bool SOLODLLCPP::SetSpeedReference(long speedReference, int& error)
+bool SOLOMotorControllers::SetSpeedReference(long speedReference, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (speedReference < 0 || speedReference > 30000)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -561,19 +561,19 @@ bool SOLODLLCPP::SetSpeedReference(long speedReference, int& error)
 	ConvertToData(speedReference, data);
 	unsigned char cmd[] = { addr,WriteSpeedReference,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetSpeedReference(long speedReference)
+bool SOLOMotorControllers::SetSpeedReference(long speedReference)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetSpeedReference(speedReference, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetSpeedReference(speedReference, error);
 }
-bool SOLODLLCPP::SetPowerReference(float powerReference, int& error)
+bool SOLOMotorControllers::SetPowerReference(float powerReference, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (powerReference < 0 || powerReference > 100)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -581,43 +581,43 @@ bool SOLODLLCPP::SetPowerReference(float powerReference, int& error)
 	ConvertToData(powerReference, data);
 	unsigned char cmd[] = { addr,WritePowerReference,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetPowerReference(float powerReference)
+bool SOLOMotorControllers::SetPowerReference(float powerReference)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetPowerReference(powerReference, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetPowerReference(powerReference, error);
 }
-bool SOLODLLCPP::MotorParametersIdentification(Action identification, int& error)
+bool SOLOMotorControllers::MotorParametersIdentification(Action identification, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,WriteMotorParametersIdentification,0x00,0x00,0x00,identification };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::MotorParametersIdentification(Action identification)
+bool SOLOMotorControllers::MotorParametersIdentification(Action identification)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::MotorParametersIdentification(identification, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::MotorParametersIdentification(identification, error);
 }
-bool SOLODLLCPP::EmergencyStop(int& error)
+bool SOLOMotorControllers::EmergencyStop(int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,WriteEmergencyStop,0x00,0x00,0x00,0x00 };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::EmergencyStop()
+bool SOLOMotorControllers::EmergencyStop()
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::EmergencyStop(error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::EmergencyStop(error);
 }
-bool SOLODLLCPP::SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz, int& error)
+bool SOLOMotorControllers::SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (outputPwmFrequencyKhz < 8 || outputPwmFrequencyKhz > 80)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -625,20 +625,20 @@ bool SOLODLLCPP::SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz, int& error
 	ConvertToData(outputPwmFrequencyKhz, data);
 	unsigned char cmd[] = { addr,WriteOutputPwmFrequencyKhz,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 
 }
-bool SOLODLLCPP::SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz)
+bool SOLOMotorControllers::SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetOutputPwmFrequencyKhz(outputPwmFrequencyKhz, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetOutputPwmFrequencyKhz(outputPwmFrequencyKhz, error);
 }
-bool SOLODLLCPP::SetSpeedControllerKp(float speedControllerKp, int& error)
+bool SOLOMotorControllers::SetSpeedControllerKp(float speedControllerKp, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (speedControllerKp < 0 || speedControllerKp > 300)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -646,19 +646,19 @@ bool SOLODLLCPP::SetSpeedControllerKp(float speedControllerKp, int& error)
 	ConvertToData(speedControllerKp, data);
 	unsigned char cmd[] = { addr,WriteSpeedControllerKp,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetSpeedControllerKp(float speedControllerKp)
+bool SOLOMotorControllers::SetSpeedControllerKp(float speedControllerKp)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetSpeedControllerKp(speedControllerKp, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetSpeedControllerKp(speedControllerKp, error);
 }
-bool SOLODLLCPP::SetSpeedControllerKi(float speedControllerKi, int& error)
+bool SOLOMotorControllers::SetSpeedControllerKi(float speedControllerKi, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (speedControllerKi < 0 || speedControllerKi > 300)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -666,31 +666,31 @@ bool SOLODLLCPP::SetSpeedControllerKi(float speedControllerKi, int& error)
 	ConvertToData(speedControllerKi, data);
 	unsigned char cmd[] = { addr,WriteSpeedControllerKi,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetSpeedControllerKi(float speedControllerKi)
+bool SOLOMotorControllers::SetSpeedControllerKi(float speedControllerKi)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetSpeedControllerKi(speedControllerKi, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetSpeedControllerKi(speedControllerKi, error);
 }
-bool SOLODLLCPP::SetMotorDirection(Direction motorDirection, int& error)
+bool SOLOMotorControllers::SetMotorDirection(Direction motorDirection, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,WriteMotorDirection,0x00,0x00,0x00,motorDirection };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetMotorDirection(Direction motorDirection)
+bool SOLOMotorControllers::SetMotorDirection(Direction motorDirection)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetMotorDirection(motorDirection, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetMotorDirection(motorDirection, error);
 }
-bool SOLODLLCPP::SetMotorResistance(float motorResistance, int& error)
+bool SOLOMotorControllers::SetMotorResistance(float motorResistance, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (motorResistance < 0.001 || motorResistance > 50)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -698,19 +698,19 @@ bool SOLODLLCPP::SetMotorResistance(float motorResistance, int& error)
 	ConvertToData(motorResistance, data);
 	unsigned char cmd[] = { addr,WriteMotorResistance,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetMotorResistance(float motorResistance)
+bool SOLOMotorControllers::SetMotorResistance(float motorResistance)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetMotorResistance(motorResistance, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetMotorResistance(motorResistance, error);
 }
-bool SOLODLLCPP::SetMotorInductance(float motorInductance, int& error)
+bool SOLOMotorControllers::SetMotorInductance(float motorInductance, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (motorInductance < 0.00001 || motorInductance > 0.2)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -718,19 +718,19 @@ bool SOLODLLCPP::SetMotorInductance(float motorInductance, int& error)
 	ConvertToData(motorInductance, data);
 	unsigned char cmd[] = { addr,WriteMotorInductance,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetMotorInductance(float motorInductance)
+bool SOLOMotorControllers::SetMotorInductance(float motorInductance)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetMotorInductance(motorInductance, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetMotorInductance(motorInductance, error);
 }
-bool SOLODLLCPP::SetMotorPolesCounts(long motorPolesCounts, int& error)
+bool SOLOMotorControllers::SetMotorPolesCounts(long motorPolesCounts, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (motorPolesCounts < 1 || motorPolesCounts > 80)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -738,19 +738,19 @@ bool SOLODLLCPP::SetMotorPolesCounts(long motorPolesCounts, int& error)
 	ConvertToData(motorPolesCounts, data);
 	unsigned char cmd[] = { addr,WriteMotorPolesCounts,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetMotorPolesCounts(long motorPolesCounts)
+bool SOLOMotorControllers::SetMotorPolesCounts(long motorPolesCounts)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetMotorPolesCounts(motorPolesCounts, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetMotorPolesCounts(motorPolesCounts, error);
 }
-bool SOLODLLCPP::SetIncrementalEncoderLines(long incrementalEncoderLines, int& error)
+bool SOLOMotorControllers::SetIncrementalEncoderLines(long incrementalEncoderLines, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (incrementalEncoderLines < 1 || incrementalEncoderLines > 40000)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -758,19 +758,19 @@ bool SOLODLLCPP::SetIncrementalEncoderLines(long incrementalEncoderLines, int& e
 	ConvertToData(incrementalEncoderLines, data);
 	unsigned char cmd[] = { addr,WriteIncrementalEncoderLines,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetIncrementalEncoderLines(long incrementalEncoderLines)
+bool SOLOMotorControllers::SetIncrementalEncoderLines(long incrementalEncoderLines)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetIncrementalEncoderLines(incrementalEncoderLines, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetIncrementalEncoderLines(incrementalEncoderLines, error);
 }
-bool SOLODLLCPP::SetSpeedLimit(long speedLimit, int& error)
+bool SOLOMotorControllers::SetSpeedLimit(long speedLimit, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (speedLimit < 1 || speedLimit > 30000)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -778,86 +778,86 @@ bool SOLODLLCPP::SetSpeedLimit(long speedLimit, int& error)
 	ConvertToData(speedLimit, data);
 	unsigned char cmd[] = { addr,WriteSpeedLimit,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetSpeedLimit(long speedLimit)
+bool SOLOMotorControllers::SetSpeedLimit(long speedLimit)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetSpeedLimit(speedLimit, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetSpeedLimit(speedLimit, error);
 }
-bool SOLODLLCPP::ResetDeviceAddress(int& error)
+bool SOLOMotorControllers::ResetDeviceAddress(int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { 0xFF,WriteResetDeviceAddress,0x00,0x00,0x00,0xFF };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::ResetDeviceAddress()
+bool SOLOMotorControllers::ResetDeviceAddress()
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::ResetDeviceAddress(error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::ResetDeviceAddress(error);
 }
-bool SOLODLLCPP::SetFeedbackControlMode(FeedbackControlMode mode, int& error)
+bool SOLOMotorControllers::SetFeedbackControlMode(FeedbackControlMode mode, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char data[4];
 	ConvertToData((long)mode, data);
 	unsigned char cmd[] = { addr,WriteFeedbackControlMode,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 
 }
-bool SOLODLLCPP::SetFeedbackControlMode(FeedbackControlMode mode)
+bool SOLOMotorControllers::SetFeedbackControlMode(FeedbackControlMode mode)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetFeedbackControlMode(mode, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetFeedbackControlMode(mode, error);
 }
-bool SOLODLLCPP::ResetFactory(int& error)
+bool SOLOMotorControllers::ResetFactory(int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,WriteResetFactory,0x00,0x00,0x00,0x01 };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::ResetFactory()
+bool SOLOMotorControllers::ResetFactory()
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::ResetFactory(error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::ResetFactory(error);
 }
-bool SOLODLLCPP::SetMotorType(MotorType motorType, int& error)
+bool SOLOMotorControllers::SetMotorType(MotorType motorType, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char data[4];
 	ConvertToData((long)motorType, data);
 	unsigned char cmd[] = { addr,WriteMotorType,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetMotorType(MotorType motorType)
+bool SOLOMotorControllers::SetMotorType(MotorType motorType)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetMotorType(motorType, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetMotorType(motorType, error);
 }
-bool SOLODLLCPP::SetControlMode(ControlMode controlMode, int& error)
+bool SOLOMotorControllers::SetControlMode(ControlMode controlMode, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char data[4];
 	ConvertToData((long)controlMode, data);
 	unsigned char cmd[] = { addr,WriteControlMode,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetControlMode(ControlMode controlMode)
+bool SOLOMotorControllers::SetControlMode(ControlMode controlMode)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetControlMode(controlMode, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetControlMode(controlMode, error);
 }
-bool SOLODLLCPP::SetCurrentControllerKp(float currentControllerKp, int& error)
+bool SOLOMotorControllers::SetCurrentControllerKp(float currentControllerKp, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (currentControllerKp < 0 || currentControllerKp > 16000)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -865,19 +865,19 @@ bool SOLODLLCPP::SetCurrentControllerKp(float currentControllerKp, int& error)
 	ConvertToData(currentControllerKp, data);
 	unsigned char cmd[] = { addr,WriteCurrentControllerKp,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetCurrentControllerKp(float currentControllerKp)
+bool SOLOMotorControllers::SetCurrentControllerKp(float currentControllerKp)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetCurrentControllerKp(currentControllerKp, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetCurrentControllerKp(currentControllerKp, error);
 }
-bool SOLODLLCPP::SetCurrentControllerKi(float currentControllerKi, int& error)
+bool SOLOMotorControllers::SetCurrentControllerKi(float currentControllerKi, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (currentControllerKi < 0 || currentControllerKi > 16000)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -885,31 +885,31 @@ bool SOLODLLCPP::SetCurrentControllerKi(float currentControllerKi, int& error)
 	ConvertToData(currentControllerKi, data);
 	unsigned char cmd[] = { addr,WriteCurrentControllerKi,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetCurrentControllerKi(float currentControllerKi)
+bool SOLOMotorControllers::SetCurrentControllerKi(float currentControllerKi)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetCurrentControllerKi(currentControllerKi, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetCurrentControllerKi(currentControllerKi, error);
 }
-bool SOLODLLCPP::SetMonitoringMode(bool mode, int& error)
+bool SOLOMotorControllers::SetMonitoringMode(bool mode, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,WriteMonitoringMode,0x00,0x00,0x00,mode };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetMonitoringMode(bool mode)
+bool SOLOMotorControllers::SetMonitoringMode(bool mode)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetMonitoringMode(mode, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetMonitoringMode(mode, error);
 }
-bool SOLODLLCPP::SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference, int& error)
+bool SOLOMotorControllers::SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (magnetizingCurrentIdReference < 0 || magnetizingCurrentIdReference > 32)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -917,19 +917,19 @@ bool SOLODLLCPP::SetMagnetizingCurrentIdReference(float magnetizingCurrentIdRefe
 	ConvertToData(magnetizingCurrentIdReference, data);
 	unsigned char cmd[] = { addr,WriteMagnetizingCurrentIdReference,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference)
+bool SOLOMotorControllers::SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetMagnetizingCurrentIdReference(magnetizingCurrentIdReference, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetMagnetizingCurrentIdReference(magnetizingCurrentIdReference, error);
 }
-bool SOLODLLCPP::SetPositionReference(long positionReference, int& error)
+bool SOLOMotorControllers::SetPositionReference(long positionReference, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (positionReference < -2147483647 || positionReference > 2147483647)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -937,19 +937,19 @@ bool SOLODLLCPP::SetPositionReference(long positionReference, int& error)
 	ConvertToData(positionReference, data);
 	unsigned char cmd[] = { addr,WritePositionReference,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetPositionReference(long positionReference)
+bool SOLOMotorControllers::SetPositionReference(long positionReference)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetPositionReference(positionReference, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetPositionReference(positionReference, error);
 }
-bool SOLODLLCPP::SetPositionControllerKp(float positionControllerKp, int& error)
+bool SOLOMotorControllers::SetPositionControllerKp(float positionControllerKp, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (positionControllerKp < 0 || positionControllerKp > 16000)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -957,19 +957,19 @@ bool SOLODLLCPP::SetPositionControllerKp(float positionControllerKp, int& error)
 	ConvertToData(positionControllerKp, data);
 	unsigned char cmd[] = { addr,WritePositionControllerKp,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetPositionControllerKp(float positionControllerKp)
+bool SOLOMotorControllers::SetPositionControllerKp(float positionControllerKp)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetPositionControllerKp(positionControllerKp, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetPositionControllerKp(positionControllerKp, error);
 }
-bool SOLODLLCPP::SetPositionControllerKi(float positionControllerKi, int& error)
+bool SOLOMotorControllers::SetPositionControllerKi(float positionControllerKi, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (positionControllerKi < 0 || positionControllerKi > 16000)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -977,44 +977,44 @@ bool SOLODLLCPP::SetPositionControllerKi(float positionControllerKi, int& error)
 	ConvertToData(positionControllerKi, data);
 	unsigned char cmd[] = { addr,WritePositionControllerKi,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetPositionControllerKi(float positionControllerKi)
+bool SOLOMotorControllers::SetPositionControllerKi(float positionControllerKi)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetPositionControllerKi(positionControllerKi, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetPositionControllerKi(positionControllerKi, error);
 }
-bool SOLODLLCPP::ResetPositionToZero(int& error)
+bool SOLOMotorControllers::ResetPositionToZero(int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,WriteResetPositionToZero,0x00,0x00,0x00,0x01 };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::ResetPositionToZero()
+bool SOLOMotorControllers::ResetPositionToZero()
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::ResetPositionToZero(error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::ResetPositionToZero(error);
 }
-bool SOLODLLCPP::OverwriteErrorRegister(int& error)
+bool SOLOMotorControllers::OverwriteErrorRegister(int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,WriteOverwriteErrorRegister,0x00,0x00,0x00,0x00 };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::OverwriteErrorRegister()
+bool SOLOMotorControllers::OverwriteErrorRegister()
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::OverwriteErrorRegister(error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::OverwriteErrorRegister(error);
 }
 // SOG => Sensorless Observer Gain 
-bool SOLODLLCPP::SetObserverGainBldcPmsm(float observerGain, int& error)
+bool SOLOMotorControllers::SetObserverGainBldcPmsm(float observerGain, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (observerGain < 0.01 || observerGain > 1000)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -1022,19 +1022,19 @@ bool SOLODLLCPP::SetObserverGainBldcPmsm(float observerGain, int& error)
 	ConvertToData(observerGain, data);
 	unsigned char cmd[] = { addr,WriteObserverGainBldcPmsm,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetObserverGainBldcPmsm(float observerGain)
+bool SOLOMotorControllers::SetObserverGainBldcPmsm(float observerGain)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetObserverGainBldcPmsm(observerGain, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetObserverGainBldcPmsm(observerGain, error);
 }
-bool SOLODLLCPP::SetObserverGainBldcPmsmUltrafast(float observerGain, int& error)
+bool SOLOMotorControllers::SetObserverGainBldcPmsmUltrafast(float observerGain, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (observerGain < 0.01 || observerGain > 1000)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -1042,19 +1042,19 @@ bool SOLODLLCPP::SetObserverGainBldcPmsmUltrafast(float observerGain, int& error
 	ConvertToData(observerGain, data);
 	unsigned char cmd[] = { addr,WriteObserverGainBldcPmsmUltrafast,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetObserverGainBldcPmsmUltrafast(float observerGain)
+bool SOLOMotorControllers::SetObserverGainBldcPmsmUltrafast(float observerGain)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetObserverGainBldcPmsmUltrafast(observerGain, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetObserverGainBldcPmsmUltrafast(observerGain, error);
 }
-bool SOLODLLCPP::SetObserverGainDc(float observerGain, int& error)
+bool SOLOMotorControllers::SetObserverGainDc(float observerGain, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (observerGain < 0.01 || observerGain > 1000)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -1062,20 +1062,20 @@ bool SOLODLLCPP::SetObserverGainDc(float observerGain, int& error)
 	ConvertToData(observerGain, data);
 	unsigned char cmd[] = { addr,WriteObserverGainDc,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetObserverGainDc(float observerGain)
+bool SOLOMotorControllers::SetObserverGainDc(float observerGain)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetObserverGainDc(observerGain, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetObserverGainDc(observerGain, error);
 }
 // SOFG => Sensorless Observer Filter Gain
-bool SOLODLLCPP::SetFilterGainBldcPmsm(float filterGain, int& error)
+bool SOLOMotorControllers::SetFilterGainBldcPmsm(float filterGain, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (filterGain < 0.01 || filterGain > 16000)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -1083,19 +1083,19 @@ bool SOLODLLCPP::SetFilterGainBldcPmsm(float filterGain, int& error)
 	ConvertToData(filterGain, data);
 	unsigned char cmd[] = { addr,WriteFilterGainBldcPmsm,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetFilterGainBldcPmsm(float filterGain)
+bool SOLOMotorControllers::SetFilterGainBldcPmsm(float filterGain)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetFilterGainBldcPmsm(filterGain, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetFilterGainBldcPmsm(filterGain, error);
 }
-bool SOLODLLCPP::SetFilterGainBldcPmsmUltrafast(float filterGain, int& error)
+bool SOLOMotorControllers::SetFilterGainBldcPmsmUltrafast(float filterGain, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (filterGain < 0.01 || filterGain > 16000)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -1103,47 +1103,47 @@ bool SOLODLLCPP::SetFilterGainBldcPmsmUltrafast(float filterGain, int& error)
 	ConvertToData(filterGain, data);
 	unsigned char cmd[] = { addr,WriteFilterGainBldcPmsmUltrafast,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetFilterGainBldcPmsmUltrafast(float filterGain)
+bool SOLOMotorControllers::SetFilterGainBldcPmsmUltrafast(float filterGain)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetFilterGainBldcPmsmUltrafast(filterGain, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetFilterGainBldcPmsmUltrafast(filterGain, error);
 }
-bool SOLODLLCPP::SetUartBaudrate(UartBaudrate baudrate, int& error)
+bool SOLOMotorControllers::SetUartBaudrate(UartBaudrate baudrate, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char data[4];
 	ConvertToData((long)baudrate, data);
 	unsigned char cmd[] = { addr,WriteUartBaudrate,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetUartBaudrate(UartBaudrate baudrate)
+bool SOLOMotorControllers::SetUartBaudrate(UartBaudrate baudrate)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetUartBaudrate(baudrate, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetUartBaudrate(baudrate, error);
 }
-bool SOLODLLCPP::SensorCalibration(PositionSensorCalibrationAction calibrationAction, int& error)
+bool SOLOMotorControllers::SensorCalibration(PositionSensorCalibrationAction calibrationAction, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char data[4];
 	ConvertToData((long)calibrationAction, data);
 	unsigned char cmd[] = { addr, WriteSensorCalibration, data[0], data[1], data[2], data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SensorCalibration(PositionSensorCalibrationAction calibrationAction)
+bool SOLOMotorControllers::SensorCalibration(PositionSensorCalibrationAction calibrationAction)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SensorCalibration(calibrationAction, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SensorCalibration(calibrationAction, error);
 }
-bool SOLODLLCPP::SetEncoderHallCcwOffset(float encoderHallOffset, int& error)
+bool SOLOMotorControllers::SetEncoderHallCcwOffset(float encoderHallOffset, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (encoderHallOffset <= 0 || encoderHallOffset >= 1)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -1151,19 +1151,19 @@ bool SOLODLLCPP::SetEncoderHallCcwOffset(float encoderHallOffset, int& error)
 	ConvertToData(encoderHallOffset, data);
 	unsigned char cmd[] = { addr, WriteEncoderHallCcwOffset, data[0], data[1], data[2], data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetEncoderHallCcwOffset(float encoderHallOffset)
+bool SOLOMotorControllers::SetEncoderHallCcwOffset(float encoderHallOffset)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetEncoderHallCcwOffset(encoderHallOffset, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetEncoderHallCcwOffset(encoderHallOffset, error);
 }
-bool SOLODLLCPP::SetEncoderHallCwOffset(float encoderHallOffset, int& error)
+bool SOLOMotorControllers::SetEncoderHallCwOffset(float encoderHallOffset, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (encoderHallOffset <= 0 || encoderHallOffset >= 1)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -1171,19 +1171,19 @@ bool SOLODLLCPP::SetEncoderHallCwOffset(float encoderHallOffset, int& error)
 	ConvertToData(encoderHallOffset, data);
 	unsigned char cmd[] = { addr, WriteEncoderHallCwOffset, data[0], data[1], data[2], data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetEncoderHallCwOffset(float encoderHallOffset)
+bool SOLOMotorControllers::SetEncoderHallCwOffset(float encoderHallOffset)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetEncoderHallCwOffset(encoderHallOffset, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetEncoderHallCwOffset(encoderHallOffset, error);
 }
-bool SOLODLLCPP::SetSpeedAccelerationValue(float speedAccelerationValue, int& error)
+bool SOLOMotorControllers::SetSpeedAccelerationValue(float speedAccelerationValue, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (speedAccelerationValue < 0 || speedAccelerationValue > 1600)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -1191,19 +1191,19 @@ bool SOLODLLCPP::SetSpeedAccelerationValue(float speedAccelerationValue, int& er
 	ConvertToData(speedAccelerationValue, data);
 	unsigned char cmd[] = { addr, WriteSpeedAccelerationValue, data[0], data[1], data[2], data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetSpeedAccelerationValue(float speedAccelerationValue)
+bool SOLOMotorControllers::SetSpeedAccelerationValue(float speedAccelerationValue)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetSpeedAccelerationValue(speedAccelerationValue, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetSpeedAccelerationValue(speedAccelerationValue, error);
 }
-bool SOLODLLCPP::SetSpeedDecelerationValue(float speedDecelerationValue, int& error)
+bool SOLOMotorControllers::SetSpeedDecelerationValue(float speedDecelerationValue, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	if (speedDecelerationValue < 0 || speedDecelerationValue > 1600)
 	{
-		error = SOLODLLCPP::SOLOMotorControllersError::outOfRengeSetting;
+		error = SOLOMotorControllers::SOLOMotorControllersError::outOfRengeSetting;
 		return false;
 	}
 
@@ -1211,956 +1211,956 @@ bool SOLODLLCPP::SetSpeedDecelerationValue(float speedDecelerationValue, int& er
 	ConvertToData(speedDecelerationValue, data);
 	unsigned char cmd[] = { addr, WriteSpeedDecelerationValue, data[0], data[1], data[2], data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetSpeedDecelerationValue(float speedDecelerationValue)
+bool SOLOMotorControllers::SetSpeedDecelerationValue(float speedDecelerationValue)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetSpeedDecelerationValue(speedDecelerationValue, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetSpeedDecelerationValue(speedDecelerationValue, error);
 }
-bool SOLODLLCPP::SetCanbusBoudrate(CanbusBaudrate canbusBoudrate, int& error)
+bool SOLOMotorControllers::SetCanbusBoudrate(CanbusBaudrate canbusBoudrate, int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char data[4];
 	ConvertToData((long)canbusBoudrate, data);
 	unsigned char cmd[] = { addr,WriteUartBaudrate,data[0],data[1],data[2],data[3] };
 
-	return SOLODLLCPP::ExeCMD(cmd, error);
+	return SOLOMotorControllers::ExeCMD(cmd, error);
 }
-bool SOLODLLCPP::SetCanbusBoudrate(CanbusBaudrate canbusBoudrate)
+bool SOLOMotorControllers::SetCanbusBoudrate(CanbusBaudrate canbusBoudrate)
 {
-	int error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
-	return SOLODLLCPP::SetCanbusBoudrate(canbusBoudrate, error);
+	int error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
+	return SOLOMotorControllers::SetCanbusBoudrate(canbusBoudrate, error);
 }
 //----------Read----------
-long SOLODLLCPP::GetDeviceAddress(int& error)
+long SOLOMotorControllers::GetDeviceAddress(int& error)
 {
-	error = SOLODLLCPP::SOLOMotorControllersError::noProcessedCommand;
+	error = SOLOMotorControllers::SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { 0xFF,ReadDeviceAddress,0x00,0x00,0x00,0x00 };
 	//return ReadAddress;
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetDeviceAddress()
+long SOLOMotorControllers::GetDeviceAddress()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetDeviceAddress(error);
 }
-float SOLODLLCPP::GetPhaseAVoltage(int& error)
+float SOLOMotorControllers::GetPhaseAVoltage(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadPhaseAVoltage,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetPhaseAVoltage()
+float SOLOMotorControllers::GetPhaseAVoltage()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetPhaseAVoltage(error);
 }
-float SOLODLLCPP::GetPhaseBVoltage(int& error)
+float SOLOMotorControllers::GetPhaseBVoltage(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadPhaseBVoltage,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetPhaseBVoltage()
+float SOLOMotorControllers::GetPhaseBVoltage()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetPhaseBVoltage(error);
 }
-float SOLODLLCPP::GetPhaseACurrent(int& error)
+float SOLOMotorControllers::GetPhaseACurrent(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadPhaseACurrent,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetPhaseACurrent()
+float SOLOMotorControllers::GetPhaseACurrent()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetPhaseACurrent(error);
 }
-float SOLODLLCPP::GetPhaseBCurrent(int& error)
+float SOLOMotorControllers::GetPhaseBCurrent(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadPhaseBCurrent,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetPhaseBCurrent()
+float SOLOMotorControllers::GetPhaseBCurrent()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetPhaseBCurrent(error);
 }
 //Battery Voltage
-float SOLODLLCPP::GetBusVoltage(int& error)
+float SOLOMotorControllers::GetBusVoltage(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadBusVoltage,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetBusVoltage()
+float SOLOMotorControllers::GetBusVoltage()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetBusVoltage(error);
 }
-float SOLODLLCPP::GetDcMotorCurrentIm(int& error)
+float SOLOMotorControllers::GetDcMotorCurrentIm(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadDcMotorCurrentIm,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetDcMotorCurrentIm()
+float SOLOMotorControllers::GetDcMotorCurrentIm()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetDcMotorCurrentIm(error);
 }
-float SOLODLLCPP::GetDcMotorVoltageVm(int& error)
+float SOLOMotorControllers::GetDcMotorVoltageVm(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadDcMotorVoltageVm,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetDcMotorVoltageVm()
+float SOLOMotorControllers::GetDcMotorVoltageVm()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetDcMotorVoltageVm(error);
 }
-float SOLODLLCPP::GetSpeedControllerKp(int& error)
+float SOLOMotorControllers::GetSpeedControllerKp(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadSpeedControllerKp,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetSpeedControllerKp()
+float SOLOMotorControllers::GetSpeedControllerKp()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetSpeedControllerKp(error);
 }
-float SOLODLLCPP::GetSpeedControllerKi(int& error)
+float SOLOMotorControllers::GetSpeedControllerKi(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadSpeedControllerKi,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetSpeedControllerKi()
+float SOLOMotorControllers::GetSpeedControllerKi()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetSpeedControllerKi(error);
 }
-long SOLODLLCPP::GetOutputPwmFrequencyKhz(int& error)
+long SOLOMotorControllers::GetOutputPwmFrequencyKhz(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadOutputPwmFrequencyHz,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return (SOLODLLCPP::ConvertToLong(data) / 1000L); //PWM reading is in Hz
+		SOLOMotorControllers::SplitData(data, cmd);
+		return (SOLOMotorControllers::ConvertToLong(data) / 1000L); //PWM reading is in Hz
 	}
 	return -1;
 }
-long SOLODLLCPP::GetOutputPwmFrequencyKhz()
+long SOLOMotorControllers::GetOutputPwmFrequencyKhz()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetOutputPwmFrequencyKhz(error);
 }
-float SOLODLLCPP::GetCurrentLimit(int& error)
+float SOLOMotorControllers::GetCurrentLimit(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadCurrentLimit,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetCurrentLimit()
+float SOLOMotorControllers::GetCurrentLimit()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetCurrentLimit(error);
 }
-float SOLODLLCPP::GetQuadratureCurrentIqFeedback(int& error)
+float SOLOMotorControllers::GetQuadratureCurrentIqFeedback(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadQuadratureCurrentIqFeedback,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetQuadratureCurrentIqFeedback()
+float SOLOMotorControllers::GetQuadratureCurrentIqFeedback()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetQuadratureCurrentIqFeedback(error);
 }
-float SOLODLLCPP::GetMagnetizingCurrentIdFeedback(int& error)
+float SOLOMotorControllers::GetMagnetizingCurrentIdFeedback(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadMagnetizingCurrentIdFeedback,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetMagnetizingCurrentIdFeedback()
+float SOLOMotorControllers::GetMagnetizingCurrentIdFeedback()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetMagnetizingCurrentIdFeedback(error);
 }
-long SOLODLLCPP::GetMotorPolesCounts(int& error)
+long SOLOMotorControllers::GetMotorPolesCounts(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadMotorPolesCounts,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetMotorPolesCounts()
+long SOLOMotorControllers::GetMotorPolesCounts()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetMotorPolesCounts(error);
 }
-long SOLODLLCPP::GetIncrementalEncoderLines(int& error)
+long SOLOMotorControllers::GetIncrementalEncoderLines(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadIncrementalEncoderLines,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetIncrementalEncoderLines()
+long SOLOMotorControllers::GetIncrementalEncoderLines()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetIncrementalEncoderLines(error);
 }
-float SOLODLLCPP::GetCurrentControllerKp(int& error)
+float SOLOMotorControllers::GetCurrentControllerKp(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadCurrentControllerKp,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetCurrentControllerKp()
+float SOLOMotorControllers::GetCurrentControllerKp()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetCurrentControllerKp(error);
 }
-float SOLODLLCPP::GetCurrentControllerKi(int& error)
+float SOLOMotorControllers::GetCurrentControllerKi(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadCurrentControllerKi,0x00,0x00,0x00,0x00 };
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data) * 0.00005;
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data) * 0.00005;
 	}
 	return -1;
 }
-float SOLODLLCPP::GetCurrentControllerKi()
+float SOLOMotorControllers::GetCurrentControllerKi()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetCurrentControllerKi(error);
 }
-float SOLODLLCPP::GetBoardTemperature(int& error)
+float SOLOMotorControllers::GetBoardTemperature(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadBoardTemperature,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetBoardTemperature()
+float SOLOMotorControllers::GetBoardTemperature()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetBoardTemperature(error);
 }
-float SOLODLLCPP::GetMotorResistance(int& error)
+float SOLOMotorControllers::GetMotorResistance(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadMotorResistance,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetMotorResistance()
+float SOLOMotorControllers::GetMotorResistance()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetMotorResistance(error);
 }
-float SOLODLLCPP::GetMotorInductance(int& error)
+float SOLOMotorControllers::GetMotorInductance(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadMotorInductance,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetMotorInductance()
+float SOLOMotorControllers::GetMotorInductance()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetMotorInductance(error);
 }
-long SOLODLLCPP::GetSpeedFeedback(int& error)
+long SOLOMotorControllers::GetSpeedFeedback(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadSpeedFeedback,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetSpeedFeedback()
+long SOLOMotorControllers::GetSpeedFeedback()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetSpeedFeedback(error);
 }
-long SOLODLLCPP::GetMotorType(int& error)
+long SOLOMotorControllers::GetMotorType(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadMotorType,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetMotorType()
+long SOLOMotorControllers::GetMotorType()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetMotorType(error);
 }
-long SOLODLLCPP::GetFeedbackControlMode(int& error)
+long SOLOMotorControllers::GetFeedbackControlMode(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadFeedbackControlMode,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetFeedbackControlMode()
+long SOLOMotorControllers::GetFeedbackControlMode()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetFeedbackControlMode(error);
 }
-long SOLODLLCPP::GetCommandMode(int& error)
+long SOLOMotorControllers::GetCommandMode(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadCommandMode,0x00,0x00,0x00,0x00 };
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return  SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return  SOLOMotorControllers::ConvertToLong(data);
 
 	}
 	return -1;
 }
-long SOLODLLCPP::GetCommandMode()
+long SOLOMotorControllers::GetCommandMode()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetCommandMode(error);
 }
-long SOLODLLCPP::GetControlMode(int& error)
+long SOLOMotorControllers::GetControlMode(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadControlMode,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetControlMode()
+long SOLOMotorControllers::GetControlMode()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetControlMode(error);
 }
-long SOLODLLCPP::GetSpeedLimit(int& error)
+long SOLOMotorControllers::GetSpeedLimit(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadSpeedLimit,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetSpeedLimit()
+long SOLOMotorControllers::GetSpeedLimit()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetSpeedLimit(error);
 }
-float SOLODLLCPP::GetPositionControllerKp(int& error)
+float SOLOMotorControllers::GetPositionControllerKp(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadPositionControllerKp,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetPositionControllerKp()
+float SOLOMotorControllers::GetPositionControllerKp()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetPositionControllerKp(error);
 }
-float SOLODLLCPP::GetPositionControllerKi(int& error)
+float SOLOMotorControllers::GetPositionControllerKi(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadPositionControllerKi,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetPositionControllerKi()
+float SOLOMotorControllers::GetPositionControllerKi()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetPositionControllerKi(error);
 }
-long SOLODLLCPP::GetPositionCountsFeedback(int& error)
+long SOLOMotorControllers::GetPositionCountsFeedback(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadPositionCountsFeedback,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetPositionCountsFeedback()
+long SOLOMotorControllers::GetPositionCountsFeedback()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetPositionCountsFeedback(error);
 }
-long SOLODLLCPP::GetErrorRegister(int& error)
+long SOLOMotorControllers::GetErrorRegister(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadErrorRegister,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetErrorRegister()
+long SOLOMotorControllers::GetErrorRegister()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetErrorRegister(error);
 }
-long SOLODLLCPP::GetDeviceFirmwareVersion(int& error)
+long SOLOMotorControllers::GetDeviceFirmwareVersion(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadDeviceFirmwareVersion,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetDeviceFirmwareVersion()
+long SOLOMotorControllers::GetDeviceFirmwareVersion()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetDeviceFirmwareVersion(error);
 }
-long SOLODLLCPP::GetDeviceHardwareVersion(int& error)
+long SOLOMotorControllers::GetDeviceHardwareVersion(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadDeviceHardwareVersion,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetDeviceHardwareVersion()
+long SOLOMotorControllers::GetDeviceHardwareVersion()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetDeviceHardwareVersion(error);
 }
-float SOLODLLCPP::GetTorqueReferenceIq(int& error)
+float SOLOMotorControllers::GetTorqueReferenceIq(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadTorqueReferenceIq,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetTorqueReferenceIq()
+float SOLOMotorControllers::GetTorqueReferenceIq()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetTorqueReferenceIq(error);
 }
-long SOLODLLCPP::GetSpeedReference(int& error)
+long SOLOMotorControllers::GetSpeedReference(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadSpeedReference,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetSpeedReference()
+long SOLOMotorControllers::GetSpeedReference()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetSpeedReference(error);
 }
-float SOLODLLCPP::GetMagnetizingCurrentIdReference(int& error)
+float SOLOMotorControllers::GetMagnetizingCurrentIdReference(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadMagnetizingCurrentIdReference,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetMagnetizingCurrentIdReference()
+float SOLOMotorControllers::GetMagnetizingCurrentIdReference()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetMagnetizingCurrentIdReference(error);
 }
-long SOLODLLCPP::GetPositionReference(int& error)
+long SOLOMotorControllers::GetPositionReference(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadPositionReference,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetPositionReference()
+long SOLOMotorControllers::GetPositionReference()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetPositionReference(error);
 }
-float SOLODLLCPP::GetPowerReference(int& error)
+float SOLOMotorControllers::GetPowerReference(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadPowerReference,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetPowerReference()
+float SOLOMotorControllers::GetPowerReference()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetPowerReference(error);
 }
-long SOLODLLCPP::GetMotorDirection(int& error)
+long SOLOMotorControllers::GetMotorDirection(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadMotorDirection,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetMotorDirection()
+long SOLOMotorControllers::GetMotorDirection()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetMotorDirection(error);
 }
-float SOLODLLCPP::GetObserverGainBldcPmsm(int& error)
+float SOLOMotorControllers::GetObserverGainBldcPmsm(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadObserverGainBldcPmsm,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetObserverGainBldcPmsm()
+float SOLOMotorControllers::GetObserverGainBldcPmsm()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetObserverGainBldcPmsm(error);
 }
-float SOLODLLCPP::GetObserverGainBldcPmsmUltrafast(int& error)
+float SOLOMotorControllers::GetObserverGainBldcPmsmUltrafast(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadObserverGainBldcPmsmUltrafast,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetObserverGainBldcPmsmUltrafast()
+float SOLOMotorControllers::GetObserverGainBldcPmsmUltrafast()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetObserverGainBldcPmsmUltrafast(error);
 }
-float SOLODLLCPP::GetObserverGainDc(int& error)
+float SOLOMotorControllers::GetObserverGainDc(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadObserverGainDc,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetObserverGainDc()
+float SOLOMotorControllers::GetObserverGainDc()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetObserverGainDc(error);
 }
-float SOLODLLCPP::GetFilterGainBldcPmsm(int& error)
+float SOLOMotorControllers::GetFilterGainBldcPmsm(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadFilterGainBldcPmsm,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetFilterGainBldcPmsm()
+float SOLOMotorControllers::GetFilterGainBldcPmsm()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetFilterGainBldcPmsm(error);
 }
-float SOLODLLCPP::GetFilterGainBldcPmsmUltrafast(int& error)
+float SOLOMotorControllers::GetFilterGainBldcPmsmUltrafast(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadFilterGainBldcPmsmUltrafast,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetFilterGainBldcPmsmUltrafast()
+float SOLOMotorControllers::GetFilterGainBldcPmsmUltrafast()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetFilterGainBldcPmsmUltrafast(error);
 }
-float SOLODLLCPP::Get3PhaseMotorAngle(int& error)
+float SOLOMotorControllers::Get3PhaseMotorAngle(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr, Read3PhaseMotorAngle, 0x00, 0x00, 0x00, 0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::Get3PhaseMotorAngle()
+float SOLOMotorControllers::Get3PhaseMotorAngle()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return Get3PhaseMotorAngle(error);
 }
-float SOLODLLCPP::GetEncoderHallCcwOffset(int& error)
+float SOLOMotorControllers::GetEncoderHallCcwOffset(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr, ReadEncoderHallCcwOffset, 0x00, 0x00, 0x00, 0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetEncoderHallCcwOffset()
+float SOLOMotorControllers::GetEncoderHallCcwOffset()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetEncoderHallCcwOffset(error);
 }
-float SOLODLLCPP::GetEncoderHallCwOffset(int& error)
+float SOLOMotorControllers::GetEncoderHallCwOffset(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr, ReadEncoderHallCwOffset, 0x00, 0x00, 0x00, 0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetEncoderHallCwOffset()
+float SOLOMotorControllers::GetEncoderHallCwOffset()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetEncoderHallCwOffset(error);
 }
-long SOLODLLCPP::GetUartBaudrate(int& error)
+long SOLOMotorControllers::GetUartBaudrate(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadUartBaudrate,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetUartBaudrate()
+long SOLOMotorControllers::GetUartBaudrate()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetUartBaudrate(error);
 }
-float SOLODLLCPP::GetSpeedAccelerationValue(int& error)
+float SOLOMotorControllers::GetSpeedAccelerationValue(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr, ReadSpeedAccelerationValue, 0x00, 0x00, 0x00, 0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetSpeedAccelerationValue()
+float SOLOMotorControllers::GetSpeedAccelerationValue()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetSpeedAccelerationValue(error);
 }
-float SOLODLLCPP::GetSpeedDecelerationValue(int& error)
+float SOLOMotorControllers::GetSpeedDecelerationValue(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr, ReadSpeedDecelerationValue, 0x00, 0x00, 0x00, 0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToFloat(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToFloat(data);
 	}
 	return -1;
 }
-float SOLODLLCPP::GetSpeedDecelerationValue()
+float SOLOMotorControllers::GetSpeedDecelerationValue()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetSpeedDecelerationValue(error);
 }
-long SOLODLLCPP::GetEncoderIndexCounts(int& error)
+long SOLOMotorControllers::GetEncoderIndexCounts(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	unsigned char cmd[] = { addr,ReadEncoderIndexCounts,0x00,0x00,0x00,0x00 };
 
-	if (SOLODLLCPP::ExeCMD(cmd, error))
+	if (SOLOMotorControllers::ExeCMD(cmd, error))
 	{
 		unsigned char data[4];
-		SOLODLLCPP::SplitData(data, cmd);
-		return SOLODLLCPP::ConvertToLong(data);
+		SOLOMotorControllers::SplitData(data, cmd);
+		return SOLOMotorControllers::ConvertToLong(data);
 	}
 	return -1;
 }
-long SOLODLLCPP::GetEncoderIndexCounts()
+long SOLOMotorControllers::GetEncoderIndexCounts()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return GetEncoderIndexCounts(error);
 }
-bool SOLODLLCPP::serialIsWorking(int& error)
+bool SOLOMotorControllers::serialIsWorking(int& error)
 {
 	error = SOLOMotorControllersError::noProcessedCommand;
 	float temperature = GetBoardTemperature(error);
-	if (error == SOLODLLCPP::SOLOMotorControllersError::noErrorDetected) {
+	if (error == SOLOMotorControllers::SOLOMotorControllersError::noErrorDetected) {
 		return true;
 	}
 	return false;
 }
-bool SOLODLLCPP::serialIsWorking()
+bool SOLOMotorControllers::serialIsWorking()
 {
 	int error = SOLOMotorControllersError::noProcessedCommand;
 	return serialIsWorking(error);

@@ -1,0 +1,1 @@
+g++ -o ReadingBusVoltage.exe ReadingBusVoltage.cpp ../src/SoloMotorControllers.cpp  -I../src

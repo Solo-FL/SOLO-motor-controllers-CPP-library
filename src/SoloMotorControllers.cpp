@@ -115,10 +115,10 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 #define ReadSpeedDecelerationValue          0xB5
 #define ReadEncoderIndexCounts              0xB8
 
-//SOLOMotorControllers::SOLOMotorControllers()
-//{
-//
-//}
+//DEBUG
+#include <iostream>
+#include <conio.h>
+using std::cout, std::endl;
 
 SOLOMotorControllers::SOLOMotorControllers(unsigned char _addr, long _baudrate, long _millisecondsTimeout, int _packetFailureTrialAttempts)
 	:addr(_addr)
@@ -240,65 +240,7 @@ bool SOLOMotorControllers::Test()
 
 bool SOLOMotorControllers::ExeCMD(unsigned char* cmd, int& error)
 {
-	//UINT8 _cmd[10] = { INITIATOR, INITIATOR, cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5], CRC, ENDING };
-	//UINT8 _readPacket[20];
-	//UINT8 idx = 0;
-
-	//dNoOFBytestoWrite = sizeof(_cmd);
-
-	//Status = WriteFile(hComm,               // Handle to the Serialport
-	//	_cmd,            // Data to be written to the port 
-	//	dNoOFBytestoWrite,   // No of bytes to write into the port
-	//	&dNoOfBytesWritten,  // No of bytes written to the port
-	//	NULL);
-
-	//if (Status != TRUE)
-	//	return false;
-
-	///*------------------------------------ Setting Receive Mask ----------------------------------------------*/
-
-	//Status = SetCommMask(hComm, EV_RXCHAR); //Configure Windows to Monitor the serial device for Character Reception
-
-	//if (Status == FALSE)
-	//	return false;
-
-	//else //If  WaitCommEvent()==True Read the RXed data using ReadFile();
-	//{
-	//	do
-	//	{
-	//		Status = ReadFile(hComm, &TempChar, sizeof(TempChar), &NoBytesRecieved, NULL);
-	//		_readPacket[idx] = TempChar;
-	//		idx++;
-	//	} while (NoBytesRecieved > 0);
-	//}
-
-	//if (_readPacket[0] == _cmd[0] && _readPacket[1] == _cmd[1]
-	//	&& _readPacket[2] == _cmd[2] && _readPacket[3] == _cmd[3]
-	//	&& _readPacket[8] == _cmd[8] && _readPacket[9] == _cmd[9])
-	//{
-	//	cmd[0] = _readPacket[2];
-	//	cmd[1] = _readPacket[3];
-	//	cmd[2] = _readPacket[4];
-	//	cmd[3] = _readPacket[5];
-	//	cmd[4] = _readPacket[6];
-	//	cmd[5] = _readPacket[7];
-	//}
-
-	//else
-	//{
-	//	cmd[0] = ERR;
-	//	cmd[1] = ERR;
-	//	cmd[2] = ERR;
-	//	cmd[3] = ERR;
-	//	cmd[4] = ERR;
-	//	cmd[5] = ERR;
-	//}
-
-	//if (cmd[2] == ERR && cmd[3] == ERR && cmd[4] == ERR && cmd[5] == ERR)
-	//	return false;
-	//else
-	//	return true;
-
+	
 	unsigned char _cmd[10] = { INITIATOR, INITIATOR, cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], cmd[5], CRC, ENDING };
 	unsigned char _readPacket[20];
 	unsigned char idx = 0;
@@ -327,14 +269,17 @@ bool SOLOMotorControllers::ExeCMD(unsigned char* cmd, int& error)
 			dNoOFBytestoWrite,   // No of bytes to write into the port
 			&dNoOfBytesWritten,  // No of bytes written to the port
 			NULL);
-
+		
+		//std::cout << "EXECMD S: " << Status << std::endl; 	
 		if (Status != TRUE)
 			continue;
 
 		/*------------------------------------ Setting Receive Mask ----------------------------------------------*/
 
 		Status = SetCommMask(hComm, EV_RXCHAR); //Configure Windows to Monitor the serial device for Character Reception
-
+		//std::cout << "Status: " << Status << std::endl; 
+		
+		
 		if (Status == FALSE)
 			continue;
 
@@ -364,7 +309,14 @@ bool SOLOMotorControllers::ExeCMD(unsigned char* cmd, int& error)
 
 	if (isPacketFailureTrialAttemptsOverflow)
 	{
+		cmd[0] = ERROR;
+		cmd[1] = ERROR;
+		cmd[2] = ERROR;
+		cmd[3] = ERROR;
+		cmd[4] = ERROR;
+		cmd[5] = ERROR;
 		error = SOLOMotorControllers::packetFailureTrialAttemptsOverflow;
+		Sleep(500);
 		return false;
 	}
 	else

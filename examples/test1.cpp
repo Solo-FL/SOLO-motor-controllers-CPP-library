@@ -28,14 +28,13 @@ int main(void)
     bool status = FALSE;
     int error;
     SOLOMotorControllers solo1, solo2;
-
+    
     status = solo1.serialSetup(0, (char *)"COM3", 115200);
 
     if(status)
     {
         std::cout << "solo1 Succesfully Conneced! " << std::endl;
     }
-
     else
     {
         std::cout << "solo1 Can't Connect" << std::endl;
@@ -106,6 +105,9 @@ int main(void)
     {
         std::cout << "Failed to Read solo2 Variable.Error is:" << error << std::endl;
     }
+
+    solo1.Disconnect();
+    solo2.Disconnect();
 
     cout << "Press Enter to Exit";
     getch();

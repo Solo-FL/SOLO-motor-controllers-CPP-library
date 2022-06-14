@@ -29,7 +29,7 @@ int main(void)
     int error;
     SOLODLLCPP solo1, solo2;
 
-    status = solo1.serialSetup(0, (char *)"COM6", 115200);
+    status = solo1.serialSetup(0, (char *)"COM3", 115200);
 
     if(status)
     {

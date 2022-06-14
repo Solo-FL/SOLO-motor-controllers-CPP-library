@@ -1,0 +1,1 @@
+g++ -o dllTest.exe dllTest.cpp ../src/SoloDLL_CPP.cpp  -I../src

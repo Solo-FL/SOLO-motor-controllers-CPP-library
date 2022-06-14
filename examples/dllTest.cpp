@@ -16,7 +16,7 @@ using std::cout, std::endl;
 
 #include <conio.h>
 
-#include "SoloDLL_CPP.h"
+#include "SoloMotorControllers.h"
 
 //change val for new value set
 float val = 19.43;

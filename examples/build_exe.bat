@@ -1,1 +1,1 @@
-g++ -o dllTest.exe dllTest.cpp ../src/SoloDLL_CPP.cpp  -I../src
+g++ -o dllTest.exe dllTest.cpp ../src/SoloMotorControllers.cpp  -I../src

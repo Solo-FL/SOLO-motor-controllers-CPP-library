@@ -11,7 +11,7 @@ This Library is made by SOLOMotorControllers.com
 To learn more please visit:  https://www.SOLOMotorControllers.com/
 */
 
-#include "SoloDLL_CPP.h"
+#include "SoloMotorControllers.h"
 
 #define ReadData                            0x00 // 0x00000000
 #define INITIATOR                           0xFF //0xFFFF

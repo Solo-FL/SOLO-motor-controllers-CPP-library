@@ -6,6 +6,8 @@ SOLO-motor-controllers-CPP-library
 
 SOLO Motor Controller's C++ Library can be used with Windows OS to Set or Read all the parameters that are stored or existing in command set of SOLO, for more information on that please visit `the SOLO website <https://www.solomotorcontrollers.com/>`_.
 
+In the src folder is possible to find the C++ SOLO library and in the example folder some C++ code example of how load and use the C++ SOLO library. In order to test the example if possible to run the <SameName>.bat that will generate and compile the <SameName>.exe, than you can execute the <SameName>.exe in order to run the example.     
+
 Authors
 =======
 

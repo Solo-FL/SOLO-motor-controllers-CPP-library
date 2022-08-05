@@ -13,6 +13,10 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 
 #include "SoloMotorControllers.h"
 
+//DEBUG
+//#include <iostream>
+//using std::cout, std::endl;
+
 #define ReadData                            0x00 // 0x00000000
 #define INITIATOR                           0xFF //0xFFFF
 #define BroadcastAddress                    0xFF
@@ -115,11 +119,6 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 #define ReadSpeedDecelerationValue          0xB5
 #define ReadEncoderIndexCounts              0xB8
 
-//DEBUG
-#include <iostream>
-#include <conio.h>
-using std::cout, std::endl;
-
 SOLOMotorControllers::SOLOMotorControllers(unsigned char _addr, long _baudrate, long _millisecondsTimeout, int _packetFailureTrialAttempts)
 	:addr(_addr)
 	, baudrate(_baudrate)
@@ -138,16 +137,24 @@ SOLOMotorControllers::~SOLOMotorControllers()
 bool SOLOMotorControllers::serialSetup(unsigned char _addr, char* _portName, long _baudrate, long _millisecondsTimeout, int _packetFailureTrialAttempts)
 {
 	addr = _addr;
-	sprintf_s(ComPortName, "\\\\.\\%s", _portName);
-	//strcpy_s(ComPortName, _portName);
+	portName = _portName;
 	baudrate = _baudrate;
 	millisecondsTimeout = _millisecondsTimeout;
 	packetFailureTrialAttempts = _packetFailureTrialAttempts;
+	return SOLOMotorControllers::Connect();
 
+}
+
+boolean SOLOMotorControllers::Connect()
+{
+	
+	sprintf_s(ComPortName, "\\\\.\\%s", portName);
+	//strcpy_s(ComPortName, _portName);
+	
 	CloseHandle(hComm);
 	bool connectionError = true;
 
-	hComm = CreateFile(ComPortName,                       // Name of the Port to be Opened
+	hComm = CreateFile( (LPCSTR) ComPortName,        // Name of the Port to be Opened
 		GENERIC_READ | GENERIC_WRITE,      // Read/Write Access
 		0,                                 // No Sharing, ports cant be shared
 		NULL,                              // No Security
@@ -225,6 +232,7 @@ bool SOLOMotorControllers::serialSetup(unsigned char _addr, char* _portName, lon
 
 void SOLOMotorControllers::Disconnect()
 {
+	isConnected = false;
 	CloseHandle(hComm);
 }
 
@@ -271,8 +279,15 @@ bool SOLOMotorControllers::ExeCMD(unsigned char* cmd, int& error)
 			NULL);
 		
 		//std::cout << "EXECMD S: " << Status << std::endl; 	
-		if (Status != TRUE)
+		if (Status != TRUE){
+			if(isConnected){
+				//std::cout << "DISCONNECT" << std::endl;
+				SOLOMotorControllers::Disconnect();
+			}else{
+				SOLOMotorControllers::Connect();
+			}
 			continue;
+		}
 
 		/*------------------------------------ Setting Receive Mask ----------------------------------------------*/
 
@@ -280,17 +295,20 @@ bool SOLOMotorControllers::ExeCMD(unsigned char* cmd, int& error)
 		//std::cout << "Status: " << Status << std::endl; 
 		
 		
-		if (Status == FALSE)
+		if (Status == FALSE){
 			continue;
-
+		}
 		else //If  WaitCommEvent()==True Read the RXed data using ReadFile();
 		{
 			do
 			{
 				Status = ReadFile(hComm, &TempChar, sizeof(TempChar), &NoBytesRecieved, NULL);
 				_readPacket[idx] = TempChar;
+				//Read messages
+				//std::cout << (long) _readPacket[idx] << " ";
 				idx++;
 			} while (NoBytesRecieved > 0);
+			//std::cout << std::endl; 
 		}
 
 		if (Status)
@@ -309,12 +327,12 @@ bool SOLOMotorControllers::ExeCMD(unsigned char* cmd, int& error)
 
 	if (isPacketFailureTrialAttemptsOverflow)
 	{
-		cmd[0] = ERROR;
-		cmd[1] = ERROR;
-		cmd[2] = ERROR;
-		cmd[3] = ERROR;
-		cmd[4] = ERROR;
-		cmd[5] = ERROR;
+		cmd[0] = ERR;
+		cmd[1] = ERR;
+		cmd[2] = ERR;
+		cmd[3] = ERR;
+		cmd[4] = ERR;
+		cmd[5] = ERR;
 		error = SOLOMotorControllers::packetFailureTrialAttemptsOverflow;
 		Sleep(500);
 		return false;

@@ -26,6 +26,7 @@ class SOLOMotorControllers {
 
 private:
 	UINT8 addr = 0;
+	char* portName;
 	bool isConnected = false;
 	HANDLE hComm;
 	UINT32 baudrate;
@@ -113,6 +114,8 @@ public:
 	};
 
 bool serialSetup(unsigned char _addr, char* _portName, long _baudrate, long _millisecondsTimeout = 200, int _packetFailureTrialAttempts = 5);
+
+boolean Connect();
 
 void Disconnect();
 

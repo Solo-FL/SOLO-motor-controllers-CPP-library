@@ -12,10 +12,9 @@
                 "${workspaceFolder}\\src\\*.cpp",
 
                 /* uncomment test file you want to build */
-
-
-                "${workspaceFolder}\\tests\\TestSOLOMotorControllersSerial.cpp",
-
+                //"${workspaceFolder}\\examples\\ReadingBusVoltage.cpp",
+                //"${workspaceFolder}\\tests\\TestSOLOMotorControllersSerial.cpp",
+                //"${workspaceFolder}\\tests\\TestSOLOMotorControllersKvaser.cpp",
                 /////////////////////////////////////////////
 
                 "-L${workspaceFolder}\\Lib",
@@ -24,10 +23,10 @@
                 "-o",
                 
                 /* uncomment output file you want to make */
-
-
-                "${workspaceFolder}\\tests\\TestSOLOMotorControllersSerial.exe",
-
+                //"${workspaceFolder}\\examples\\test3.exe",
+                //"${workspaceFolder}\\examples\\ReadingBusVoltage.exe",
+                //"${workspaceFolder}\\tests\\TestSOLOMotorControllersSerial.exe",
+                //"${workspaceFolder}\\tests\\TestSOLOMotorControllersKvaser.exe",
                 /////////////////////////////////////////////
             ],
             "options": {

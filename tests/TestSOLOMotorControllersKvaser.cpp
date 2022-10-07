@@ -19,14 +19,15 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 using std::cout;
 using std::endl;
 
-#include "SOLOMotorControllersSerial.h"
+#include "SOLOMotorControllersKvaser.h"
 
 #include <conio.h>
 #include<windows.h>
+#include "canlib.h"
 
 const std::string currentDateTime();
 
-int TestCommunication(char* COMPortName);
+int TestCommunication();
 int TestCommandMode(SOLOMotorControllers::CommandMode setValue);
 int TestCurrentLimit(float setValue);
 int TestTorqueReferenceIq(float setValue);
@@ -84,21 +85,27 @@ int TestGetDeviceHardwareVersion();
 int TestGet3PhaseMotorAngle();
 int TestGetEncoderIndexCounts();
 
-SOLOMotorControllersSerial *solo;
+//////Kvaser Functions
+int TestGuardTime(long setValue);
+int TestLifeTimeFactor(long setValue);
+int TestProducerHeartbeatTime(long setValue);
+
+
+SOLOMotorControllersKvaser *solo;
 std::ofstream file;
 int successTest =0;
 int totalTest =0;
 float epsilon = 0.001;
 
 int main(void){
-	file.open ("RESULT_SOLOMotorControllersSerial.txt");
+	file.open ("RESULT_SOLOMotorControllersKvaser.txt");
 	
-	successTest+= TestCommunication((char*)"COM3");
+	successTest+= TestCommunication();
 	totalTest++;
 
 	successTest+= TestCommandMode(SOLOMotorControllers::CommandMode::digital);
 	totalTest++;
-
+	
 	successTest+= TestCurrentLimit(11.5);
 	totalTest++;
 
@@ -192,8 +199,8 @@ int main(void){
 	successTest+= TestFilterGainBldcPmsmUltrafast(4550);
 	totalTest++;
 
-	// successTest+= TestUartBaudrate(SOLOMotorControllers::UartBaudrate::rate115200);
-	// totalTest++;
+	successTest+= TestUartBaudrate(SOLOMotorControllers::UartBaudrate::rate115200);
+	totalTest++;
 
 	successTest+= TestSensorCalibration(SOLOMotorControllers::PositionSensorCalibrationAction::incrementalEncoderStartCalibration);
 	totalTest++;
@@ -210,8 +217,8 @@ int main(void){
 	successTest+= TestSpeedDecelerationValue(220);
 	totalTest++;
 
-	successTest+= TestCanbusBaudrate(SOLOMotorControllers::CanbusBaudrate::rate1000);
-	totalTest++;
+	// successTest+= TestCanbusBaudrate(SOLOMotorControllers::CanbusBaudrate::rate1000);
+	// totalTest++;
 
 	successTest+= TestGetPhaseAVoltage();
 	totalTest++;
@@ -264,6 +271,16 @@ int main(void){
 	successTest+= TestGetEncoderIndexCounts();
 	totalTest++;
 
+	//////Kvaser Functions
+	successTest+= TestGuardTime(1000);
+	totalTest++;
+
+	successTest+= TestLifeTimeFactor(1000);
+	totalTest++;
+
+	successTest+= TestProducerHeartbeatTime(1000);
+	totalTest++;
+
 	std::cout<<currentDateTime()<< "SUCCESS TESTS: ["<<successTest << "/" <<totalTest<< "]" << std::endl;
 	file << currentDateTime()<< "SUCCESS TESTS: ["<<successTest << "/" <<totalTest<< "]" << std::endl;
 	file.close();
@@ -280,7 +297,7 @@ const std::string currentDateTime() {
     return buf;
 }
 
-int TestCommunication(char* COMPortName)
+int TestCommunication()
 {
 	int error;
 	
@@ -288,7 +305,7 @@ int TestCommunication(char* COMPortName)
 	file << currentDateTime()<< "Testing Communication: ";
 	
 	try {
-		solo = new SOLOMotorControllersSerial(COMPortName, 0, SOLOMotorControllers::UartBaudrate::rate115200, 50, 3,false);
+		solo = new SOLOMotorControllersKvaser(0, SOLOMotorControllers::CanbusBaudrate::rate1000, 50,false);
 		solo->Connect();
 		Sleep(500);
 		solo->Disconnect();
@@ -1829,6 +1846,91 @@ int TestGetEncoderIndexCounts()
 	}
 
 	if(error == 0){
+		std::cout << "[OK]"<< std::endl;
+		file<< "[OK]"<< std::endl;
+		return 1;
+	}else{
+		std::cout << "[ERROR]"<< std::endl;
+		file<< "[ERROR]"<< std::endl;
+		return 0;
+	}
+}
+
+//////Kvaser Functions
+int TestGuardTime(long setValue)
+{
+	float getValue;
+	int error;
+	
+	std::cout<<currentDateTime()<< "Testing TestGuardTime (Test value: "<< setValue << "): ";
+	file << currentDateTime()<< "Testing TestGuardTime (Test value: "<< setValue << "): ";
+	
+	try {
+		solo->SetGuardTime(setValue, error);
+		getValue = solo->GetGuardTime(error);
+	}catch (...){
+		std::cout << "[EXCEPTION]"<< std::endl;
+		file<< "[EXCEPTION]"<< std::endl;
+		return 0;
+	}
+
+	if(abs(getValue - setValue) < epsilon && error == 0){
+		std::cout << "[OK]"<< std::endl;
+		file<< "[OK]"<< std::endl;
+		return 1;
+	}else{
+		std::cout << "[ERROR]"<< std::endl;
+		file<< "[ERROR]"<< std::endl;
+		return 0;
+	}
+}
+
+int TestLifeTimeFactor(long setValue)
+{
+	float getValue;
+	int error;
+	
+	std::cout<<currentDateTime()<< "Testing TestLifeTimeFactor (Test value: "<< setValue << "): ";
+	file << currentDateTime()<< "Testing TestLifeTimeFactor (Test value: "<< setValue << "): ";
+	
+	try {
+		solo->SetGuardTime(setValue, error);
+		getValue = solo->GetGuardTime(error);
+	}catch (...){
+		std::cout << "[EXCEPTION]"<< std::endl;
+		file<< "[EXCEPTION]"<< std::endl;
+		return 0;
+	}
+
+	if(abs(getValue - setValue) < epsilon && error == 0){
+		std::cout << "[OK]"<< std::endl;
+		file<< "[OK]"<< std::endl;
+		return 1;
+	}else{
+		std::cout << "[ERROR]"<< std::endl;
+		file<< "[ERROR]"<< std::endl;
+		return 0;
+	}
+}
+
+int TestProducerHeartbeatTime(long setValue)
+{
+	float getValue;
+	int error;
+	
+	std::cout<<currentDateTime()<< "Testing TestProducerHeartbeatTime (Test value: "<< setValue << "): ";
+	file << currentDateTime()<< "Testing TestProducerHeartbeatTime (Test value: "<< setValue << "): ";
+	
+	try {
+		solo->SetGuardTime(setValue, error);
+		getValue = solo->GetGuardTime(error);
+	}catch (...){
+		std::cout << "[EXCEPTION]"<< std::endl;
+		file<< "[EXCEPTION]"<< std::endl;
+		return 0;
+	}
+
+	if(abs(getValue - setValue) < epsilon && error == 0){
 		std::cout << "[OK]"<< std::endl;
 		file<< "[OK]"<< std::endl;
 		return 1;

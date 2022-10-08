@@ -2,7 +2,7 @@
 // GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 /*
-*    Title: SOLO Motor Controllers DLL
+*    Title: SOLO Motor Controllers CPP Library
 *    Author: SOLOMotorControllers
 *    Date: 2022
 *    Code version: 1.0.0
@@ -152,7 +152,7 @@ extern "C"
 
 	public:
 
-		SOLOMotorControllersSerial(char* COMPortName, unsigned char deviceAddress = 0,
+		SOLOMotorControllersSerial(char* COMPortName, UINT8 deviceAddress = 0,
  				SOLOMotorControllers::UartBaudrate baudrate = SOLOMotorControllersSerial::UartBaudrate::rate115200,
  				long millisecondsTimeout = 50, int packetFailureTrialAttempts = 3, bool autoConnect = true);
 
@@ -174,7 +174,7 @@ extern "C"
 
 	public:
 
-		bool Connect(char* COMPortName, unsigned char deviceAddress = 0,
+		bool Connect(char* COMPortName, UINT8 deviceAddress = 0,
  				SOLOMotorControllers::UartBaudrate baudrate = SOLOMotorControllersSerial::UartBaudrate::rate115200,
  				long millisecondsTimeout = 50, int packetFailureTrialAttempts = 3);
 

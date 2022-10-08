@@ -2,7 +2,7 @@
 // GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 /*
-*    Title: SOLO Motor Controllers DLL
+*    Title: SOLO Motor Controllers CPP Library
 *    Author: SOLOMotorControllers
 *    Date: 2022
 *    Code version: 1.0.0
@@ -13,7 +13,7 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 
 #include "SOLOMotorControllersKvaser.h"
 
-SOLOMotorControllersKvaser::SOLOMotorControllersKvaser(unsigned char deviceAddress, 
+SOLOMotorControllersKvaser::SOLOMotorControllersKvaser(UINT8 deviceAddress, 
 		SOLOMotorControllers::CanbusBaudrate baudrate, long millisecondsTimeout, bool autoConnect)
 	:Address(deviceAddress)
 	, timeout(millisecondsTimeout)
@@ -57,7 +57,7 @@ SOLOMotorControllersKvaser::~SOLOMotorControllersKvaser()
 	Disconnect();
 }
 
-bool SOLOMotorControllersKvaser::Connect(unsigned char deviceAddress, 
+bool SOLOMotorControllersKvaser::Connect(UINT8 deviceAddress, 
 		SOLOMotorControllers::CanbusBaudrate baudrate, long millisecondsTimeout)
 {
 	Address = deviceAddress;

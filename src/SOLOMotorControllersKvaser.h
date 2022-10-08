@@ -2,7 +2,7 @@
 // GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 /*
-*    Title: SOLO Motor Controllers DLL
+*    Title: SOLO Motor Controllers CPP Library
 *    Author: SOLOMotorControllers
 *    Date: 2022
 *    Code version: 1.0.0
@@ -103,7 +103,7 @@ private:
 	long canBaudrate;
 
 public:
-	SOLOMotorControllersKvaser(unsigned char deviceAddress = 1, 
+	SOLOMotorControllersKvaser(UINT8 deviceAddress = 0, 
 			SOLOMotorControllers::CanbusBaudrate baudrate = SOLOMotorControllers::CanbusBaudrate::rate1000,
 	 		long millisecondsTimeout = 200, bool autoConnect = true);
 
@@ -117,7 +117,7 @@ private:
 	void  ExtractData(unsigned char _Data[], unsigned char _ExtractedData[]);
 
 public:
-	bool Connect(unsigned char deviceAddress, 
+	bool Connect(UINT8 deviceAddress, 
 		SOLOMotorControllers::CanbusBaudrate baudrate = SOLOMotorControllers::CanbusBaudrate::rate1000,
 		long millisecondsTimeout = 200);
 

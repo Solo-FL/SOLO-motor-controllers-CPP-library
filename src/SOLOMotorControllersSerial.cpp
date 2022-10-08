@@ -2,7 +2,7 @@
 // GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 /*
-*    Title: SOLO Motor Controllers DLL
+*    Title: SOLO Motor Controllers CPP Library
 *    Author: SOLOMotorControllers
 *    Date: 2022
 *    Code version: 1.0.0
@@ -119,7 +119,7 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 #define ReadSpeedDecelerationValue          0xB5
 #define ReadEncoderIndexCounts              0xB8
 
-SOLOMotorControllersSerial::SOLOMotorControllersSerial(char* COMPortName, unsigned char deviceAddress,
+SOLOMotorControllersSerial::SOLOMotorControllersSerial(char* COMPortName, UINT8 deviceAddress,
  		SOLOMotorControllers::UartBaudrate baudrate,
  		long millisecondsTimeout, int packetFailureTrialAttempts, bool autoConnect)
 	:addr(deviceAddress)
@@ -140,7 +140,7 @@ SOLOMotorControllersSerial::~SOLOMotorControllersSerial()
 	Disconnect();
 }
 
-bool SOLOMotorControllersSerial::Connect(char* COMPortName, unsigned char deviceAddress,
+bool SOLOMotorControllersSerial::Connect(char* COMPortName, UINT8 deviceAddress,
  		SOLOMotorControllers::UartBaudrate baudrate,
  		long millisecondsTimeout, int packetFailureTrialAttempts)
 {

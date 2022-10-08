@@ -6,7 +6,12 @@ SOLO-motor-controllers-CPP-library
 
 SOLO Motor Controller's C++ Library can be used with Windows OS to Set or Read all the parameters that are stored or existing in command set of SOLO, for more information on that please visit `the SOLO website <https://www.solomotorcontrollers.com/>`_.
 
-In the src folder is possible to find the C++ SOLO library and in the example folder some C++ code example of how load and use the C++ SOLO library. In order to test the example if possible to run the <SameName>.bat that will generate and compile the <SameName>.exe, than you can execute the <SameName>.exe in order to run the example.     
+The library support USB or Kvaser communication. 
+
+The Library is compiled using GCC, Visual Studio Code (`C/C++ for Visual Studio Code extension  <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools>`)
+
+Kvaser work on top of `Kvaser Drivers for Windows V5.39  <https://www.kvaser.com/download/>`
+
 
 Authors
 =======
@@ -17,15 +22,27 @@ SOLO Motor Controller CPP Library is created by SOLO Motor Controllers team
 Folders and Files Hierarchy
 =======
 
-src  = Source Files
+src/ = Source File folder
 
-example = Examples Files (this examples compile thanks to the src files)
+  SOLOMotorControllersKvaser.* = implementation of SOLOMotorControllers using Kvaser Drivers
 
-  .cpp = specific example code
+  SOLOMotorControllersSerial.* = implementation of SOLOMotorControllers using USB 
+
+examples/ = Examples File folder
+
+  serial/ = Examples over SOLOMotorControllersSerial 
+
+  kvaser/ = Examples over SOLOMotorControllersKvaser
    
-  _exe.bat = this file generete the .exe file from the .cpp file  (double click to execute the .bat)
-   
-  .exe = this file are genereted from .bat and is possible to run it to test the example (double click to ececute the .exe)
+inc/ = File used by Kvaser implementation
+
+lib/ = .Lib used by Kvaser implementation
+
+tests/ = Test folder, reference for testing unit
+
+vscode example/ = reference over VScode set-up (reference for Build/Debug using VScode)
+
+buildAll.bat = spript for complie all the cpp file in examples and tests (in the main folder, write in the terminal: .\buildAll  )
 
 License
 =======

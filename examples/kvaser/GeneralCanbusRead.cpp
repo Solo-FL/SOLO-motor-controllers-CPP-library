@@ -1,11 +1,11 @@
-// Copyright: (c) 2021, SOLO motor controllers project
+// Copyright: (c) 2021-2022, SOLO motor controllers project
 // GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 /*
-*    Title: SOLO Motor Controllers DLL
+*    Title: SOLO Motor Controllers CPP Library
 *    Author: SOLOMotorControllers
 *    Date: 2022
-*    Code version: 0.0.0
+*    Code version: 1.0.0
 *    Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
 This Library is made by SOLOMotorControllers.com
 To learn more please visit:  https://www.SOLOMotorControllers.com/

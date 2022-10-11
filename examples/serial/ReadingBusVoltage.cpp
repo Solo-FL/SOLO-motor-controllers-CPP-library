@@ -22,6 +22,7 @@ int main(void)
 {
     float readingValue;
     int error;
+    //Equivalent, avoiding the default parameter of SOLO Device Address: SOLOMotorControllers *solo = new SOLOMotorControllersSerial((char*)"COM3",0);
     SOLOMotorControllers *solo = new SOLOMotorControllersSerial((char*)"COM3");
 
     //TRY CONNECT LOOP

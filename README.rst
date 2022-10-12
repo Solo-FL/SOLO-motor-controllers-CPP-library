@@ -4,13 +4,13 @@
 SOLO-motor-controllers-CPP-library
 *******
 
-SOLO Motor Controller's C++ Library can be used with Windows OS to Set or Read all the parameters that are stored or existing in command set of SOLO, for more information on that please visit `the SOLO website <https://www.solomotorcontrollers.com/>`_.
+SOLO Motor Controller's C++ Library can be used with Windows OS to SETor READ all the parameters that are stored or existing in the command set of SOLO, for more information on that please visit `the SOLO website <https://www.solomotorcontrollers.com/>`_.
 
-The library support USB or Kvaser communication. 
+This library supports all the communications offered by SOLO including UART, USB, or CANopen communication using KVASER products.  
 
 The Library is compiled using GCC, Visual Studio Code (`C/C++ for Visual Studio Code extension  <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools>`_)
 
-Kvaser work on top of `Kvaser Drivers for Windows V5.39  <https://www.kvaser.com/download/>`_
+Kvaser works on top of  `Kvaser Drivers for Windows V5.39  <https://www.kvaser.com/download/>`_
 
 
 Authors

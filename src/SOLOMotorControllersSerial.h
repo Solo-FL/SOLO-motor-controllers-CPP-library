@@ -1,15 +1,18 @@
-// Copyright: (c) 2021-2022, SOLO motor controllers project
-// GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-
-/*
-*    Title: SOLO Motor Controllers CPP Library
-*    Author: SOLOMotorControllers
-*    Date: 2022
-*    Code version: 1.0.0
-*    Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
-This Library is made by SOLOMotorControllers.com
-To learn more please visit:  https://www.SOLOMotorControllers.com/
-*/
+/**
+ *******************************************************************************
+ * @file    SOLOMotorControllersSerial.h
+ * @authors SOLO Motor Controllers
+ * @brief   This file contains all the base functions prototypes for the Solo Drivers
+ *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-ARDUINO-library
+ * 
+ * @date    Date: 2023
+ * @version 1.1.0
+ * *******************************************************************************    
+ * @attention
+ * Copyright: (c) 2021-2023, SOLO motor controllers project
+ * GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+ ******************************************************************************* 
+ */
 
 #pragma once
 
@@ -25,6 +28,10 @@ extern "C"
 {
 #endif
 
+/** @defgroup Serial_Commands Serial Commands
+  * @brief all serial command hex code
+  * @{
+  */
 #define ReadData                            0x00 // 0x00000000
 #define INITIATOR                           0xFF //0xFFFF
 #define BroadcastAddress                    0xFF
@@ -74,6 +81,13 @@ extern "C"
 #define WriteSpeedAccelerationValue         0x2A
 #define WriteSpeedDecelerationValue         0x2B
 #define WriteCanbusBaudrate                 0x2C
+#define WriteASRDC                          0x2D
+#define WriteMotionProfileMode              0x30
+#define WriteMotionProfileVariable1         0x31
+#define WriteMotionProfileVariable2         0x32
+#define WriteMotionProfileVariable3         0x33
+#define WriteMotionProfileVariable4         0x34
+#define WriteMotionProfileVariable5         0x35
 
 #define ReadDeviceAddress                   0x81
 #define ReadPhaseAVoltage                   0x82
@@ -126,7 +140,21 @@ extern "C"
 #define ReadSpeedAccelerationValue          0xB4
 #define ReadSpeedDecelerationValue          0xB5
 #define ReadEncoderIndexCounts              0xB8
+#define ReadASRDC                           0xB7
+#define ReadEncoderIndexCounts              0xB8
+#define ReadMotionProfileMode               0xBB
+#define ReadMotionProfileVariable1          0xBC
+#define ReadMotionProfileVariable2          0xBD
+#define ReadMotionProfileVariable3          0xBE
+#define ReadMotionProfileVariable4          0xBF
+#define ReadMotionProfileVariable5          0xC0
+/**
+  * @}
+  */
 
+/**
+ * @brief a class for handle serial communication
+ * */
 	class SOLOMotorControllersSerial : public SOLOMotorControllers {
 
 	private:
@@ -147,7 +175,6 @@ extern "C"
 		DWORD NoBytesRecieved;
 		char  TempChar;
 
-		//javad
 		SOLOMotorControllersUtils* soloUtils;
 
 	public:
@@ -184,6 +211,9 @@ extern "C"
 
 		bool Test();
 
+    /** @addtogroup SOLOMotorControllersSerial_Write_Functions SOLOMotorControllersSerial Write Functions
+     * @{
+     */
 		//----------Write----------
 
 		bool SetDeviceAddress(unsigned char deviceAddress, int& error);
@@ -357,7 +387,41 @@ extern "C"
 		bool SetCanbusBaudrate(CanbusBaudrate canbusBoudrate, int& error);
 
 		bool SetCanbusBaudrate(CanbusBaudrate canbusBoudrate);
+		
+		bool SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient, int &error);
+		
+        bool SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient);
+		
+        bool SetMotionProfileMode( MotionProfileMode motionProfileMode, int &error);
+		
+        bool SetMotionProfileMode( MotionProfileMode motionProfileMode);
+		
+        bool SetMotionProfileVariable1(float MotionProfileVariable1, int &error);
+		
+        bool SetMotionProfileVariable1(float MotionProfileVariable1);
+		
+        bool SetMotionProfileVariable2(float MotionProfileVariable2, int &error);
+		
+        bool SetMotionProfileVariable2(float MotionProfileVariable2);
+		
+        bool SetMotionProfileVariable3(float MotionProfileVariable3, int &error);
+		
+        bool SetMotionProfileVariable3(float MotionProfileVariable3);
+		
+        bool SetMotionProfileVariable4(float MotionProfileVariable4, int &error);
+		
+        bool SetMotionProfileVariable4(float MotionProfileVariable4);
+		
+        bool SetMotionProfileVariable5(float MotionProfileVariable5, int &error);
+		
+        bool SetMotionProfileVariable5(float MotionProfileVariable5);
+	/**
+     * @}
+     */
 
+    /** @addtogroup SOLOMotorControllersSerial_Read_Functions SOLOMotorControllersSerial Read Functions
+     * @{
+     */
 		////----------Read----------
 		long  GetDeviceAddress(int& error);
 
@@ -550,6 +614,10 @@ extern "C"
 		long  GetUartBaudrate(int& error);
 
 		long  GetUartBaudrate();
+		
+		long  GetAnalogueSpeedResolutionDivisionCoefficient(int &error);
+		
+        long  GetAnalogueSpeedResolutionDivisionCoefficient();
 
 		float GetSpeedAccelerationValue(int& error);
 
@@ -566,6 +634,33 @@ extern "C"
 		bool CommunicationIsWorking(int& error);
 
 		bool CommunicationIsWorking();
+		
+		long GetMotionProfileMode(int &error);
+		
+        long GetMotionProfileMode();
+		
+        float GetMotionProfileVariable1(int &error);
+		
+        float GetMotionProfileVariable1();
+		
+        float GetMotionProfileVariable2(int &error);
+		
+        float GetMotionProfileVariable2();
+		
+        float GetMotionProfileVariable3(int &error);
+		
+        float GetMotionProfileVariable3();
+		
+        float GetMotionProfileVariable4(int &error);
+		
+        float GetMotionProfileVariable4();
+		
+        float GetMotionProfileVariable5(int &error);
+		
+        float GetMotionProfileVariable5();
+	/**
+     * @}
+     */
 
 	};
 

@@ -1,15 +1,18 @@
-// Copyright: (c) 2021-2022, SOLO motor controllers project
-// GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-
-/*
-*    Title: SOLO Motor Controllers CPP Library
-*    Author: SOLOMotorControllers
-*    Date: 2022
-*    Code version: 1.0.0
-*    Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
-This Library is made by SOLOMotorControllers.com
-To learn more please visit:  https://www.SOLOMotorControllers.com/
-*/
+/**
+ *******************************************************************************
+ * @file    SOLOMotorControllersKvaser.h
+ * @authors SOLO Motor Controllers
+ * @brief   This file contains all the base functions prototypes for the Solo Drivers
+ *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-ARDUINO-library
+ * 
+ * @date    Date: 2023
+ * @version 1.1.0
+ * *******************************************************************************    
+ * @attention
+ * Copyright: (c) 2021-2023, SOLO motor controllers project
+ * GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+ ******************************************************************************* 
+ */
 
 #pragma once
 
@@ -24,12 +27,20 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 #define SOLOMOTORCONTROLLERSCANOPEN_H
 
 //SOLO Object Index
-//***** NMT Control Objects
+/** @addtogroup NMT_Control_Objects NMT Control Objects
+  * @{
+  */ 
 #define Object_ReadErrorRegister                       0x1001
 #define Object_GuardTime                               0x100C
 #define Object_LifeTimeFactor                          0x100D
 #define Object_ProducerHeartbeatTime                   0x1017
-//***** SOLO UNO CANOPEN Objects
+/**
+  * @}
+  */
+
+/** @addtogroup SOLO_UNO_CANOPEN_Objects SOLO UNO CANOPEN Objects
+  * @{
+  */
 #define Object_SetDeviceAddress                        0x3001
 #define Object_CommandMode                             0x3002
 #define Object_CurrentLimit                            0x3003
@@ -91,6 +102,20 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 #define Object_DeviceHardwareVersion                   0x303B
 #define Object_EncoderIndexCounts                      0x303D
 
+#define Object_ASRDC                                   0x303E
+#define Object_MotionProfileMode                       0x303F
+#define Object_MotionProfileVariable1                  0x3040
+#define Object_MotionProfileVariable2                  0x3041
+#define Object_MotionProfileVariable3                  0x3042
+#define Object_MotionProfileVariable4                  0x3043
+#define Object_MotionProfileVariable5                  0x3044
+/**
+  * @}
+  */
+
+/**
+ * @brief a class for handle canopen communication
+ * */
 class SOLOMotorControllersKvaser : public SOLOMotorControllers
 {
 
@@ -125,6 +150,9 @@ public:
 
 	void Disconnect();
 	
+/** @addtogroup SOLOMotorControllersCanopen_Write_Functions SOLOMotorControllersCanopen Write Functions
+  * @{
+  */
 	//----------Write  SOLOMotorControllersCanopen----------
 	bool SetGuardTime(long guardtime, int& error);
 	bool SetGuardTime(long guardtime);
@@ -132,6 +160,13 @@ public:
 	bool SetLifeTimeFactor(long lifeTimeFactor);
 	bool SetProducerHeartbeatTime(long producerHeartbeatTime, int& error);
 	bool SetProducerHeartbeatTime(long producerHeartbeatTime);
+/**
+  * @}
+  */
+
+/** @addtogroup SOLOMotorControllers_Write_Functions SOLOMotorControllers Write Functions
+  * @{
+  */
 	//----------Write  SOLOMotorControllers----------   
 	bool SetDeviceAddress(unsigned char deviceAddress, int& error);
 	bool SetDeviceAddress(unsigned char deviceAddress);
@@ -219,7 +254,27 @@ public:
 	bool SetSpeedDecelerationValue(float speedDecelerationValue);
 	bool SetCanbusBaudrate(CanbusBaudrate canbusBaudrate, int& error);
 	bool SetCanbusBaudrate(CanbusBaudrate canbusBaudrate);
+	bool SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient, int &error);
+    bool SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient);
+    bool SetMotionProfileMode( MotionProfileMode motionProfileMode, int &error);
+    bool SetMotionProfileMode( MotionProfileMode motionProfileMode);
+    bool SetMotionProfileVariable1(float MotionProfileVariable1, int &error);
+    bool SetMotionProfileVariable1(float MotionProfileVariable1);
+    bool SetMotionProfileVariable2(float MotionProfileVariable2, int &error);
+    bool SetMotionProfileVariable2(float MotionProfileVariable2);
+    bool SetMotionProfileVariable3(float MotionProfileVariable3, int &error);
+    bool SetMotionProfileVariable3(float MotionProfileVariable3);
+    bool SetMotionProfileVariable4(float MotionProfileVariable4, int &error);
+    bool SetMotionProfileVariable4(float MotionProfileVariable4);
+    bool SetMotionProfileVariable5(float MotionProfileVariable5, int &error);
+    bool SetMotionProfileVariable5(float MotionProfileVariable5);
+/**
+  * @}
+  */
 
+/** @addtogroup SOLOMotorControllers_Read_Functions SOLOMotorControllers Read Functions
+  * @{
+  */
 	//----------Read SOLOMotorControllers----------
 	long  GetReadErrorRegister(int& error);
 	long  GetReadErrorRegister();
@@ -329,14 +384,29 @@ public:
 	float GetSpeedAccelerationValue();
 	float GetSpeedDecelerationValue(int& error);
 	float GetSpeedDecelerationValue();
+	long  GetAnalogueSpeedResolutionDivisionCoefficient(int &error);
+    long  GetAnalogueSpeedResolutionDivisionCoefficient();
 	bool  CommunicationIsWorking(int& error);
 	bool  CommunicationIsWorking();
 	long  GetEncoderIndexCounts(int& error);
 	long  GetEncoderIndexCounts();
+	long GetMotionProfileMode(int &error);
+    long GetMotionProfileMode();
+    float GetMotionProfileVariable1(int &error);
+    float GetMotionProfileVariable1();
+    float GetMotionProfileVariable2(int &error);
+    float GetMotionProfileVariable2();
+    float GetMotionProfileVariable3(int &error);
+    float GetMotionProfileVariable3();
+    float GetMotionProfileVariable4(int &error);
+    float GetMotionProfileVariable4();
+    float GetMotionProfileVariable5(int &error);
+    float GetMotionProfileVariable5();
 	void GeneralCanbusRead(uint16_t *ID , uint8_t *DLC, uint8_t *Data);
 	void GeneralCanbusWrite(uint16_t ID, uint8_t *DLC, uint8_t *Data, int &error);
 };
-
-
+/**
+  * @}
+  */
 
 #endif

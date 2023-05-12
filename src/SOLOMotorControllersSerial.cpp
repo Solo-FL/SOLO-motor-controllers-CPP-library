@@ -1,15 +1,18 @@
-// Copyright: (c) 2021-2022, SOLO motor controllers project
-// GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-
-/*
-*    Title: SOLO Motor Controllers CPP Library
-*    Author: SOLOMotorControllers
-*    Date: 2022
-*    Code version: 1.0.0
-*    Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
-This Library is made by SOLOMotorControllers.com
-To learn more please visit:  https://www.SOLOMotorControllers.com/
-*/
+/**
+ *******************************************************************************
+ * @file    SOLOMotorControllersSerial.cpp
+ * @authors SOLO Motor Controllers
+ * @brief   This file contains all the base functions prototypes for the Solo Drivers
+ *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-ARDUINO-library
+ * 
+ * @date    Date: 2023
+ * @version 1.1.0
+ * *******************************************************************************    
+ * @attention
+ * Copyright: (c) 2021-2023, SOLO motor controllers project
+ * GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+ ******************************************************************************* 
+ */
 
 #include "SOLOMotorControllersSerial.h"
 
@@ -178,29 +181,11 @@ bool SOLOMotorControllersSerial::Connect()
 
 	switch (uartBaudrate)
 	{
-	case 9600:
-		dcbSerialParams.BaudRate = CBR_9600;
-		break;
-	case 14400:
-		dcbSerialParams.BaudRate = CBR_14400;
-		break;
-	case 19200:
-		dcbSerialParams.BaudRate = CBR_19200;
-		break;
-	case 38400:
-		dcbSerialParams.BaudRate = CBR_38400;
-		break;
-	case 56000:
-		dcbSerialParams.BaudRate = CBR_56000;
-		break;
-	case 57600:
-		dcbSerialParams.BaudRate = CBR_57600;
-		break;
-	case 115200:
-		dcbSerialParams.BaudRate = CBR_115200;
-		break;
-	case 937500:
+	case 0:
 		dcbSerialParams.BaudRate = 937500;
+		break;
+	case 1:
+		dcbSerialParams.BaudRate = CBR_115200;
 		break;
 	default:
 		dcbSerialParams.BaudRate = CBR_115200;
@@ -457,26 +442,46 @@ void SOLOMotorControllersSerial::SplitData(unsigned char* data, unsigned char* c
 	data[3] = cmd[5];
 }
 
+/**
+  * @brief  This command sets the desired device address for a SOLO unit
+  *           .The method refers to the Uart Write command: 0x01
+  * @param  deviceAddress  address want to set for board
+  * @param  error   pointer to an integer that specify result of function       
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetDeviceAddress(unsigned char deviceAddress, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 	unsigned char cmd[] = { addr,WriteDeviceAddres,0x00,0x00,0x00,deviceAddress };
 
-	if (deviceAddress < 0 || deviceAddress > 254)
+	if (!soloUtils->SetDeviceAddressInputValidation(deviceAddress, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
 
+/**
+  * @brief  This command sets the desired device address for a SOLO unit
+  *           .The method refers to the Uart Write command: 0x01
+  * @param  deviceAddress  address want to set for board    
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetDeviceAddress(unsigned char deviceAddress)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetDeviceAddress(deviceAddress, error);
 }
 
+/**
+  * @brief  This command sets the mode of the operation of SOLO
+  *         in terms of operating in Analogue mode or Digital
+  *           .The method refers to the Uart Write command: 0x02
+  * @param  mode  enum that specify mode of the operation of SOLO 
+  * @param  error   pointer to an integer that specify result of function       
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetCommandMode(CommandMode mode, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -484,17 +489,32 @@ bool SOLOMotorControllersSerial::SetCommandMode(CommandMode mode, int& error)
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the mode of the operation of SOLO
+  *         in terms of operating in Analogue mode or Digital
+  *           .The method refers to the Uart Write command: 0x02
+  * @param  mode  enum that specify mode of the operation of SOLO      
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetCommandMode(CommandMode mode)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetCommandMode(mode, error);
 }
+
+/**
+  * @brief  This command defines the maximum allowed current into the motor in terms of Amps
+  *           .The method refers to the Uart Write command: 0x03
+  * @param  currentLimit  a float value [Amps]
+  * @param  error   pointer to an integer that specify result of function       
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetCurrentLimit(float currentLimit, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (currentLimit < 0 || currentLimit > 32)
+	if (!soloUtils->SetCurrentLimitInputValidation(currentLimit, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -504,17 +524,31 @@ bool SOLOMotorControllersSerial::SetCurrentLimit(float currentLimit, int& error)
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command defines the maximum allowed current into the motor in terms of Amps
+  *           .The method refers to the Uart Write command: 0x03
+  * @param  currentLimit  a float value [Amps]     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetCurrentLimit(float currentLimit)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetCurrentLimit(currentLimit, error);
 }
+
+/**
+  * @brief  This command sets the amount of desired current that acts in torque generation
+  *           .The method refers to the Uart Write command: 0x04
+  * @param  torqueReferenceIq  a float [Amps]
+  * @param  error   pointer to an integer that specify result of function       
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetTorqueReferenceIq(float torqueReferenceIq, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (torqueReferenceIq < 0 || torqueReferenceIq > 32)
+	if (!soloUtils->SetTorqueReferenceIqInputValidation(torqueReferenceIq, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -524,17 +558,31 @@ bool SOLOMotorControllersSerial::SetTorqueReferenceIq(float torqueReferenceIq, i
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the amount of desired current that acts in torque generation
+  *           .The method refers to the Uart Write command: 0x04
+  * @param  torqueReferenceIq  a float [Amps]      
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetTorqueReferenceIq(float torqueReferenceIq)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetTorqueReferenceIq(torqueReferenceIq, error);
 }
+
+/**
+  * @brief  This command defines the speed reference for SOLO once it’s in Digital Speed Mode
+  *           .The method refers to the Uart Write command: 0x05
+  * @param  speedReference  a long value [RPM]
+  * @param  error   pointer to an integer that specify result of function       
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetSpeedReference(long speedReference, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (speedReference < 0 || speedReference > 30000)
+	if (!soloUtils->SetSpeedReferenceInputValidation(speedReference, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -544,17 +592,32 @@ bool SOLOMotorControllersSerial::SetSpeedReference(long speedReference, int& err
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command defines the speed reference for SOLO once it’s in Digital Speed Mode
+  *           .The method refers to the Uart Write command: 0x05
+  * @param  speedReference  a long value [RPM]      
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetSpeedReference(long speedReference)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetSpeedReference(speedReference, error);
 }
+
+/**
+  * @brief  This command defines the amount of power percentage during only
+  *         Open-loop mode for 3-phase motors
+  *           .The method refers to the Uart Write command: 0x06
+  * @param  powerReference  a float value between 0 to 100
+  * @param  error   pointer to an integer that specify result of function       
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetPowerReference(float powerReference, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (powerReference < 0 || powerReference > 100)
+	if (!soloUtils->SetPowerReferenceInputValidation(powerReference, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -564,11 +627,28 @@ bool SOLOMotorControllersSerial::SetPowerReference(float powerReference, int& er
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command defines the amount of power percentage during only
+  *         Open-loop mode for 3-phase motors
+  *           .The method refers to the Uart Write command: 0x06
+  * @param  powerReference  a float value between 0 to 100       
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetPowerReference(float powerReference)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetPowerReference(powerReference, error);
 }
+
+/**
+  * @brief  By putting 1 in the DATA section of a packet sent with this command, SOLO will start
+            identifying the electrical parameters of the Motor connected
+              .The method refers to the Uart Write command: 0x07
+  * @param  powerReference  enum that specify Start or Stop of something in SOLO 
+  * @param  error   pointer to an integer that specify result of function       
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::MotorParametersIdentification(Action identification, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -576,11 +656,27 @@ bool SOLOMotorControllersSerial::MotorParametersIdentification(Action identifica
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  By putting 1 in the DATA section of a packet sent with this command, SOLO will start
+            identifying the electrical parameters of the Motor connected
+              .The method refers to the Uart Write command: 0x07
+  * @param  powerReference  enum that specify Start or Stop of something in SOLO      
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::MotorParametersIdentification(Action identification)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::MotorParametersIdentification(identification, error);
 }
+
+/**
+  * @brief  This command if the DATA is set at zero will stop the whole power and switching system
+            connected to the motor and it will cut the current floating into the Motor from SOLO
+              .The method refers to the Uart Write command: 0x08
+  * @param  error   pointer to an integer that specify result of function       
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::EmergencyStop(int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -588,17 +684,31 @@ bool SOLOMotorControllersSerial::EmergencyStop(int& error)
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command if the DATA is set at zero will stop the whole power and switching system
+            connected to the motor and it will cut the current floating into the Motor from SOLO 
+              .The method refers to the Uart Write command: 0x08     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::EmergencyStop()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::EmergencyStop(error);
 }
+
+/**
+  * @brief  This command sets the output switching frequency of the whole power unit on the Motor
+  *           .The method refers to the Uart Write command: 0x09
+  * @param  outputPwmFrequencyKhz  switching frequencies [kHz]
+  * @param  error   pointer to an integer that specify result of function     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (outputPwmFrequencyKhz < 8 || outputPwmFrequencyKhz > 80)
+	if (!soloUtils->SetOutputPwmFrequencyKhzInputValidation(outputPwmFrequencyKhz, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -609,17 +719,32 @@ bool SOLOMotorControllersSerial::SetOutputPwmFrequencyKhz(long outputPwmFrequenc
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 
 }
+
+/**
+  * @brief  This command sets the output switching frequency of the whole power unit on the Motor
+  *           .The method refers to the Uart Write command: 0x09
+  * @param  outputPwmFrequencyKhz  switching frequencies [kHz]      
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetOutputPwmFrequencyKhz(outputPwmFrequencyKhz, error);
 }
+
+/**
+  * @brief  This command sets the Speed controller Kp Gain, and it will
+  *         be functional only in Digital Closed-loop mode  
+  *           .The method refers to the Uart Write command: 0x0A
+  * @param  speedControllerKp  a float value between 0 to 300 
+  * @param  error   pointer to an integer that specify result of function     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetSpeedControllerKp(float speedControllerKp, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (speedControllerKp < 0 || speedControllerKp > 300)
+	if (!soloUtils->SetSpeedControllerKpInputValidation(speedControllerKp, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -629,17 +754,33 @@ bool SOLOMotorControllersSerial::SetSpeedControllerKp(float speedControllerKp, i
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the Speed controller Kp Gain, and it will
+  *         be functional only in Digital Closed-loop mode
+  *           .The method refers to the Uart Write command: 0x0A
+  * @param  speedControllerKp  a float value between 0 to 300     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetSpeedControllerKp(float speedControllerKp)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetSpeedControllerKp(speedControllerKp, error);
 }
+
+/**
+  * @brief  This command sets the Speed controller Ki gain, and it will
+  *         be functional only in Digital Closed-loop mode
+  *           .The method refers to the Uart Write command: 0x0B
+  * @param  speedControllerKi  a float value between 0 to 300 
+  * @param  error   pointer to an integer that specify result of function     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetSpeedControllerKi(float speedControllerKi, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (speedControllerKi < 0 || speedControllerKi > 300)
+	if (!soloUtils->SetSpeedControllerKiInputValidation(speedControllerKi, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -649,11 +790,28 @@ bool SOLOMotorControllersSerial::SetSpeedControllerKi(float speedControllerKi, i
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the Speed controller Ki gain, and it will
+  *         be functional only in Digital Closed-loop mode
+  *           .The method refers to the Uart Write command: 0x0B
+  * @param  speedControllerKi  a float value between 0 to 300      
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetSpeedControllerKi(float speedControllerKi)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetSpeedControllerKi(speedControllerKi, error);
 }
+
+/**
+  * @brief  This commands sets the direction of the rotation of the motor
+  *         either to ClockWise rotation or to Counter Clockwise Rotation
+  *           .The method refers to the Uart Write command: 0x0C
+  * @param  motorDirection  enum that specify the direction of the rotation of the motor
+  * @param  error   pointer to an integer that specify result of function     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetMotorDirection(Direction motorDirection, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -661,17 +819,33 @@ bool SOLOMotorControllersSerial::SetMotorDirection(Direction motorDirection, int
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This commands sets the direction of the rotation of the motor
+  *         either to ClockWise rotation or to Counter Clockwise Rotation
+  *           .The method refers to the Uart Write command: 0x0C
+  * @param  motorDirection  enum that specify the direction of the rotation of the motor    
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetMotorDirection(Direction motorDirection)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetMotorDirection(motorDirection, error);
 }
+
+/**
+  * @brief  This command sets the amount of the Phase or Armature resistance
+  *         for 3-phase or DC Brushed motors respectively
+  *           .The method refers to the Uart Write command: 0x0D
+  * @param  motorResistance  a float value [Ohm]
+  * @param  error   pointer to an integer that specify result of function     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetMotorResistance(float motorResistance, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (motorResistance < 0.001 || motorResistance > 50)
+	if (!soloUtils->SetMotorResistanceInputValidation(motorResistance, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -681,17 +855,33 @@ bool SOLOMotorControllersSerial::SetMotorResistance(float motorResistance, int& 
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the amount of the Phase or Armature resistance
+  *         for 3-phase or DC Brushed motors respectively
+  *           .The method refers to the Uart Write command: 0x0D
+  * @param  motorResistance  a float value [Ohm]    
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetMotorResistance(float motorResistance)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetMotorResistance(motorResistance, error);
 }
+
+/**
+  * @brief  This command sets the amount of the Phase or Armature Inductance
+  *         for 3-phase or DC Brushed motors respectively
+  *           .The method refers to the Uart Write command: 0x0E
+  * @param  motorInductance  a float value [Henry]
+  * @param  error   pointer to an integer that specify result of function     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetMotorInductance(float motorInductance, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (motorInductance < 0.00001 || motorInductance > 0.2)
+	if (!soloUtils->SetMotorInductanceInputValidation(motorInductance, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -701,17 +891,32 @@ bool SOLOMotorControllersSerial::SetMotorInductance(float motorInductance, int& 
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the amount of the Phase or Armature Inductance
+  *         for 3-phase or DC Brushed motors respectively
+  *           .The method refers to the Uart Write command: 0x0E
+  * @param  motorInductance  a float value [Henry]   
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetMotorInductance(float motorInductance)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetMotorInductance(motorInductance, error);
 }
+
+/**
+  * @brief  This command sets the number of the Poles of a 3-phase motor commissioned with SOLO
+  *           .The method refers to the Uart Write command: 0x0F
+  * @param  motorPolesCounts  a long value between 1 to 254   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetMotorPolesCounts(long motorPolesCounts, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (motorPolesCounts < 1 || motorPolesCounts > 80)
+	if (!soloUtils->SetMotorPolesCountsInputValidation(motorPolesCounts, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -721,17 +926,32 @@ bool SOLOMotorControllersSerial::SetMotorPolesCounts(long motorPolesCounts, int&
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the number of the Poles of a 3-phase motor commissioned with SOLO
+  *           .The method refers to the Uart Write command: 0x0F
+  * @param  motorPolesCounts  a long value between 1 to 254     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetMotorPolesCounts(long motorPolesCounts)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetMotorPolesCounts(motorPolesCounts, error);
 }
+
+/**
+  * @brief  This command sets the pre-quad number of physical lines of an 
+  *         incremental encoder engraved on its disk
+  *           .The method refers to the Uart Write command: 0x10
+  * @param  incrementalEncoderLines  a long value [pre-quad]  
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetIncrementalEncoderLines(long incrementalEncoderLines, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (incrementalEncoderLines < 1 || incrementalEncoderLines > 40000)
+	if (!soloUtils->SetIncrementalEncoderLinesInputValidation(incrementalEncoderLines, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -741,17 +961,33 @@ bool SOLOMotorControllersSerial::SetIncrementalEncoderLines(long incrementalEnco
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the pre-quad number of physical lines of an 
+  *         incremental encoder engraved on its disk
+  *           .The method refers to the Uart Write command: 0x10
+  * @param  incrementalEncoderLines  a long value [pre-quad]    
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetIncrementalEncoderLines(long incrementalEncoderLines)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetIncrementalEncoderLines(incrementalEncoderLines, error);
 }
+
+/**
+  * @brief  This command sets the allowed speed during trajectory following
+  *         in closed-loop position controlling mode
+  *           .The method refers to the Uart Write command: 0x11
+  * @param  speedLimit  a long value [RPM]  
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetSpeedLimit(long speedLimit, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (speedLimit < 1 || speedLimit > 30000)
+	if (!soloUtils->SetSpeedLimitInputValidation(speedLimit, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -761,11 +997,26 @@ bool SOLOMotorControllersSerial::SetSpeedLimit(long speedLimit, int& error)
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the allowed speed during trajectory following
+  *         in closed-loop position controlling mode
+  *           .The method refers to the Uart Write command: 0x11
+  * @param  speedLimit  a long value [RPM]     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetSpeedLimit(long speedLimit)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetSpeedLimit(speedLimit, error);
 }
+
+/**
+  * @brief  This command resets the device address of any connected SOLO to zero  
+  *           .The method refers to the Uart Write command: 0x12 
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::ResetDeviceAddress(int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -773,11 +1024,25 @@ bool SOLOMotorControllersSerial::ResetDeviceAddress(int& error)
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command resets the device address of any connected SOLO to zero  
+  *           .The method refers to the Uart Write command: 0x12  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::ResetDeviceAddress()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::ResetDeviceAddress(error);
 }
+
+/**
+  * @brief  This command sets the type of the feedback control SOLO has to operate
+  *           .The method refers to the Uart Write command: 0x13
+  * @param  mode  enum that specify the type of the feedback control SOLO 
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetFeedbackControlMode(FeedbackControlMode mode, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -788,11 +1053,25 @@ bool SOLOMotorControllersSerial::SetFeedbackControlMode(FeedbackControlMode mode
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 
 }
+
+/**
+  * @brief  This command sets the type of the feedback control SOLO has to operate
+  *           .The method refers to the Uart Write command: 0x13
+  * @param  mode  enum that specify the type of the feedback control SOLO   
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetFeedbackControlMode(FeedbackControlMode mode)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetFeedbackControlMode(mode, error);
 }
+
+/**
+  * @brief  This command resets SOLO to its factory setting to all the default parameters  
+  *           .The method refers to the Uart Write command: 0x14 
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::ResetFactory(int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -800,11 +1079,25 @@ bool SOLOMotorControllersSerial::ResetFactory(int& error)
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command resets SOLO to its factory setting to all the default parameters 
+  *           .The method refers to the Uart Write command: 0x14    
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::ResetFactory()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::ResetFactory(error);
 }
+
+/**
+  * @brief  This command sets the Motor type that is connected to SOLO in Digital Mode
+  *           .The method refers to the Uart Write command: 0x15
+  * @param  motorType  enum that specify the Motor type that is connected to SOLO in Digital Mode
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetMotorType(MotorType motorType, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -814,11 +1107,28 @@ bool SOLOMotorControllersSerial::SetMotorType(MotorType motorType, int& error)
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the Motor type that is connected to SOLO in Digital Mode
+  *           .The method refers to the Uart Write command: 0x15
+  * @param  motorType  enum that specify the Motor type that is connected to SOLO in Digital Mode 
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetMotorType(MotorType motorType)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetMotorType(motorType, error);
 }
+
+/**
+  * @brief  This command sets the Control Mode in terms of Torque,
+  *         Speed or Position only in Digital Mode
+  *           .The method refers to the Uart Write command: 0x16
+  * @param  controlMode  enum that specify the Control Mode in terms of Torque,
+  *                       Speed or Position only in Digital Mode 
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetControlMode(ControlMode controlMode, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -828,17 +1138,33 @@ bool SOLOMotorControllersSerial::SetControlMode(ControlMode controlMode, int& er
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the Control Mode in terms of Torque,
+  *         Speed or Position only in Digital Mode
+  *           .The method refers to the Uart Write command: 0x16
+  * @param  controlMode  enum that specify the Control Mode in terms of Torque,
+  *                       Speed or Position only in Digital Mode  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetControlMode(ControlMode controlMode)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetControlMode(controlMode, error);
 }
+
+/**
+  * @brief  This command sets the value for Current Controller Kp or proportional gain
+  *           .The method refers to the Uart Write command: 0x17
+  * @param  currentControllerKp  a float value between 0 to 16000  
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetCurrentControllerKp(float currentControllerKp, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (currentControllerKp < 0 || currentControllerKp > 16000)
+	if (!soloUtils->SetCurrentControllerKpInputValidation(currentControllerKp, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -848,17 +1174,31 @@ bool SOLOMotorControllersSerial::SetCurrentControllerKp(float currentControllerK
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the value for Current Controller Kp or proportional gain
+  *           .The method refers to the Uart Write command: 0x17
+  * @param  currentControllerKp  a float value between 0 to 16000   
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetCurrentControllerKp(float currentControllerKp)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetCurrentControllerKp(currentControllerKp, error);
 }
+
+/**
+  * @brief  This command sets the value for Current Controller Ki or integral gain
+  *           .The method refers to the Uart Write command: 0x18
+  * @param  motorInductance  a float value between 0 to 16000  
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetCurrentControllerKi(float currentControllerKi, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (currentControllerKi < 0 || currentControllerKi > 16000)
+	if (!soloUtils->SetCurrentControllerKiInputValidation(currentControllerKi, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -868,6 +1208,13 @@ bool SOLOMotorControllersSerial::SetCurrentControllerKi(float currentControllerK
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the value for Current Controller Ki or integral gain
+  *           .The method refers to the Uart Write command: 0x18
+  * @param  motorInductance  a float value between 0 to 16000   
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetCurrentControllerKi(float currentControllerKi)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -885,12 +1232,22 @@ bool SOLOMotorControllersSerial::SetMonitoringMode(bool mode)
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetMonitoringMode(mode, error);
 }
+
+/**
+  * @brief  depending on the Motor type: in case of BLDC or PMSM motors Sets the Field
+  *         Weakening current reference to help the motor reaching speeds higher than
+  *         nominal values and in case of AC Induction Motors Sets the desired magnetizing
+  *         current (Id) required for controlling ACIM motors in FOC in Amps 
+  *           .The method refers to the Uart Write command: 0x1A
+  * @param  magnetizingCurrentIdReference  a float value [Amps]   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (magnetizingCurrentIdReference < 0 || magnetizingCurrentIdReference > 32)
+	if (!soloUtils->SetMagnetizingCurrentIdReferenceInputValidation(magnetizingCurrentIdReference, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -900,17 +1257,36 @@ bool SOLOMotorControllersSerial::SetMagnetizingCurrentIdReference(float magnetiz
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  depending on the Motor type: in case of BLDC or PMSM motors Sets the Field
+  *         Weakening current reference to help the motor reaching speeds higher than
+  *         nominal values and in case of AC Induction Motors Sets the desired magnetizing
+  *         current (Id) required for controlling ACIM motors in FOC in Amps 
+  *           .The method refers to the Uart Write command: 0x1A
+  * @param  magnetizingCurrentIdReference  a float value [Amps]    
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetMagnetizingCurrentIdReference(magnetizingCurrentIdReference, error);
 }
+
+/**
+  * @brief  This command sets the desired Position reference in terms of quadrature
+  *         pulses while SOLO operates with the Incremental Encoders or in terms of
+  *         pulses while while SOLO operates with Hall sensors
+  *           .The method refers to the Uart Write command: 0x1B
+  * @param  positionReference  a long value [Quad-Pulse]   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetPositionReference(long positionReference, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (positionReference < -2147483647 || positionReference > 2147483647)
+	if (!soloUtils->SetPositionReferenceInputValidation(positionReference, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -920,17 +1296,33 @@ bool SOLOMotorControllersSerial::SetPositionReference(long positionReference, in
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the desired Position reference in terms of quadrature
+  *         pulses while SOLO operates with the Incremental Encoders or in terms of
+  *         pulses while while SOLO operates with Hall sensors
+  *           .The method refers to the Uart Write command: 0x1B
+  * @param  positionReference  a long value [Quad-Pulse]   
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetPositionReference(long positionReference)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetPositionReference(positionReference, error);
 }
+
+/**
+  * @brief  This command sets the value for Position Controller Kp or proportional gain
+  *           .The method refers to the Uart Write command: 0x1C
+  * @param  positionControllerKp  a float value between 0 to 16000  
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetPositionControllerKp(float positionControllerKp, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (positionControllerKp < 0 || positionControllerKp > 16000)
+	if (!soloUtils->SetPositionControllerKpInputValidation(positionControllerKp, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -940,17 +1332,32 @@ bool SOLOMotorControllersSerial::SetPositionControllerKp(float positionControlle
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the value for Position Controller Kp or proportional gain 
+  *           .The method refers to the Uart Write command: 0x1C
+  * @param  positionControllerKp  a float value between 0 to 16000   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetPositionControllerKp(float positionControllerKp)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetPositionControllerKp(positionControllerKp, error);
 }
+
+/**
+  * @brief  This command sets the value for Position Controller Ki or integrator gain
+  *           .The method refers to the Uart Write command: 0x1D
+  * @param  positionControllerKi  a float value between 0 to 16000   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetPositionControllerKi(float positionControllerKi, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (positionControllerKi < 0 || positionControllerKi > 16000)
+	if (!soloUtils->SetPositionControllerKiInputValidation(positionControllerKi, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -960,11 +1367,25 @@ bool SOLOMotorControllersSerial::SetPositionControllerKi(float positionControlle
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the value for Position Controller Ki or integrator gain
+  *           .The method refers to the Uart Write command: 0x1D
+  * @param  positionControllerKi  a float value between 0 to 16000     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetPositionControllerKi(float positionControllerKi)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetPositionControllerKi(positionControllerKi, error);
 }
+
+/**
+  * @brief  This command resets the position counter back to zero    
+  *           .The method refers to the Uart Write command: 0x1F
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::ResetPositionToZero(int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -972,11 +1393,25 @@ bool SOLOMotorControllersSerial::ResetPositionToZero(int& error)
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command resets the position counter back to zero   
+  *           .The method refers to the Uart Write command: 0x1F  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::ResetPositionToZero()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::ResetPositionToZero(error);
 }
+
+/**
+  * @brief  This command overwrites the reported errors in Error Register
+  *         reported with command code of "0xA1"  
+  *           .The method refers to the Uart Write command: 0x20
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::OverwriteErrorRegister(int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -984,18 +1419,34 @@ bool SOLOMotorControllersSerial::OverwriteErrorRegister(int& error)
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command overwrites the reported errors in Error Register
+  *         reported with command code of "0xA1"   
+  *           .The method refers to the Uart Write command: 0x20
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::OverwriteErrorRegister()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::OverwriteErrorRegister(error);
 }
+
+/**
+  * @brief  This command sets the observer gain for the Non-linear observer
+  *         that estimates the speed and angle of a BLDC or PMSM once the 
+  *         motor type is selected as normal BLDC-PMSM
+  *           .The method refers to the Uart Write command: 0x21
+  * @param  observerGain  a float value between 0.01 to 1000  
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 // SOG => Sensorless Observer Gain 
 bool SOLOMotorControllersSerial::SetObserverGainBldcPmsm(float observerGain, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (observerGain < 0.01 || observerGain > 1000)
+	if (!soloUtils->SetObserverGainBldcPmsmInputValidation(observerGain, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -1005,17 +1456,35 @@ bool SOLOMotorControllersSerial::SetObserverGainBldcPmsm(float observerGain, int
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the observer gain for the Non-linear observer
+  *         that estimates the speed and angle of a BLDC or PMSM once the 
+  *         motor type is selected as normal BLDC-PMSM
+  *           .The method refers to the Uart Write command: 0x21
+  * @param  observerGain  a float value between 0.01 to 1000    
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetObserverGainBldcPmsm(float observerGain)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetObserverGainBldcPmsm(observerGain, error);
 }
+
+/**
+  * @brief  This command sets the observer gain for the Non-linear observer that
+  *         estimates the speed and angle of a BLDC or PMSM once the motor type
+  *         is selected as ultra-fast BLDC-PMSM
+  *           .The method refers to the Uart Write command: 0x22
+  * @param  observerGain  a float value between 0.01 to 1000   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetObserverGainBldcPmsmUltrafast(float observerGain, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (observerGain < 0.01 || observerGain > 1000)
+	if (!soloUtils->SetObserverGainBldcPmsmUltrafastInputValidation(observerGain, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -1025,17 +1494,35 @@ bool SOLOMotorControllersSerial::SetObserverGainBldcPmsmUltrafast(float observer
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the observer gain for the Non-linear observer that
+  *         estimates the speed and angle of a BLDC or PMSM once the motor type
+  *         is selected as ultra-fast BLDC-PMSM
+  *           .The method refers to the Uart Write command: 0x22
+  * @param  observerGain  a float value between 0.01 to 1000    
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetObserverGainBldcPmsmUltrafast(float observerGain)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetObserverGainBldcPmsmUltrafast(observerGain, error);
 }
+
+/**
+  * @brief  This command sets the observer gain for the Non-linear observer
+  *         that estimates the speed of a DC brushed once the motor type 
+  *         is selected as DC brushed
+  *           .The method refers to the Uart Write command: 0x23
+  * @param  observerGain  a float value between 0.01 to 1000   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetObserverGainDc(float observerGain, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (observerGain < 0.01 || observerGain > 1000)
+	if (!soloUtils->SetObserverGainDcInputValidation(observerGain, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -1045,18 +1532,35 @@ bool SOLOMotorControllersSerial::SetObserverGainDc(float observerGain, int& erro
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the observer gain for the Non-linear observer
+  *         that estimates the speed of a DC brushed once the motor type 
+  *         is selected as DC brushed
+  *           .The method refers to the Uart Write command: 0x23
+  * @param  observerGain  a float value between 0.01 to 1000    
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetObserverGainDc(float observerGain)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetObserverGainDc(observerGain, error);
 }
+
+/**
+  * @brief  This command sets how fast the observer should operate once
+  *         SOLO is in sensorless mode with normal BLDC-PMSM selected as the Motor type
+  *           .The method refers to the Uart Write command: 0x24
+  * @param  filterGain  a float value between 0.01 to 16000 
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 // SOFG => Sensorless Observer Filter Gain
 bool SOLOMotorControllersSerial::SetFilterGainBldcPmsm(float filterGain, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (filterGain < 0.01 || filterGain > 16000)
+	if (!soloUtils->SetFilterGainBldcPmsmInputValidation(filterGain, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -1066,17 +1570,33 @@ bool SOLOMotorControllersSerial::SetFilterGainBldcPmsm(float filterGain, int& er
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets how fast the observer should operate once
+  *         SOLO is in sensorless mode with normal BLDC-PMSM selected as the Motor type
+  *           .The method refers to the Uart Write command: 0x24
+  * @param  filterGain  a float value between 0.01 to 16000   
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetFilterGainBldcPmsm(float filterGain)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetFilterGainBldcPmsm(filterGain, error);
 }
+
+/**
+  * @brief  This command sets how fast the observer should operate once SOLO
+  *         is in sensorless mode with ultra-fast BLDC-PMSM selected as the Motor type
+  *           .The method refers to the Uart Write command: 0x25
+  * @param  filterGain  a float value between 0.01 to 16000  
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetFilterGainBldcPmsmUltrafast(float filterGain, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (filterGain < 0.01 || filterGain > 16000)
+	if (!soloUtils->SetFilterGainBldcPmsmUltrafastInputValidation(filterGain, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -1086,11 +1606,27 @@ bool SOLOMotorControllersSerial::SetFilterGainBldcPmsmUltrafast(float filterGain
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets how fast the observer should operate once SOLO
+  *         is in sensorless mode with ultra-fast BLDC-PMSM selected as the Motor type
+  *           .The method refers to the Uart Write command: 0x25
+  * @param  filterGain  a float value between 0.01 to 16000   
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetFilterGainBldcPmsmUltrafast(float filterGain)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetFilterGainBldcPmsmUltrafast(filterGain, error);
 }
+
+/**
+  * @brief  This command sets the baud-rate of the UART line
+  *           .The method refers to the Uart Write command: 0x26
+  * @param  baudrate  enum that specify the baud-rate of the UART line  
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetUartBaudrate(UartBaudrate baudrate, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1100,11 +1636,26 @@ bool SOLOMotorControllersSerial::SetUartBaudrate(UartBaudrate baudrate, int& err
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the baud-rate of the UART line
+  *           .The method refers to the Uart Write command: 0x26
+  * @param  baudrate  enum that specify the baud-rate of the UART line     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetUartBaudrate(UartBaudrate baudrate)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetUartBaudrate(baudrate, error);
 }
+
+/**
+  * @brief  This command starts or stops the process of sensor calibration
+  *           .The method refers to the Uart Write command: 0x27
+  * @param  calibrationAction  enum that specify the process of sensor calibration 
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SensorCalibration(PositionSensorCalibrationAction calibrationAction, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1114,17 +1665,32 @@ bool SOLOMotorControllersSerial::SensorCalibration(PositionSensorCalibrationActi
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command starts or stops the process of sensor calibration
+  *           .The method refers to the Uart Write command: 0x27
+  * @param  calibrationAction  enum that specify the process of sensor calibration   
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SensorCalibration(PositionSensorCalibrationAction calibrationAction)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SensorCalibration(calibrationAction, error);
 }
+
+/**
+  * @brief  This command sets the per-unit offset identified after sensor calibration
+  *         for Encoder or Hall sensors in C.C.W direction
+  *           .The method refers to the Uart Write command: 0x28
+  * @param  encoderHallOffset  a float value between 0.0 to 1.0  
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetEncoderHallCcwOffset(float encoderHallOffset, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (encoderHallOffset <= 0 || encoderHallOffset >= 1)
+	if (!soloUtils->SetEncoderHallCcwOffsetInputValidation(encoderHallOffset, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -1134,17 +1700,33 @@ bool SOLOMotorControllersSerial::SetEncoderHallCcwOffset(float encoderHallOffset
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the per-unit offset identified after sensor calibration
+  *         for Encoder or Hall sensors in C.C.W direction
+  *           .The method refers to the Uart Write command: 0x28
+  * @param  encoderHallOffset  a float value between 0.0 to 1.0   
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetEncoderHallCcwOffset(float encoderHallOffset)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetEncoderHallCcwOffset(encoderHallOffset, error);
 }
+
+/**
+  * @brief  This command sets the per-unit offset identified after sensor calibration
+  *         for Encoder or Hall sensors in C.W direction
+  *           .The method refers to the Uart Write command: 0x29
+  * @param  encoderHallOffset  a float value between 0.0 to 1.0   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetEncoderHallCwOffset(float encoderHallOffset, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (encoderHallOffset <= 0 || encoderHallOffset >= 1)
+	if (!soloUtils->SetEncoderHallCwOffsetInputValidation(encoderHallOffset, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -1154,17 +1736,33 @@ bool SOLOMotorControllersSerial::SetEncoderHallCwOffset(float encoderHallOffset,
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the per-unit offset identified after sensor calibration
+  *         for Encoder or Hall sensors in C.W direction
+  *           .The method refers to the Uart Write command: 0x29
+  * @param  encoderHallOffset  a float value between 0.0 to 1.0     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetEncoderHallCwOffset(float encoderHallOffset)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetEncoderHallCwOffset(encoderHallOffset, error);
 }
+
+/**
+  * @brief  This command defines the acceleration value of the Speed for speed controller
+  *         both in Analogue and Digital modes in Revolution per square seconds
+  *           .The method refers to the Uart Write command: 0x2A
+  * @param  speedAccelerationValue  a float value [Rev/S^2]  
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetSpeedAccelerationValue(float speedAccelerationValue, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (speedAccelerationValue < 0 || speedAccelerationValue > 1600)
+	if (!soloUtils->SetSpeedAccelerationValueInputValidation(speedAccelerationValue, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -1174,17 +1772,33 @@ bool SOLOMotorControllersSerial::SetSpeedAccelerationValue(float speedAccelerati
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command defines the acceleration value of the Speed for speed controller
+  *         both in Analogue and Digital modes in Revolution per square seconds
+  *           .The method refers to the Uart Write command: 0x2A
+  * @param  speedAccelerationValue  a float value [Rev/S^2]  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetSpeedAccelerationValue(float speedAccelerationValue)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetSpeedAccelerationValue(speedAccelerationValue, error);
 }
+
+/**
+  * @brief  This command defines the deceleration value of the Speed for speed controller
+  *         both in Analogue and Digital modes in Revolution per square seconds
+  *           .The method refers to the Uart Write command: 0x2B
+  * @param  speedDecelerationValue  a float value [Rev/S^2]   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetSpeedDecelerationValue(float speedDecelerationValue, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (speedDecelerationValue < 0 || speedDecelerationValue > 1600)
+	if (!soloUtils->SetSpeedDecelerationValueInputValidation(speedDecelerationValue, error))
 	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 
@@ -1194,11 +1808,27 @@ bool SOLOMotorControllersSerial::SetSpeedDecelerationValue(float speedDecelerati
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command defines the deceleration value of the Speed for speed controller
+  *         both in Analogue and Digital modes in Revolution per square seconds
+  *           .The method refers to the Uart Write command: 0x2B
+  * @param  speedDecelerationValue  a float value [Rev/S^2]     
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetSpeedDecelerationValue(float speedDecelerationValue)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetSpeedDecelerationValue(speedDecelerationValue, error);
 }
+
+/**
+  * @brief  This command sets the baud rate of CAN bus in CANOpen network
+  *           .The method refers to the Uart Write command: 0x2C
+  * @param  canbusBaudrate  enum that specify the baud rate of CAN bus in CANOpen network   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetCanbusBaudrate(CanbusBaudrate canbusBoudrate, int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1208,12 +1838,265 @@ bool SOLOMotorControllersSerial::SetCanbusBaudrate(CanbusBaudrate canbusBoudrate
 
 	return SOLOMotorControllersSerial::ExeCMD(cmd, error);
 }
+
+/**
+  * @brief  This command sets the baud rate of CAN bus in CANOpen network
+  *           .The method refers to the Uart Write command: 0x2C
+  * @param  canbusBaudrate  enum that specify the baud rate of CAN bus in CANOpen network    
+  * @retval bool 0 fail / 1 for success
+  */
 bool SOLOMotorControllersSerial::SetCanbusBaudrate(CanbusBaudrate canbusBoudrate)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return SOLOMotorControllersSerial::SetCanbusBaudrate(canbusBoudrate, error);
 }
+
+/**
+  * @brief  This command defines the resolution of the speed at S/T input
+  *           while SOLO operates in Analogue mode
+  *           .The method refers to the Uart Write command: 0x2D
+  * @param  divisionCoefficient  a long value    
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient, int &error)
+{	
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+	if (!soloUtils->SetAnalogueSpeedResolutionDivisionCoefficientInputValidation(divisionCoefficient, error))
+	{
+		return false;
+	}
+	
+    unsigned char data[4];
+    ConvertToData(divisionCoefficient, data);
+
+    unsigned char cmd[] = {addr, WriteASRDC, data[0], data[1], data[2], data[3]};
+    return SOLOMotorControllersSerial::ExeCMD(cmd,error);
+}
+
+/**
+  * @brief  This command defines the resolution of the speed at S/T input
+  *           while SOLO operates in Analogue mode
+  *           .The method refers to the Uart Write command: 0x2D
+  * @param  divisionCoefficient  a long value     
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient)
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::SetAnalogueSpeedResolutionDivisionCoefficient(divisionCoefficient, error);
+}
+
+/**
+  * @brief  This command defines the type of the Motion Profile that is 
+  *           being used in Speed or Position Modes
+  *           .The method refers to the Uart Write command: 0x30
+  * @param  motionProfileMode enum that specify the type of the Motion Profile   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetMotionProfileMode( MotionProfileMode motionProfileMode, int &error)
+{
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+
+    unsigned char data[4];
+    ConvertToData((long)motionProfileMode, data);
+
+    unsigned char cmd[] = {addr, WriteMotionProfileMode, data[0], data[1], data[2], data[3]};
+    return SOLOMotorControllersSerial::ExeCMD(cmd,error);
+}
+
+/**
+  * @brief  This command defines the type of the Motion Profile that is 
+  *           being used in Speed or Position Modes
+  *           .The method refers to the Uart Write command: 0x30
+  * @param  motionProfileMode enum that specify the type of the Motion Profile    
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetMotionProfileMode( MotionProfileMode motionProfileMode)
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::SetMotionProfileMode(motionProfileMode, error);
+}
+
+/**
+  * @brief  This parameter depending on the Motion Profile Mode and the Control Type will have roles
+  *           .The method refers to the Uart Write command: 0x31  
+  * @param  MotionProfileVariable1 a float value   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetMotionProfileVariable1(float MotionProfileVariable1, int &error)
+{
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+	if (!soloUtils->SetMotionProfileVariable1InputValidation(MotionProfileVariable1, error))
+	{
+		return false;
+	}
+
+    unsigned char data[4];
+    ConvertToData(MotionProfileVariable1, data);
+
+    unsigned char cmd[] = {addr, WriteMotionProfileVariable1, data[0], data[1], data[2], data[3]};
+    return SOLOMotorControllersSerial::ExeCMD(cmd,error);
+}
+
+/**
+  * @brief  This parameter depending on the Motion Profile Mode and the Control Type will have roles
+  *           .The method refers to the Uart Write command: 0x31  
+  * @param  MotionProfileVariable1 a float value     
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetMotionProfileVariable1(float MotionProfileVariable1)
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::SetMotionProfileVariable1(MotionProfileVariable1, error);
+}
+
+/**
+  * @brief  This parameter depending on the Motion Profile Mode and the Control Type will have roles
+  *           .The method refers to the Uart Write command: 0x32  
+  * @param  MotionProfileVariable2 a float value   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetMotionProfileVariable2(float MotionProfileVariable2, int &error)
+{
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+	if (!soloUtils->SetMotionProfileVariable2InputValidation(MotionProfileVariable2, error))
+	{
+		return false;
+	}
+
+    unsigned char data[4];
+    soloUtils->ConvertToData(MotionProfileVariable2, data);
+
+    unsigned char cmd[] = {addr, WriteMotionProfileVariable2, data[0], data[1], data[2], data[3]};
+    return SOLOMotorControllersSerial::ExeCMD(cmd,error);
+}
+
+/**
+  * @brief  This parameter depending on the Motion Profile Mode and the Control Type will have roles
+  *           .The method refers to the Uart Write command: 0x32  
+  * @param  MotionProfileVariable2 a float value     
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetMotionProfileVariable2(float MotionProfileVariable2)
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::SetMotionProfileVariable2(MotionProfileVariable2, error);
+}
+
+/**
+  * @brief  This parameter depending on the Motion Profile Mode and the Control Type will have roles
+  *           .The method refers to the Uart Write command: 0x33 
+  * @param  MotionProfileVariable3 a float value   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetMotionProfileVariable3(float MotionProfileVariable3, int &error)
+{
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+	if (!soloUtils->SetMotionProfileVariable3InputValidation(MotionProfileVariable3, error))
+	{
+		return false;
+	}
+
+    unsigned char data[4];
+    ConvertToData(MotionProfileVariable3, data);
+
+    unsigned char cmd[] = {addr, WriteMotionProfileVariable3, data[0], data[1], data[2], data[3]};
+    return SOLOMotorControllersSerial::ExeCMD(cmd,error);
+}
+
+/**
+  * @brief  This parameter depending on the Motion Profile Mode and the Control Type will have roles
+  *           .The method refers to the Uart Write command: 0x31  
+  * @param  MotionProfileVariable3 a float value     
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetMotionProfileVariable3(float MotionProfileVariable3)
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::SetMotionProfileVariable3(MotionProfileVariable3, error);
+}
+
+/**
+  * @brief  This parameter depending on the Motion Profile Mode and the Control Type will have roles
+  *           .The method refers to the Uart Write command: 0x34 
+  * @param  MotionProfileVariable4 a float value   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetMotionProfileVariable4(float MotionProfileVariable4, int &error)
+{
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+	if (!soloUtils->SetMotionProfileVariable4InputValidation(MotionProfileVariable4, error))
+	{
+		return false;
+	}
+
+    unsigned char data[4];
+    ConvertToData(MotionProfileVariable4, data);
+
+    unsigned char cmd[] = {addr, WriteMotionProfileVariable4, data[0], data[1], data[2], data[3]};
+    return SOLOMotorControllersSerial::ExeCMD(cmd,error);
+}
+
+/**
+  * @brief  This parameter depending on the Motion Profile Mode and the Control Type will have roles
+  *           .The method refers to the Uart Write command: 0x34  
+  * @param  MotionProfileVariable4 a float value     
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetMotionProfileVariable4(float MotionProfileVariable4)
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::SetMotionProfileVariable4(MotionProfileVariable4, error);
+}
+
+/**
+  * @brief  This parameter depending on the Motion Profile Mode and the Control Type will have roles
+  *           .The method refers to the Uart Write command: 0x35  
+  * @param  MotionProfileVariable5 a float value   
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetMotionProfileVariable5(float MotionProfileVariable5, int &error)
+{
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+	if (!soloUtils->SetMotionProfileVariable5InputValidation(MotionProfileVariable5, error))
+	{
+		return false;
+	}
+
+    unsigned char data[4];
+    ConvertToData(MotionProfileVariable5, data);
+
+    unsigned char cmd[] = {addr, WriteMotionProfileVariable5, data[0], data[1], data[2], data[3]};
+    return SOLOMotorControllersSerial::ExeCMD(cmd,error);
+}
+
+/**
+  * @brief  This parameter depending on the Motion Profile Mode and the Control Type will have roles
+  *           .The method refers to the Uart Write command: 0x35  
+  * @param  MotionProfileVariable5 a float value     
+  * @retval bool 0 fail / 1 for success
+  */
+bool SOLOMotorControllersSerial::SetMotionProfileVariable5(float MotionProfileVariable5)
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::SetMotionProfileVariable5(MotionProfileVariable5, error);
+}
+
 ////----------Read----------
+
+/**
+  * @brief  This command reads the device address connected on the line 
+  *           .The method refers to the Uart Read command: 0x81 
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long device address connected on the line
+  */
 long SOLOMotorControllersSerial::GetDeviceAddress(int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1227,11 +2110,25 @@ long SOLOMotorControllersSerial::GetDeviceAddress(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the device address connected on the line 
+  *           .The method refers to the Uart Read command: 0x81   
+  * @retval long device address connected on the line
+  */
 long SOLOMotorControllersSerial::GetDeviceAddress()
 {
 	int error = Error::noProcessedCommand;
 	return GetDeviceAddress(error);
 }
+
+/**
+  * @brief  This command reads the phase-A voltage of the motor connected to the
+  *         "A" pin output of SOLO for 3-phase Motors 
+  *           .The method refers to the Uart Read command: 0x82
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float phase-A voltage of the motor [Volts]
+  */
 float SOLOMotorControllersSerial::GetPhaseAVoltage(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1245,11 +2142,26 @@ float SOLOMotorControllersSerial::GetPhaseAVoltage(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the phase-A voltage of the motor connected to the
+  *         "A" pin output of SOLO for 3-phase Motors   
+  *           .The method refers to the Uart Read command: 0x82
+  * @retval float phase-A voltage of the motor [Volts]
+  */
 float SOLOMotorControllersSerial::GetPhaseAVoltage()
 {
 	int error = Error::noProcessedCommand;
 	return GetPhaseAVoltage(error);
 }
+
+/**
+  * @brief  This command reads the phase-B voltage of the motor connected to the
+  *         "B" pin output of SOLO for 3-phase Motors  
+  *           .The method refers to the Uart Read command: 0x83
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float 0 phase-A voltage of the motor [Volts]
+  */
 float SOLOMotorControllersSerial::GetPhaseBVoltage(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1263,11 +2175,26 @@ float SOLOMotorControllersSerial::GetPhaseBVoltage(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the phase-B voltage of the motor connected to the
+  *         "B" pin output of SOLO for 3-phase Motors  
+  *           .The method refers to the Uart Read command: 0x83
+  * @retval float 0 phase-A voltage of the motor [Volts]
+  */
 float SOLOMotorControllersSerial::GetPhaseBVoltage()
 {
 	int error = Error::noProcessedCommand;
 	return GetPhaseBVoltage(error);
 }
+
+/**
+  * @brief  This command reads the phase-A current of the motor connected to the
+  *         "A" pin output of SOLO for 3-phase Motors
+  *           .The method refers to the Uart Read command: 0x84
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval phase-A current of the motor [Amps]
+  */
 float SOLOMotorControllersSerial::GetPhaseACurrent(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1281,11 +2208,26 @@ float SOLOMotorControllersSerial::GetPhaseACurrent(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the phase-A current of the motor connected to the
+  *         "A" pin output of SOLO for 3-phase Motors 
+  *           .The method refers to the Uart Read command: 0x84
+  * @retval float phase-A current of the motor [Amps]
+  */
 float SOLOMotorControllersSerial::GetPhaseACurrent()
 {
 	int error = Error::noProcessedCommand;
 	return GetPhaseACurrent(error);
 }
+
+/**
+  * @brief  This command reads the phase-B current of the motor connected to the
+  *         "B" pin output of SOLO for 3-phase Motors 
+  *           .The method refers to the Uart Read command: 0x85
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float phase-B current of the motor [Amps]
+  */
 float SOLOMotorControllersSerial::GetPhaseBCurrent(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1299,11 +2241,25 @@ float SOLOMotorControllersSerial::GetPhaseBCurrent(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the phase-B current of the motor connected to the
+  *         "B" pin output of SOLO for 3-phase Motors  
+  *           .The method refers to the Uart Read command: 0x85
+  * @retval float phase-B current of the motor [Amps]
+  */
 float SOLOMotorControllersSerial::GetPhaseBCurrent()
 {
 	int error = Error::noProcessedCommand;
 	return GetPhaseBCurrent(error);
 }
+
+/**
+  * @brief  This command reads the input BUS voltage  
+  *           .The method refers to the Uart Read command: 0x86
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float  BUS voltage [Volts]
+  */
 //Battery Voltage
 float SOLOMotorControllersSerial::GetBusVoltage(int& error)
 {
@@ -1318,11 +2274,25 @@ float SOLOMotorControllersSerial::GetBusVoltage(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the input BUS voltage   
+  *           .The method refers to the Uart Read command: 0x86 
+  * @retval float  BUS voltage [Volts]
+  */
 float SOLOMotorControllersSerial::GetBusVoltage()
 {
 	int error = Error::noProcessedCommand;
 	return GetBusVoltage(error);
 }
+
+/**
+  * @brief  This command reads the current inside the DC brushed motor connected to
+  *         "B" and "C" outputs of SOLO 
+  *           .The method refers to the Uart Read command: 0x87
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float between [Amps]
+  */
 float SOLOMotorControllersSerial::GetDcMotorCurrentIm(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1336,11 +2306,26 @@ float SOLOMotorControllersSerial::GetDcMotorCurrentIm(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the current inside the DC brushed motor connected to
+  *         "B" and "C" outputs of SOLO  
+  *           .The method refers to the Uart Read command: 0x87
+  * @retval float between [Amps]
+  */
 float SOLOMotorControllersSerial::GetDcMotorCurrentIm()
 {
 	int error = Error::noProcessedCommand;
 	return GetDcMotorCurrentIm(error);
 }
+
+/**
+  * @brief  This command reads the voltage of the DC brushed motor connected to
+  *         "B" and "C" outputs of SOLO 
+  *           .The method refers to the Uart Read command: 0x88
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [Volts]
+  */
 float SOLOMotorControllersSerial::GetDcMotorVoltageVm(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1354,11 +2339,26 @@ float SOLOMotorControllersSerial::GetDcMotorVoltageVm(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the voltage of the DC brushed motor connected to
+  *         "B" and "C" outputs of SOLO  
+  *           .The method refers to the Uart Read command: 0x88
+  * @retval float [Volts]
+  */
 float SOLOMotorControllersSerial::GetDcMotorVoltageVm()
 {
 	int error = Error::noProcessedCommand;
 	return GetDcMotorVoltageVm(error);
 }
+
+/**
+  * @brief  This command reads the value of the Speed controller Kp gain, 
+  *         set for Digital mode operations  
+  *           .The method refers to the Uart Read command: 0x89
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float between 0 to 16000
+  */
 float SOLOMotorControllersSerial::GetSpeedControllerKp(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1372,11 +2372,26 @@ float SOLOMotorControllersSerial::GetSpeedControllerKp(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the value of the Speed controller Kp gain, 
+  *         set for Digital mode operations   
+  *           .The method refers to the Uart Read command: 0x89
+  * @retval float between 0 to 16000
+  */
 float SOLOMotorControllersSerial::GetSpeedControllerKp()
 {
 	int error = Error::noProcessedCommand;
 	return GetSpeedControllerKp(error);
 }
+
+/**
+  * @brief  This command reads the value of the Speed controller Ki gain,
+  *         set for Digital mode operations  
+  *           .The method refers to the Uart Read command: 0x8A
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float between 0 to 16000
+  */
 float SOLOMotorControllersSerial::GetSpeedControllerKi(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1390,11 +2405,25 @@ float SOLOMotorControllersSerial::GetSpeedControllerKi(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the value of the Speed controller Ki gain,
+  *         set for Digital mode operations   
+  *           .The method refers to the Uart Read command: 0x8A
+  * @retval float between 0 to 16000
+  */
 float SOLOMotorControllersSerial::GetSpeedControllerKi()
 {
 	int error = Error::noProcessedCommand;
 	return GetSpeedControllerKi(error);
 }
+
+/**
+  * @brief  This command reads the output switching frequency of SOLO in Hertz
+  *           .The method refers to the Uart Read command: 0x8B  
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long [Hz]
+  */
 long SOLOMotorControllersSerial::GetOutputPwmFrequencyKhz(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1408,11 +2437,25 @@ long SOLOMotorControllersSerial::GetOutputPwmFrequencyKhz(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the output switching frequency of SOLO in Hertz 
+  *           .The method refers to the Uart Read command: 0x8B  
+  * @retval long [Hz]
+  */
 long SOLOMotorControllersSerial::GetOutputPwmFrequencyKhz()
 {
 	int error = Error::noProcessedCommand;
 	return GetOutputPwmFrequencyKhz(error);
 }
+
+/**
+  * @brief  This command reads the value of the current limit set for SOLO in
+  *         closed-loop digital operation mode   
+  *           .The method refers to the Uart Read command: 0x8C
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [Amps]
+  */
 float SOLOMotorControllersSerial::GetCurrentLimit(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1426,11 +2469,26 @@ float SOLOMotorControllersSerial::GetCurrentLimit(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the value of the current limit set for SOLO in
+  *         closed-loop digital operation mode   
+  *           .The method refers to the Uart Read command: 0x8C
+  * @retval float [Amps]
+  */
 float SOLOMotorControllersSerial::GetCurrentLimit()
 {
 	int error = Error::noProcessedCommand;
 	return GetCurrentLimit(error);
 }
+
+/**
+  * @brief  This command reads the actual monetary value of “Iq” that is
+  *         the current acts in torque generation in FOC mode for 3-phase motors
+  *           .The method refers to the Uart Read command: 0x8D
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [Amps]
+  */
 float SOLOMotorControllersSerial::GetQuadratureCurrentIqFeedback(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1444,11 +2502,26 @@ float SOLOMotorControllersSerial::GetQuadratureCurrentIqFeedback(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the actual monetary value of “Iq” that is
+  *         the current acts in torque generation in FOC mode for 3-phase motors 
+  *           .The method refers to the Uart Read command: 0x8D 
+  * @retval float [Amps]
+  */
 float SOLOMotorControllersSerial::GetQuadratureCurrentIqFeedback()
 {
 	int error = Error::noProcessedCommand;
 	return GetQuadratureCurrentIqFeedback(error);
 }
+
+/**
+  * @brief  This command reads the actual monetary value of Id that is the
+  *         direct current acting in FOC 
+  *           .The method refers to the Uart Read command: 0x8E
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [Amps]
+  */
 float SOLOMotorControllersSerial::GetMagnetizingCurrentIdFeedback(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1462,11 +2535,25 @@ float SOLOMotorControllersSerial::GetMagnetizingCurrentIdFeedback(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the actual monetary value of Id that is the
+  *         direct current acting in FOC  
+  *           .The method refers to the Uart Read command: 0x8E
+  * @retval float [Amps]
+  */
 float SOLOMotorControllersSerial::GetMagnetizingCurrentIdFeedback()
 {
 	int error = Error::noProcessedCommand;
 	return GetMagnetizingCurrentIdFeedback(error);
 }
+
+/**
+  * @brief  This command reads the number of Poles set for 3-phase motors  
+  *           .The method refers to the Uart Read command: 0x8F
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long between 1 to 254
+  */
 long SOLOMotorControllersSerial::GetMotorPolesCounts(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1480,11 +2567,24 @@ long SOLOMotorControllersSerial::GetMotorPolesCounts(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the number of Poles set for 3-phase motors 
+  *           .The method refers to the Uart Read command: 0x8F  
+  * @retval long between 1 to 254
+  */
 long SOLOMotorControllersSerial::GetMotorPolesCounts()
 {
 	int error = Error::noProcessedCommand;
 	return GetMotorPolesCounts(error);
 }
+
+/**
+  * @brief  This command reads the number of physical Incremental encoder lines set on SOLO   
+  *           .The method refers to the Uart Read command: 0x90
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long between 1 to 200000
+  */
 long SOLOMotorControllersSerial::GetIncrementalEncoderLines(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1498,11 +2598,25 @@ long SOLOMotorControllersSerial::GetIncrementalEncoderLines(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the number of physical Incremental encoder lines set on SOLO   
+  *           .The method refers to the Uart Read command: 0x90
+  * @retval long between 1 to 200000
+  */
 long SOLOMotorControllersSerial::GetIncrementalEncoderLines()
 {
 	int error = Error::noProcessedCommand;
 	return GetIncrementalEncoderLines(error);
 }
+
+/**
+  * @brief  This command reads the amount of value set for Current controller
+  *         Kp or proportional gain 
+  *           .The method refers to the Uart Read command: 0x91
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float between 0 to 16000
+  */
 float SOLOMotorControllersSerial::GetCurrentControllerKp(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1516,11 +2630,26 @@ float SOLOMotorControllersSerial::GetCurrentControllerKp(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the amount of value set for Current controller
+  *         Kp or proportional gain  
+  *           .The method refers to the Uart Read command: 0x91
+  * @retval float between 0 to 16000
+  */
 float SOLOMotorControllersSerial::GetCurrentControllerKp()
 {
 	int error = Error::noProcessedCommand;
 	return GetCurrentControllerKp(error);
 }
+
+/**
+  * @brief  This command reads the amount of value set for Current controller
+  *         Ki or integrator gain  
+  *           .The method refers to the Uart Read command: 0x92
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float between 0 to 16000
+  */
 float SOLOMotorControllersSerial::GetCurrentControllerKi(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1533,11 +2662,25 @@ float SOLOMotorControllersSerial::GetCurrentControllerKi(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the amount of value set for Current controller
+  *         Ki or integrator gain    
+  *           .The method refers to the Uart Read command: 0x92
+  * @retval float between 0 to 16000
+  */
 float SOLOMotorControllersSerial::GetCurrentControllerKi()
 {
 	int error = Error::noProcessedCommand;
 	return GetCurrentControllerKi(error);
 }
+
+/**
+  * @brief  This command reads the momentary temperature of the board in centigrade
+  *           .The method refers to the Uart Read command: 0x93  
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [°C]
+  */
 float SOLOMotorControllersSerial::GetBoardTemperature(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1551,11 +2694,25 @@ float SOLOMotorControllersSerial::GetBoardTemperature(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the momentary temperature of the board in centigrade  
+  *           .The method refers to the Uart Read command: 0x93
+  * @retval float [°C]
+  */
 float SOLOMotorControllersSerial::GetBoardTemperature()
 {
 	int error = Error::noProcessedCommand;
 	return GetBoardTemperature(error);
 }
+
+/**
+  * @brief  This command reads the Phase or Armature resistance of
+  *         the 3-phase or DC brushed motor connected to SOLO respectively  
+  *           .The method refers to the Uart Read command: 0x94
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [Ohms]
+  */
 float SOLOMotorControllersSerial::GetMotorResistance(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1569,11 +2726,26 @@ float SOLOMotorControllersSerial::GetMotorResistance(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the Phase or Armature resistance of
+  *         the 3-phase or DC brushed motor connected to SOLO respectively  
+  *           .The method refers to the Uart Read command: 0x94 
+  * @retval float [Ohms]
+  */
 float SOLOMotorControllersSerial::GetMotorResistance()
 {
 	int error = Error::noProcessedCommand;
 	return GetMotorResistance(error);
 }
+
+/**
+  * @brief  This command reads the Phase or Armature Inductance of 
+  *         the 3-phase or DC brushed motor connected to SOLO respectively  
+  *           .The method refers to the Uart Read command: 0x95
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [Henry]
+  */
 float SOLOMotorControllersSerial::GetMotorInductance(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1587,11 +2759,26 @@ float SOLOMotorControllersSerial::GetMotorInductance(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the Phase or Armature Inductance of 
+  *         the 3-phase or DC brushed motor connected to SOLO respectively 
+  *           .The method refers to the Uart Read command: 0x95  
+  * @retval float [Henry]
+  */
 float SOLOMotorControllersSerial::GetMotorInductance()
 {
 	int error = Error::noProcessedCommand;
 	return GetMotorInductance(error);
 }
+
+/**
+  * @brief  his command reads the actual speed of the motor measured or estimated by SOLO in
+            sensorless or sensor-based modes respectively  
+              .The method refers to the Uart Read command: 0x96
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long [RPM]
+  */
 long SOLOMotorControllersSerial::GetSpeedFeedback(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1605,11 +2792,25 @@ long SOLOMotorControllersSerial::GetSpeedFeedback(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  his command reads the actual speed of the motor measured or estimated by SOLO in
+            sensorless or sensor-based modes respectively   
+              .The method refers to the Uart Read command: 0x96
+  * @retval long [RPM]
+  */
 long SOLOMotorControllersSerial::GetSpeedFeedback()
 {
 	int error = Error::noProcessedCommand;
 	return GetSpeedFeedback(error);
 }
+
+/**
+  * @brief  This command reads the Motor type selected for Digital or Analogue mode operations
+  *           .The method refers to the Uart Read command: 0x97 
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long between 0 to 3
+  */
 long SOLOMotorControllersSerial::GetMotorType(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1623,11 +2824,25 @@ long SOLOMotorControllersSerial::GetMotorType(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the Motor type selected for Digital or Analogue mode operations 
+  *           .The method refers to the Uart Read command: 0x97  
+  * @retval long between 0 to 3
+  */
 long SOLOMotorControllersSerial::GetMotorType()
 {
 	int error = Error::noProcessedCommand;
 	return GetMotorType(error);
 }
+
+/**
+  * @brief  This command reads the feedback control mode selected on SOLO both
+  *         for Analogue and Digital operations  
+  *           .The method refers to the Uart Read command: 0x99
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long between 0 to 2
+  */
 long SOLOMotorControllersSerial::GetFeedbackControlMode(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1641,11 +2856,25 @@ long SOLOMotorControllersSerial::GetFeedbackControlMode(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the feedback control mode selected on SOLO both
+  *         for Analogue and Digital operations    
+  *           .The method refers to the Uart Read command: 0x99
+  * @retval long between 0 to 2
+  */
 long SOLOMotorControllersSerial::GetFeedbackControlMode()
 {
 	int error = Error::noProcessedCommand;
 	return GetFeedbackControlMode(error);
 }
+
+/**
+  * @brief  This command reads the actual commanding mode that SOLO is operating 
+  *           .The method refers to the Uart Read command: 0x9A
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long between 0 or 1
+  */
 long SOLOMotorControllersSerial::GetCommandMode(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1659,11 +2888,25 @@ long SOLOMotorControllersSerial::GetCommandMode(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the actual commanding mode that SOLO is operating 
+  *           .The method refers to the Uart Read command: 0x9A 
+  * @retval long between 0 or 1
+  */
 long SOLOMotorControllersSerial::GetCommandMode()
 {
 	int error = Error::noProcessedCommand;
 	return GetCommandMode(error);
 }
+
+/**
+  * @brief  This command reads the Control Mode type in terms of Torque,
+  *         Speed or Position in both Digital and Analogue modes 
+  *           .The method refers to the Uart Read command: 0x9B
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long between 0 to 2
+  */
 long SOLOMotorControllersSerial::GetControlMode(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1677,11 +2920,25 @@ long SOLOMotorControllersSerial::GetControlMode(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the Control Mode type in terms of Torque,
+  *         Speed or Position in both Digital and Analogue modes  
+  *           .The method refers to the Uart Read command: 0x9B
+  * @retval long between 0 to 2
+  */
 long SOLOMotorControllersSerial::GetControlMode()
 {
 	int error = Error::noProcessedCommand;
 	return GetControlMode(error);
 }
+
+/**
+  * @brief  This command reads the value of the speed limit set on SOLO 
+  *           .The method refers to the Uart Read command: 0x9C
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long [RPM]
+  */
 long SOLOMotorControllersSerial::GetSpeedLimit(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1695,11 +2952,25 @@ long SOLOMotorControllersSerial::GetSpeedLimit(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the value of the speed limit set on SOLO  
+  *           .The method refers to the Uart Read command: 0x9C
+  * @retval long [RPM]
+  */
 long SOLOMotorControllersSerial::GetSpeedLimit()
 {
 	int error = Error::noProcessedCommand;
 	return GetSpeedLimit(error);
 }
+
+/**
+  * @brief  This command reads the amount of value set for Position
+  *         controller Kp or proportional gain  
+  *           .The method refers to the Uart Read command: 0x9D
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float between 0 to 16000
+  */
 float SOLOMotorControllersSerial::GetPositionControllerKp(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1713,11 +2984,26 @@ float SOLOMotorControllersSerial::GetPositionControllerKp(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the amount of value set for Position
+  *         controller Kp or proportional gain   
+  *           .The method refers to the Uart Read command: 0x9D
+  * @retval float between 0 to 16000
+  */
 float SOLOMotorControllersSerial::GetPositionControllerKp()
 {
 	int error = Error::noProcessedCommand;
 	return GetPositionControllerKp(error);
 }
+
+/**
+  * @brief  This command reads the amount of value set for Position
+  *         controller Ki or integrator gain  
+  *           .The method refers to the Uart Read command: 0x9E
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float between 0 to 16000
+  */
 float SOLOMotorControllersSerial::GetPositionControllerKi(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1731,11 +3017,26 @@ float SOLOMotorControllersSerial::GetPositionControllerKi(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the amount of value set for Position
+  *         controller Ki or integrator gain   
+  *           .The method refers to the Uart Read command: 0x9E
+  * @retval float between 0 to 16000
+  */
 float SOLOMotorControllersSerial::GetPositionControllerKi()
 {
 	int error = Error::noProcessedCommand;
 	return GetPositionControllerKi(error);
 }
+
+/**
+  * @brief  This command reads the number of counted pulses from the
+  *         Incremental Encoder or Hall sensors 
+  *           .The method refers to the Uart Read command: 0xA0
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long [Quad-Pulses]
+  */
 long SOLOMotorControllersSerial::GetPositionCountsFeedback(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1749,11 +3050,26 @@ long SOLOMotorControllersSerial::GetPositionCountsFeedback(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the number of counted pulses from the
+  *         Incremental Encoder or Hall sensors  
+  *           .The method refers to the Uart Read command: 0xA0
+  * @retval long [Quad-Pulses]
+  */
 long SOLOMotorControllersSerial::GetPositionCountsFeedback()
 {
 	int error = Error::noProcessedCommand;
 	return GetPositionCountsFeedback(error);
 }
+
+/**
+  * @brief  This command reads the error register which is a 32 bit register with
+  *         each bit corresponding to specific errors  
+  *           .The method refers to the Uart Read command: 0xA1
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long 
+  */
 long SOLOMotorControllersSerial::GetErrorRegister(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1767,11 +3083,25 @@ long SOLOMotorControllersSerial::GetErrorRegister(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the error register which is a 32 bit register with
+  *         each bit corresponding to specific errors   
+  *           .The method refers to the Uart Read command: 0xA1
+  * @retval long 
+  */
 long SOLOMotorControllersSerial::GetErrorRegister()
 {
 	int error = Error::noProcessedCommand;
 	return GetErrorRegister(error);
 }
+
+/**
+  * @brief  This command reads the Firmware version existing currently on the SOLO unit   
+  *           .The method refers to the Uart Read command: 0xA2  
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long
+  */
 long SOLOMotorControllersSerial::GetDeviceFirmwareVersion(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1785,11 +3115,24 @@ long SOLOMotorControllersSerial::GetDeviceFirmwareVersion(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the Firmware version existing currently on the SOLO unit   
+  *           .The method refers to the Uart Read command: 0xA2
+  * @retval long
+  */
 long SOLOMotorControllersSerial::GetDeviceFirmwareVersion()
 {
 	int error = Error::noProcessedCommand;
 	return GetDeviceFirmwareVersion(error);
 }
+
+/**
+  * @brief  This command reads the Hardware version of the SOLO unit connected   
+  *           .The method refers to the Uart Read command: 0xA3
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long
+  */
 long SOLOMotorControllersSerial::GetDeviceHardwareVersion(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1803,11 +3146,25 @@ long SOLOMotorControllersSerial::GetDeviceHardwareVersion(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the Hardware version of the SOLO unit connected    
+  *           .The method refers to the Uart Read command: 0xA3 
+  * @retval long
+  */
 long SOLOMotorControllersSerial::GetDeviceHardwareVersion()
 {
 	int error = Error::noProcessedCommand;
 	return GetDeviceHardwareVersion(error);
 }
+
+/**
+  * @brief  This command reads the amount of desired Torque reference (Iq or IM)
+  *         already set for the Motor to follow in Digital Closed-loop Torque control mode  
+  *           .The method refers to the Uart Read command: 0xA4
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [Amps]
+  */
 float SOLOMotorControllersSerial::GetTorqueReferenceIq(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1821,11 +3178,26 @@ float SOLOMotorControllersSerial::GetTorqueReferenceIq(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the amount of desired Torque reference (Iq or IM)
+  *         already set for the Motor to follow in Digital Closed-loop Torque control mode  
+  *           .The method refers to the Uart Read command: 0xA4 
+  * @retval float [Amps]
+  */
 float SOLOMotorControllersSerial::GetTorqueReferenceIq()
 {
 	int error = Error::noProcessedCommand;
 	return GetTorqueReferenceIq(error);
 }
+
+/**
+  * @brief  This command reads the amount of desired Speed reference already set for
+  *         the Motor to follow in Digital Closed-loop Speed control mode  
+  *           .The method refers to the Uart Read command: 0xA5
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long [RPM]
+  */
 long SOLOMotorControllersSerial::GetSpeedReference(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1839,11 +3211,27 @@ long SOLOMotorControllersSerial::GetSpeedReference(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the amount of desired Speed reference already set for
+  *         the Motor to follow in Digital Closed-loop Speed control mode   
+  *           .The method refers to the Uart Read command: 0xA5
+  * @retval long [RPM]
+  */
 long SOLOMotorControllersSerial::GetSpeedReference()
 {
 	int error = Error::noProcessedCommand;
 	return GetSpeedReference(error);
 }
+
+/**
+  * @brief  This command reads the amount of desired Id (direct current) or
+  *         Magnetizing current reference already set for the Motor to follow
+  *         in Digital Closed-loop Speed control mode for ACIM motors 
+  *           .The method refers to the Uart Read command: 0xA6
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [Amps]
+  */
 float SOLOMotorControllersSerial::GetMagnetizingCurrentIdReference(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1857,11 +3245,27 @@ float SOLOMotorControllersSerial::GetMagnetizingCurrentIdReference(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the amount of desired Id (direct current) or
+  *         Magnetizing current reference already set for the Motor to follow
+  *         in Digital Closed-loop Speed control mode for ACIM motors  
+  *           .The method refers to the Uart Read command: 0xA6
+  * @retval float [Amps]
+  */
 float SOLOMotorControllersSerial::GetMagnetizingCurrentIdReference()
 {
 	int error = Error::noProcessedCommand;
 	return GetMagnetizingCurrentIdReference(error);
 }
+
+/**
+  * @brief  This command reads the desired position reference set for the Motor
+  *         to follow in Digital Closed-loop Position mode in terms of quadrature pulses 
+  *           .The method refers to the Uart Read command: 0xA7
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long [Quad-Pulses]
+  */
 long SOLOMotorControllersSerial::GetPositionReference(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1875,11 +3279,26 @@ long SOLOMotorControllersSerial::GetPositionReference(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the desired position reference set for the Motor
+  *         to follow in Digital Closed-loop Position mode in terms of quadrature pulses 
+  *           .The method refers to the Uart Read command: 0xA7 
+  * @retval long [Quad-Pulses]
+  */
 long SOLOMotorControllersSerial::GetPositionReference()
 {
 	int error = Error::noProcessedCommand;
 	return GetPositionReference(error);
 }
+
+/**
+  * @brief  This command reads the desired Power reference for SOLO to apply in 
+  *         Digital Open-loop speed control mode for 3-phase motors in terms of percentage
+  *           .The method refers to the Uart Read command: 0xA8
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [%]
+  */
 float SOLOMotorControllersSerial::GetPowerReference(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1893,11 +3312,25 @@ float SOLOMotorControllersSerial::GetPowerReference(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the desired Power reference for SOLO to apply in 
+  *         Digital Open-loop speed control mode for 3-phase motors in terms of percentage
+  *           .The method refers to the Uart Read command: 0xA8
+  * @retval float [%]
+  */
 float SOLOMotorControllersSerial::GetPowerReference()
 {
 	int error = Error::noProcessedCommand;
 	return GetPowerReference(error);
 }
+
+/**
+  * @brief  This commands reads the desired direction of rotation set for the Motor 
+  *           .The method refers to the Uart Read command: 0xA9
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long 0 Counter ClockWise / 1 ClockWise
+  */
 long SOLOMotorControllersSerial::GetMotorDirection(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1911,11 +3344,24 @@ long SOLOMotorControllersSerial::GetMotorDirection(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This commands reads the desired direction of rotation set for the Motor   
+  *           .The method refers to the Uart Read command: 0xA9
+  * @retval long 0 Counter ClockWise / 1 ClockWise
+  */
 long SOLOMotorControllersSerial::GetMotorDirection()
 {
 	int error = Error::noProcessedCommand;
 	return GetMotorDirection(error);
 }
+
+/**
+  * @brief  This command reads the value of Sensorless Observer Gain for Normal BLDC-PMSM Motors    
+  *           .The method refers to the Uart Read command: 0xAA
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float between 0.01 to 1000
+  */
 float SOLOMotorControllersSerial::GetObserverGainBldcPmsm(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1929,11 +3375,24 @@ float SOLOMotorControllersSerial::GetObserverGainBldcPmsm(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the value of Sensorless Observer Gain for Normal BLDC-PMSM Motors  
+  *           .The method refers to the Uart Read command: 0xAA 
+  * @retval float between 0.01 to 1000
+  */
 float SOLOMotorControllersSerial::GetObserverGainBldcPmsm()
 {
 	int error = Error::noProcessedCommand;
 	return GetObserverGainBldcPmsm(error);
 }
+
+/**
+  * @brief  This command reads the value of Sensorless Observer Gain for Normal BLDC-PMSM Motors 
+  *           .The method refers to the Uart Read command: 0xAB
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float between 0.01 to 1000
+  */
 float SOLOMotorControllersSerial::GetObserverGainBldcPmsmUltrafast(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1947,11 +3406,24 @@ float SOLOMotorControllersSerial::GetObserverGainBldcPmsmUltrafast(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the value of Sensorless Observer Gain for Normal BLDC-PMSM Motors  
+  *           .The method refers to the Uart Read command: 0xAB
+  * @retval float between 0.01 to 1000
+  */
 float SOLOMotorControllersSerial::GetObserverGainBldcPmsmUltrafast()
 {
 	int error = Error::noProcessedCommand;
 	return GetObserverGainBldcPmsmUltrafast(error);
 }
+
+/**
+  * @brief  This command reads the value of Sensorless Observer Gain for DC Motor  
+  *           .The method refers to the Uart Read command: 0xAC
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float between 0.01 to 1000
+  */
 float SOLOMotorControllersSerial::GetObserverGainDc(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1965,11 +3437,25 @@ float SOLOMotorControllersSerial::GetObserverGainDc(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the value of Sensorless Observer Gain for DC Motor  
+  *           .The method refers to the Uart Read command: 0xAC 
+  * @retval float between 0.01 to 1000
+  */
 float SOLOMotorControllersSerial::GetObserverGainDc()
 {
 	int error = Error::noProcessedCommand;
 	return GetObserverGainDc(error);
 }
+
+/**
+  * @brief  This command reads the value of Sensorless Observer
+  *         Filter Gain for Normal BLDC-PMSM Motors  
+  *           .The method refers to the Uart Read command: 0xAD
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float between 0.01 to 16000
+  */
 float SOLOMotorControllersSerial::GetFilterGainBldcPmsm(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -1983,11 +3469,26 @@ float SOLOMotorControllersSerial::GetFilterGainBldcPmsm(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the value of Sensorless Observer
+  *         Filter Gain for Normal BLDC-PMSM Motors    
+  *           .The method refers to the Uart Read command: 0xAD
+  * @retval float between 0.01 to 16000
+  */
 float SOLOMotorControllersSerial::GetFilterGainBldcPmsm()
 {
 	int error = Error::noProcessedCommand;
 	return GetFilterGainBldcPmsm(error);
 }
+
+/**
+  * @brief  This command reads the value of Sensorless Observer
+  *         Filter Gain for Ultra Fast BLDC-PMSM Motors 
+  *           .The method refers to the Uart Read command: 0xAE
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float between 0.01 to 16000
+  */
 float SOLOMotorControllersSerial::GetFilterGainBldcPmsmUltrafast(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -2001,11 +3502,25 @@ float SOLOMotorControllersSerial::GetFilterGainBldcPmsmUltrafast(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the value of Sensorless Observer
+  *         Filter Gain for Ultra Fast BLDC-PMSM Motors  
+  *           .The method refers to the Uart Read command: 0xAE 
+  * @retval float between 0.01 to 16000
+  */
 float SOLOMotorControllersSerial::GetFilterGainBldcPmsmUltrafast()
 {
 	int error = Error::noProcessedCommand;
 	return GetFilterGainBldcPmsmUltrafast(error);
 }
+
+/**
+  * @brief  This command reads the measured or estimated per-unit angle of the 3-phase motors 
+  *           .The method refers to the Uart Read command: 0xB0 
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [Per Unit]
+  */
 float SOLOMotorControllersSerial::Get3PhaseMotorAngle(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -2019,11 +3534,24 @@ float SOLOMotorControllersSerial::Get3PhaseMotorAngle(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the measured or estimated per-unit angle of the 3-phase motors   
+  *           .The method refers to the Uart Read command: 0xB0
+  * @retval float [Per Unit]
+  */
 float SOLOMotorControllersSerial::Get3PhaseMotorAngle()
 {
 	int error = Error::noProcessedCommand;
 	return Get3PhaseMotorAngle(error);
 }
+
+/**
+  * @brief  This command reads the per-unit Encoder or Hall sensor offset in C.C.W direction  
+  *           .The method refers to the Uart Read command: 0xB1
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [Per Unit]
+  */
 float SOLOMotorControllersSerial::GetEncoderHallCcwOffset(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -2037,11 +3565,24 @@ float SOLOMotorControllersSerial::GetEncoderHallCcwOffset(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the per-unit Encoder or Hall sensor offset in C.C.W direction    
+  *           .The method refers to the Uart Read command: 0xB1
+  * @retval float [Per Unit]
+  */
 float SOLOMotorControllersSerial::GetEncoderHallCcwOffset()
 {
 	int error = Error::noProcessedCommand;
 	return GetEncoderHallCcwOffset(error);
 }
+
+/**
+  * @brief  This command reads the per-unit Encoder or Hall sensor offset in C.C.W direction 
+  *           .The method refers to the Uart Read command: 0xB2 
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [Per Unit]
+  */
 float SOLOMotorControllersSerial::GetEncoderHallCwOffset(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -2055,11 +3596,24 @@ float SOLOMotorControllersSerial::GetEncoderHallCwOffset(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the per-unit Encoder or Hall sensor offset in C.C.W direction 
+  *           .The method refers to the Uart Read command: 0xB2  
+  * @retval float [Per Unit]
+  */
 float SOLOMotorControllersSerial::GetEncoderHallCwOffset()
 {
 	int error = Error::noProcessedCommand;
 	return GetEncoderHallCwOffset(error);
 }
+
+/**
+  * @brief  This command reads Baud Rate selected on SOLO unit to communicate through UART line  
+  *           .The method refers to the Uart Read command: 0xB3
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long [Bits/s]
+  */
 long SOLOMotorControllersSerial::GetUartBaudrate(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -2073,11 +3627,26 @@ long SOLOMotorControllersSerial::GetUartBaudrate(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads Baud Rate selected on SOLO unit to communicate through UART line   
+  *           .The method refers to the Uart Read command: 0xB3
+  * @retval long [Bits/s]
+  */
 long SOLOMotorControllersSerial::GetUartBaudrate()
 {
 	int error = Error::noProcessedCommand;
 	return GetUartBaudrate(error);
 }
+
+/**
+  * @brief  This command reads the acceleration value of the Speed for
+  *         speed controller both in Analogue and Digital modes
+  *         in Revolution per square seconds  
+  *           .The method refers to the Uart Read command: 0xB4
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [Rev/S^2]
+  */
 float SOLOMotorControllersSerial::GetSpeedAccelerationValue(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -2091,11 +3660,28 @@ float SOLOMotorControllersSerial::GetSpeedAccelerationValue(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the acceleration value of the Speed for
+  *         speed controller both in Analogue and Digital modes
+  *         in Revolution per square seconds  
+  *           .The method refers to the Uart Read command: 0xB4
+  * @retval float [Rev/S^2]
+  */
 float SOLOMotorControllersSerial::GetSpeedAccelerationValue()
 {
 	int error = Error::noProcessedCommand;
 	return GetSpeedAccelerationValue(error);
 }
+
+/**
+  * @brief  This command reads the deceleration value of the Speed for
+  *         speed controller both in Analogue and Digital modes
+  *         in Revolution per square seconds 
+  *           .The method refers to the Uart Read command: 0xB5
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float [Rev/S^2]
+  */
 float SOLOMotorControllersSerial::GetSpeedDecelerationValue(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -2109,11 +3695,27 @@ float SOLOMotorControllersSerial::GetSpeedDecelerationValue(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This command reads the deceleration value of the Speed for
+  *         speed controller both in Analogue and Digital modes
+  *         in Revolution per square seconds  
+  *           .The method refers to the Uart Read command: 0xB5
+  * @retval float [Rev/S^2]
+  */
 float SOLOMotorControllersSerial::GetSpeedDecelerationValue()
 {
 	int error = Error::noProcessedCommand;
 	return GetSpeedDecelerationValue(error);
 }
+
+/**
+  * @brief  This Command reads the number of counted index pulses 
+  *         seen on the Incremental Encoder’s output  
+  *           .The method refers to the Uart Read command: 0xB8
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long [Pulses]
+  */
 long SOLOMotorControllersSerial::GetEncoderIndexCounts(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -2127,11 +3729,24 @@ long SOLOMotorControllersSerial::GetEncoderIndexCounts(int& error)
 	}
 	return -1;
 }
+
+/**
+  * @brief  This Command reads the number of counted index pulses 
+  *         seen on the Incremental Encoder’s output  
+  *           .The method refers to the Uart Read command: 0xB8 
+  * @retval long [Pulses]
+  */
 long SOLOMotorControllersSerial::GetEncoderIndexCounts()
 {
 	int error = Error::noProcessedCommand;
 	return GetEncoderIndexCounts(error);
 }
+
+/**
+ * 
+  * @brief  This command test if the communication is working   
+  * @retval bool 0 not working / 1 for working
+  */
 bool SOLOMotorControllersSerial::CommunicationIsWorking(int& error)
 {
 	error = Error::noProcessedCommand;
@@ -2141,8 +3756,230 @@ bool SOLOMotorControllersSerial::CommunicationIsWorking(int& error)
 	}
 	return false;
 }
+
+/**
+  * @brief  This command test if the communication is working   
+  * @retval bool 0 not working / 1 for working
+  */
 bool SOLOMotorControllersSerial::CommunicationIsWorking()
 {
 	int error = Error::noProcessedCommand;
 	return CommunicationIsWorking(error);
+}
+
+/**
+  * @brief  This command reads the Analogue Speed Resolution Division Coefficient (ASRDC)
+  *           .The method refers to the Uart Read command: 0xB7
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long
+  */
+long SOLOMotorControllersSerial::GetAnalogueSpeedResolutionDivisionCoefficient(int &error)
+{
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+    unsigned char cmd[] = {addr, ReadASRDC, 0x00, 0x00, 0x00, 0x00};
+
+    if (SOLOMotorControllersSerial::ExeCMD(cmd,error))
+    {
+        unsigned char data[4];
+		SOLOMotorControllersSerial::SplitData(data, cmd);
+		return SOLOMotorControllersSerial::ConvertToLong(data);
+    }
+    return -1;
+}
+
+/**
+  * @brief  This command reads the Analogue Speed Resolution Division Coefficient (ASRDC)
+  *           .The method refers to the Uart Read command: 0xB7
+  * @retval long
+  */
+long SOLOMotorControllersSerial::GetAnalogueSpeedResolutionDivisionCoefficient()
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::GetAnalogueSpeedResolutionDivisionCoefficient(error);
+}
+
+/**
+  * @brief  This command reads the type of the Embedded Motion profile active in the controller 
+  *           .The method refers to the Uart Read command: 0xBB
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval long
+  */
+long SOLOMotorControllersSerial::GetMotionProfileMode(int &error)
+{
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+    unsigned char cmd[] = {addr, ReadMotionProfileMode, 0x00, 0x00, 0x00, 0x00};
+
+    if (SOLOMotorControllersSerial::ExeCMD(cmd,error))
+    {
+        unsigned char data[4];
+		SOLOMotorControllersSerial::SplitData(data, cmd);
+		return SOLOMotorControllersSerial::ConvertToLong(data);
+    }
+    return -1;
+}
+
+/**
+  * @brief  This command reads the type of the Embedded Motion profile active in the controller 
+  *           .The method refers to the Uart Read command: 0xBB  
+  * @retval long
+  */
+long SOLOMotorControllersSerial::GetMotionProfileMode()
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::GetMotionProfileMode(error);
+}
+
+/**
+  * @brief  This command reads the value of the Motion Profile Variable1 set inside the controller 
+  *           .The method refers to the Uart Read command: 0xBC
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float
+  */
+float SOLOMotorControllersSerial::GetMotionProfileVariable1(int &error)
+{
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+    unsigned char cmd[] = {addr, ReadMotionProfileVariable1, 0x00, 0x00, 0x00, 0x00};
+
+    if (SOLOMotorControllersSerial::ExeCMD(cmd,error))
+    {
+        unsigned char data[4];
+		SOLOMotorControllersSerial::SplitData(data, cmd);
+		return SOLOMotorControllersSerial::ConvertToFloat(data);
+    }
+    return -1;
+}
+
+/**
+  * @brief  This command reads the value of the Motion Profile Variable1 set inside the controller 
+  *           .The method refers to the Uart Read command: 0xBC  
+  * @retval float
+  */
+float SOLOMotorControllersSerial::GetMotionProfileVariable1()
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::GetMotionProfileVariable1(error);
+}
+
+/**
+  * @brief  This command reads the value of the Motion Profile Variable2 set inside the controller 
+  *           .The method refers to the Uart Read command: 0xBD
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float
+  */
+float SOLOMotorControllersSerial::GetMotionProfileVariable2(int &error)
+{
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+    unsigned char cmd[] = {addr, ReadMotionProfileVariable2, 0x00, 0x00, 0x00, 0x00};
+
+    if (SOLOMotorControllersSerial::ExeCMD(cmd,error))
+    {
+        unsigned char data[4];
+		SOLOMotorControllersSerial::SplitData(data, cmd);
+		return SOLOMotorControllersSerial::ConvertToFloat(data);
+    }
+    return -1;
+}
+
+/**
+  * @brief  This command reads the value of the Motion Profile Variable2 set inside the controller 
+  *           .The method refers to the Uart Read command: 0xBD 
+  * @retval float
+  */
+float SOLOMotorControllersSerial::GetMotionProfileVariable2()
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::GetMotionProfileVariable2(error);
+}
+
+/**
+  * @brief  This command reads the value of the Motion Profile Variable3 set inside the controller 
+  *           .The method refers to the Uart Read command: 0xBE
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float
+  */
+float SOLOMotorControllersSerial::GetMotionProfileVariable3(int &error)
+{
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+    unsigned char cmd[] = {addr, ReadMotionProfileVariable3, 0x00, 0x00, 0x00, 0x00};
+
+    if (SOLOMotorControllersSerial::ExeCMD(cmd,error))
+    {
+        unsigned char data[4];
+		SOLOMotorControllersSerial::SplitData(data, cmd);
+		return SOLOMotorControllersSerial::ConvertToFloat(data);
+    }
+    return -1;
+}
+
+/**
+  * @brief  This command reads the value of the Motion Profile Variable3 set inside the controller 
+  *           .The method refers to the Uart Read command: 0xBE 
+  * @retval float
+  */
+float SOLOMotorControllersSerial::GetMotionProfileVariable3()
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::GetMotionProfileVariable3(error);
+}
+
+/**
+  * @brief  This command reads the value of the Motion Profile Variable4 set inside the controller
+  *           .The method refers to the Uart Read command: 0xBF
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float
+  */
+float SOLOMotorControllersSerial::GetMotionProfileVariable4(int &error)
+{
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+    unsigned char cmd[] = {addr, ReadMotionProfileVariable4, 0x00, 0x00, 0x00, 0x00};
+
+    if (SOLOMotorControllersSerial::ExeCMD(cmd,error))
+    {
+        unsigned char data[4];
+		SOLOMotorControllersSerial::SplitData(data, cmd);
+		return SOLOMotorControllersSerial::ConvertToFloat(data);
+    }
+    return -1;
+}
+
+/**
+  * @brief  This command reads the value of the Motion Profile Variable4 set inside the controller
+  *           .The method refers to the Uart Read command: 0xBF  
+  * @retval float
+  */
+float SOLOMotorControllersSerial::GetMotionProfileVariable4()
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::GetMotionProfileVariable4(error);
+}
+
+/**
+  * @brief  This command reads the value of the Motion Profile Variable5 set inside the controller 
+  *           .The method refers to the Uart Read command: 0xC0
+  * @param  error   pointer to an integer that specify result of function  
+  * @retval float
+  */
+float SOLOMotorControllersSerial::GetMotionProfileVariable5(int &error)
+{
+    error = SOLOMotorControllers::Error::noProcessedCommand;
+    unsigned char cmd[] = {addr, ReadMotionProfileVariable5, 0x00, 0x00, 0x00, 0x00};
+
+    if (SOLOMotorControllersSerial::ExeCMD(cmd,error))
+    {
+        unsigned char data[4];
+		SOLOMotorControllersSerial::SplitData(data, cmd);
+		return SOLOMotorControllersSerial::ConvertToFloat(data);
+    }
+    return -1;  
+}
+
+/**
+  * @brief  This command reads the value of the Motion Profile Variable5 set inside the controller 
+  *           .The method refers to the Uart Read command: 0xC0 
+  * @retval float
+  */
+float SOLOMotorControllersSerial::GetMotionProfileVariable5()
+{
+    int error = SOLOMotorControllers::Error::noProcessedCommand;
+    return SOLOMotorControllersSerial::GetMotionProfileVariable5(error);
 }

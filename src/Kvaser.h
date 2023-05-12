@@ -1,15 +1,18 @@
-// Copyright: (c) 2021-2022, SOLO motor controllers project
-// GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-
-/*
-*    Title: SOLO Motor Controllers CPP Library
-*    Author: SOLOMotorControllers
-*    Date: 2022
-*    Code version: 1.0.0
-*    Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
-This Library is made by SOLOMotorControllers.com
-To learn more please visit:  https://www.SOLOMotorControllers.com/
-*/
+/**
+ *******************************************************************************
+ * @file    SOLOMotorControllersUtils.h
+ * @authors SOLO Motor Controllers
+ * @brief   This file contains all the base functions prototypes for the Solo Drivers
+ *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-ARDUINO-library
+ * 
+ * @date    Date: 2023
+ * @version 1.1.0
+ * *******************************************************************************    
+ * @attention
+ * Copyright: (c) 2021-2023, SOLO motor controllers project
+ * GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+ ******************************************************************************* 
+ */
 
 #pragma once
 

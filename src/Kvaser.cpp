@@ -17,6 +17,15 @@
 #include "Kvaser.h"
 #include "SOLOMotorControllers.h"
 
+/*TEST
+// #include <iostream>
+// #include <string>
+// #include <stdio.h>
+// using std::cout;
+// using std::cin;
+// using std::endl;
+*/
+
 Kvaser::Kvaser()
 {
 	canInitializeLibrary();
@@ -31,7 +40,7 @@ bool Kvaser::CANOpenTransmit(int hnd, uint8_t _address, uint16_t _object, uint8_
 	uint8_t  rcvMsg[8] = { 0,0,0,0,0,0,0,0 };
 	DWORD timestamp;
 	uint16_t i = 0;
-	uint8_t msg[8] = { 0x22 ,                        //Data 0 - SDO Write Request
+	uint8_t msg[8] = { 	 0x22 ,                        //Data 0 - SDO Write Request
 						 (uint8_t)(_object) ,          //Data 1 - Object Index(LSB)
 						 (uint8_t)(_object >> 8) ,     //Data 2 - Object Index(MSB)
 						 0x00 ,                        //Data 3 - SubIndex
@@ -41,19 +50,26 @@ bool Kvaser::CANOpenTransmit(int hnd, uint8_t _address, uint16_t _object, uint8_
 						 _informatrionToSend[0]        //Data 7
 	};
 
-	canBusOn(hnd);
-
 	stat = canWriteWait(hnd, 0x600 + _address, msg, 8, 0, 100);
 	if (stat != canOK) //0x08 is Data Length(DLC)
 	{
+		error = SOLOMotorControllers::Error::generalError;
 		return false;
 	}
 	
 	//Check SDO Write Reply
-	stat = canReadWait(hnd, &ID_Read, rcvMsg, &dlc, &flags, &timestamp, 100);
+	do{
+		stat = canReadSpecific(hnd, 0x580 + _address, rcvMsg, &dlc, &flags, &timestamp);
+		//std::cout<< "CANOPEN: write stat: "<< stat <<" ID: "<< 0x580 + _address<<" rcvMsg: "<< rcvMsg[0] <<rcvMsg[1]<<rcvMsg[2]<<" dlc: "<< dlc<<" flags: "<< flags <<" \n";
+	}while(
+		!((rcvMsg[1] == (uint8_t)(_object)) && (rcvMsg[2] == (uint8_t)(_object >> 8)))  //read the first correct object (lose the not related)
+		&& stat == canOK  //exit if error happen
+	);
 
-	stat = canBusOff(hnd);
-	//stat = canClose(hnd);
+	if(stat != canOK){
+		error = SOLOMotorControllers::Error::generalError;
+		return false;
+	}
 
 	//Abort Checking
 	if ((ID_Read == (uint16_t)(0x580 + _address))  // Check COB-ID
@@ -76,11 +92,13 @@ bool Kvaser::CANOpenTransmit(int hnd, uint8_t _address, uint16_t _object, uint8_
 	if ((ID_Read == (uint16_t)(0x580 + _address))  // Check COB-ID
 		&& (rcvMsg[0] == 0x60)                          // Check Byte1  
 		&& (rcvMsg[1] == (uint8_t)(_object))            // Check Object Index(LSB)
-		&& (rcvMsg[2] == (uint8_t)(_object >> 8)))        // Check Object Index(MSB)                 
+		&& (rcvMsg[2] == (uint8_t)(_object >> 8)))       // Check Object Index(MSB)    
 	{
 		error = SOLOMotorControllers::Error::noErrorDetected;
 		return true;
 	}
+
+	error = SOLOMotorControllers::Error::generalError;		
 	return false;
 }
 
@@ -91,8 +109,6 @@ bool Kvaser::CANOpenGenericTransmit(int hnd, uint16_t _ID , uint8_t *_DLC, uint8
 
 	ID_High = (uint8_t) (_ID >> 3);
     ID_Low  = (uint8_t) ( (_ID << 5) & 0x00E0 );
-
-	canBusOn(hnd);
 
 	stat = canWriteWait(hnd, (ID_High << 8 || ID_Low), _Data, *_DLC, 0, 100);
 	if (stat != canOK)
@@ -115,9 +131,7 @@ bool Kvaser::CANOpenReceive(int hnd, uint8_t _address, uint16_t _object, uint8_t
 	DWORD timestamp;
 	uint16_t i = 0;
 
-	canBusOn(hnd);
-
-	uint8_t msg[8] = { 0x40 ,                      //Data 0 - SDO Write Request
+	uint8_t msg[8] = { 0x40 ,                        //Data 0 - SDO Write Request
 						 (uint8_t)(_object) ,        //Data 1 - Object Index(LSB)
 						 (uint8_t)(_object >> 8) ,   //Data 2 - Object Index(MSB)
 						 0x00 ,                      //Data 3 - SubIndex
@@ -130,18 +144,28 @@ bool Kvaser::CANOpenReceive(int hnd, uint8_t _address, uint16_t _object, uint8_t
 	stat = canWriteWait(hnd, 0x600 + _address, msg, 8, 0, 100);
 	if (stat != canOK) //0x08 is Data Length(DLC)
 	{
+		error = SOLOMotorControllers::Error::generalError;
 		return false;
 	}
 
 	//Check SDO Write Reply
-	stat = canReadWait(hnd, &ID_Read, rcvMsg, &dlc, &flags, &timestamp, 100);
-
-	stat = canBusOff(hnd);
+	do{
+		stat = canReadSpecific(hnd, 0x580 + _address, rcvMsg, &dlc, &flags, &timestamp);
+		//std::cout<< "CANOPEN: read stat: "<< stat <<" ID: "<<  0x580 + _address<<" rcvMsg: "<< rcvMsg[0] <<rcvMsg[1]<<rcvMsg[2]<<" dlc: "<< dlc<<" flags: "<< flags <<" \n";
+	}while(
+		!((rcvMsg[1] == (uint8_t)(_object)) && (rcvMsg[2] == (uint8_t)(_object >> 8)))  //read the first correct object (lose the not related)
+		&& stat == canOK  //exit if error happen
+	);
 
 	_informationReceived[0] = rcvMsg[7];
 	_informationReceived[1] = rcvMsg[6];
 	_informationReceived[2] = rcvMsg[5];
 	_informationReceived[3] = rcvMsg[4];
+
+	if(stat != canOK){
+		error = SOLOMotorControllers::Error::generalError;
+		return false;
+	}
 
 	//Abort Checking
 	if ((ID_Read == (uint16_t)(0x580 + _address))  // Check COB-ID
@@ -177,16 +201,12 @@ bool Kvaser::CANOpenGenericReceive(int hnd, uint16_t *_ID , uint8_t *_DLC, uint8
 	*_ID = 0;
 	*_DLC = 0;
 
-	canBusOn(hnd);
-
 	stat = canReadWait(hnd, (long *)_ID, _Data, (unsigned int *)_DLC, &flags, &timestamp, 100);
 
 	if (stat != canOK)
 	{
 		return false;
 	}
-
-	stat = canBusOff(hnd);
 
 	if (stat != canOK)
 	{

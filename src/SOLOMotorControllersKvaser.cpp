@@ -28,19 +28,19 @@ SOLOMotorControllersKvaser::SOLOMotorControllersKvaser(UINT8 deviceAddress,
 
 	switch (baudrate)
 	{
-	case 1000:
+	case 0:
 		canBaudrate = canBITRATE_1M;
 		break;
-	case 500:
+	case 1:
 		canBaudrate = canBITRATE_500K;
 		break;
-	case 250:
+	case 2:
 		canBaudrate = canBITRATE_250K;
 		break;
-	case 125:
+	case 3:
 		canBaudrate = canBITRATE_125K;
 		break;
-	case 100:
+	case 4:
 		canBaudrate = canBITRATE_100K;
 		break;
 	default:
@@ -100,8 +100,10 @@ bool SOLOMotorControllersKvaser::Connect()
 		return false;
 	}
 	stat = canSetBusParams(hnd, canBaudrate, 0, 0, 0, 0, 0);
-	if(stat == canOK)
+	if(stat == canOK){
+		canBusOn(hnd);
 		return true;
+	}
 	else
 	{
 		canClose(hnd);

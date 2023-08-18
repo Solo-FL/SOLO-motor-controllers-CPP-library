@@ -8,9 +8,13 @@ SOLO Motor Controller's C++ Library can be used with Windows OS to SETor READ al
 
 This library supports all the communications offered by SOLO including UART, USB, or CANopen communication using KVASER products.  
 
-The Library is compiled using GCC, Visual Studio Code (`C/C++ for Visual Studio Code extension  <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools>`_)
-
 Kvaser works on top of  `Kvaser Drivers for Windows V5.39  <https://www.kvaser.com/download/>`_
+
+
+Branch Info
+=======
+
+MAIN BRANCH: The Library is compiled using GCC, supporting Visual Studio Code (`C/C++ for Visual Studio Code extension  <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools>`_)
 
 
 Authors
@@ -37,8 +41,6 @@ examples/ = Examples File folder
 inc/ = File used by Kvaser implementation
 
 lib/ = .Lib used by Kvaser implementation
-
-tests/ = Test folder, reference for testing unit
 
 vscode example/ = reference over VScode set-up (reference for Build/Debug using VScode)
 

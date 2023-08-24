@@ -3,10 +3,10 @@
  * @file    SOLOMotorControllers.h
  * @authors SOLO Motor Controllers
  * @brief   This file contains all the base functions prototypes for the Solo Drivers
- *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-ARDUINO-library
+ *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
  * 
  * @date    Date: 2023
- * @version 1.1.0
+ * @version 1.2.0
  * *******************************************************************************    
  * @attention
  * Copyright: (c) 2021-2023, SOLO motor controllers project
@@ -44,7 +44,12 @@ extern "C"
 			Abort_Value = 7,						/*!< abort value */
 			MCP2515_Transmit_ArbitrationLost = 8,	/*!< MCP2515 transmit arbitration lost */
 			MCP2515_Transmit_Error = 9,				/*!< MCP2515 transmit error */
-			objectNotInitialize = 10				/*!< Kvaser object not initialize */
+			objectNotInitialize = 10,				/*!< Kvaser object not initialize */
+			canEmptyBuffer = 11,					/*!< Kvaser buffer have no data for the defined COBID */
+			pdoParameterIdOutOfRange = 12,			/*!< PDO configuration id out of range */
+			pdoSyncOutOfRange = 13,					/*!< PDO configuration sync out of range */
+			pdoMissingCobId = 14,					/*!< PDO no specific CobId for the specified pdo*/
+			pdoRtrCommandNotAllowed = 15,			/*!< PDO RTR specific command not allowed*/
 		};
 
     /**

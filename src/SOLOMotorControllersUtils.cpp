@@ -3,10 +3,10 @@
  * @file    SOLOMotorControllersUtils.cpp
  * @authors SOLO Motor Controllers
  * @brief   This file contains all the base functions prototypes for the Solo Drivers
- *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-ARDUINO-library
+ *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
  * 
  * @date    Date: 2023
- * @version 1.1.0
+ * @version 1.2.0
  * *******************************************************************************    
  * @attention
  * Copyright: (c) 2021-2023, SOLO motor controllers project
@@ -42,12 +42,12 @@ void SOLOMotorControllersUtils::ConvertToData(float f, unsigned char data[])
 		dec *= -1;
 		dec = 0xFFFFFFFF - dec;
 	}
-	data[0] = dec >> 24;
+	data[0] = (UINT8)(dec >> 24);
 	dec = dec % 16777216;
-	data[1] = dec >> 16;
+	data[1] = (UINT8)(dec >> 16);
 	dec = dec % 65536;
-	data[2] = dec >> 8;
-	data[3] = dec % 256;
+	data[2] = (UINT8)(dec >> 8);
+	data[3] = (UINT8)(dec % 256);
 }
 long SOLOMotorControllersUtils::ConvertToLong(unsigned char data[])
 {
@@ -81,13 +81,6 @@ void SOLOMotorControllersUtils::ConvertToData(long l, unsigned char data[])
 	dec = dec % 65536;
 	data[2] = dec >> 8;
 	data[3] = dec % 256;
-}
-void SOLOMotorControllersUtils::SplitData(unsigned char data[], unsigned char cmd[])
-{
-	data[0] = cmd[2];
-	data[1] = cmd[3];
-	data[2] = cmd[4];
-	data[3] = cmd[5];
 }
 
 void SOLOMotorControllersUtils::ExtractData(unsigned char _Data[], unsigned char _ExtractedData[]) {

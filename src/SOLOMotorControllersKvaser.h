@@ -3,10 +3,10 @@
  * @file    SOLOMotorControllersKvaser.h
  * @authors SOLO Motor Controllers
  * @brief   This file contains all the base functions prototypes for the Solo Drivers
- *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-ARDUINO-library
+ *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
  * 
  * @date    Date: 2023
- * @version 1.1.0
+ * @version 1.2.0
  * *******************************************************************************    
  * @attention
  * Copyright: (c) 2021-2023, SOLO motor controllers project
@@ -22,6 +22,7 @@
 
 #include "canlib.h"
 #include "Kvaser.h"
+#include <map>
 
 #ifndef SOLOMOTORCONTROLLERSCANOPEN_H       //Avoid loading SOLOMotorControllersCanopen.h more than once
 #define SOLOMOTORCONTROLLERSCANOPEN_H
@@ -49,7 +50,7 @@
 #define Object_PowerReference                          0x3006
 #define Object_MotorParametersIdentification           0x3007
 #define Object_EmergencyStop                           0x3008
-#define Object_OutputPwmFrequencyKhz                   0x3009
+#define Object_OutputPwmFrequency                      0x3009
 #define Object_SpeedControllerKp                       0x300A
 #define Object_SpeedControllerKi                       0x300B
 #define Object_MotorDirection                          0x300C
@@ -113,21 +114,61 @@
   * @}
   */
 
+#define PdoParameterNameCount							12
+
+#define RPDO_MIN_COBIB									0x200
+#define RPDO_MAX_COBIB									0x27F
+#define TPDO_MIN_COBIB									0x280
+#define TPDO_MAX_COBIB									0x2FF
+
+/**
+ * @brief  Pdo Parameter Name enumeration
+ */
+enum PdoParameterName
+{
+	positionReference 				= 0,			/*!< target position [RPDO] */
+	speedReference 					= 1,			/*!< target velocity [RPDO] */
+	torqueReferenceIq 				= 2,			/*!< target torque [RPDO] */
+	magnetizingCurrentIdReference 	= 3,			/*!< target direct current [RPDO] */
+	controlMode 					= 4,			/*!< control mode [RPDO] */
+	motorDirection 					= 5,			/*!< motor direction [RPDO] */
+	positionCountsFeedback			= 6,			/*!< feedback position [TPDO] */
+	speedFeedback 					= 7,			/*!< feedback velocity [TPDO] */
+	quadratureCurrentIqFeedback		= 8,			/*!< feedback lq [TPDO] */
+	magnetizingCurrentIdFeedback 	= 9,			/*!< feedback ld [TPDO] */
+	errorRegister 					= 10,			/*!< error register [TPDO] */
+	boardTemperature 				= 11			/*!< board temperature [TPDO] */
+};
+
+/**
+ * @brief a struct that include all the Parameter used during PDO configuration
+ */
+typedef struct 
+{
+	PdoParameterName 		parameterName;
+	int						parameterCobId;
+	bool					isPdoParameterEnable;	
+	bool					isRrtParameterEnable; 	
+	int 					syncParameterCount;								
+} PdoParameterConfig;
+
 /**
  * @brief a class for handle canopen communication
- * */
+ */
 class SOLOMotorControllersKvaser : public SOLOMotorControllers
 {
 
 private:
 	uint8_t Address;
-	canHandle hnd;		//javad
+	canHandle hnd;		
 	Kvaser *kvaser;
 	SOLOMotorControllersUtils *soloUtils;
 	long timeout;
 	long canBaudrate;
+	int pdoParameterObjectByPdoParameterName[PdoParameterNameCount];
 
 public:
+	int pdoParameterCobIdByPdoParameterName[PdoParameterNameCount];
 	SOLOMotorControllersKvaser(UINT8 deviceAddress = 0, 
 			SOLOMotorControllers::CanbusBaudrate baudrate = SOLOMotorControllers::CanbusBaudrate::rate1000,
 	 		long millisecondsTimeout = 200, bool autoConnect = true);
@@ -135,11 +176,11 @@ public:
 	~SOLOMotorControllersKvaser();
 
 private:
-	float ConvertToFloat(unsigned char data[]);
-	long  ConvertToLong(unsigned char data[]);
-	void  ConvertToData(float f, unsigned char data[]);
-	void  ConvertToData(long l, unsigned char data[]);
-	void  ExtractData(unsigned char _Data[], unsigned char _ExtractedData[]);
+	float 	ConvertToFloat(unsigned char data[]);
+	long  	ConvertToLong(unsigned char data[]);
+	void  	ConvertToData(float f, unsigned char data[]);
+	void  	ConvertToData(long l, unsigned char data[]);
+	void  	ExtractData(unsigned char _Data[], unsigned char _ExtractedData[]);
 
 public:
 	bool Connect(UINT8 deviceAddress, 
@@ -150,7 +191,7 @@ public:
 
 	void Disconnect();
 	
-/** @addtogroup SOLOMotorControllersCanopen_Write_Functions SOLOMotorControllersCanopen Write Functions
+/** @addtogroup CANOpen_Write_Functions_Specific Specific CANOpen Write Functions
   * @{
   */
 	//----------Write  SOLOMotorControllersCanopen----------
@@ -160,11 +201,66 @@ public:
 	bool SetLifeTimeFactor(long lifeTimeFactor);
 	bool SetProducerHeartbeatTime(long producerHeartbeatTime, int& error);
 	bool SetProducerHeartbeatTime(long producerHeartbeatTime);
+	bool SetPdoParameterConfig(PdoParameterConfig config, int &error);
+
 /**
   * @}
   */
 
-/** @addtogroup SOLOMotorControllers_Write_Functions SOLOMotorControllers Write Functions
+/** @addtogroup CANOpen_PDO_Functions CANOpen Functions for Work with PDO Objects
+  * @{
+  */
+	bool 	SetPdoParameterCobbIdInputValidation(PdoParameterName parameterName, int parameterCobbId, int &error);
+	bool 	SetSyncParameterCountInputValidation(uint8_t parameterCount, int &error);
+	long 	GetPdoParameterValueLong(PdoParameterName parameterName, int &error);
+	float 	GetPdoParameterValueFloat(PdoParameterName parameterName, int &error);
+	bool 	PdoRtrValidParameter(PdoParameterName parameterName, int &error);
+	void 	InitPdoConfig();
+	long 	GetPdoParameterCobId(PdoParameterName parameterName, int &error);
+	bool 	SetPdoParameterValue(PdoParameterName parameterName, long value, int &error);
+	bool 	SetPdoParameterValue(PdoParameterName parameterName, long value);
+	bool 	SetPdoParameterValue(PdoParameterName parameterName, float value, int &error);
+	bool 	SetPdoParameterValue(PdoParameterName parameterName, float value);
+	
+	bool SendPdoSync(int &error);
+	bool SendPdoSync();
+	bool SendPdoRtr(PdoParameterName parameterName, int &error);
+	bool SendPdoRtr(PdoParameterName parameterName);
+	
+
+	bool SetPdoPositionReference(long positionReference, int& error);
+	bool SetPdoPositionReference(long positionReference);
+	bool SetPdoSpeedReference(long speedReference, int &error);
+	bool SetPdoSpeedReference(long speedReference);
+	bool SetPdoTorqueReferenceIq(float torqueReferenceIq, int& error);
+	bool SetPdoTorqueReferenceIq(float torqueReferenceIq);
+	bool SetPdoMagnetizingCurrentIdReference(float magnetizingCurrentIdReference, int& error);
+	bool SetPdoMagnetizingCurrentIdReference(float magnetizingCurrentIdReference);
+	bool SetPdoControlMode(SOLOMotorControllers::ControlMode controlMode, int& error);
+	bool SetPdoControlMode(SOLOMotorControllers::ControlMode controlMode);
+	bool SetPdoMotorDirection(SOLOMotorControllers::Direction motorDirection, int& error);
+	bool SetPdoMotorDirection(SOLOMotorControllers::Direction motorDirection);
+
+	long 	GetPdoPositionCountsFeedback(int& error);
+	long 	GetPdoPositionCountsFeedback();
+	long	GetPdoSpeedFeedback (int &error);
+	long 	GetPdoSpeedFeedback ();
+	float 	GetPdoQuadratureCurrentIqFeedback(int& error);
+	float 	GetPdoQuadratureCurrentIqFeedback();
+	float 	GetPdoMagnetizingCurrentIdFeedback(int& error);
+	float 	GetPdoMagnetizingCurrentIdFeedback();
+	long 	GetPdoErrorRegister(int& error);
+	long 	GetPdoErrorRegister();
+	float 	GetPdoBoardTemperature(int& error);
+	float 	GetPdoBoardTemperature();
+	PdoParameterConfig 	GetPdoParameterConfig(PdoParameterName parameterName, int &error);
+	bool 	UpdatePdoParameterCobIdByPdoParameterName();
+
+/**
+  * @}
+  */
+
+/** @addtogroup CANOpen_Write_Functions Standard CANOpen Write Functions
   * @{
   */
 	//----------Write  SOLOMotorControllers----------   
@@ -272,138 +368,145 @@ public:
   * @}
   */
 
-/** @addtogroup SOLOMotorControllers_Read_Functions SOLOMotorControllers Read Functions
+/** @addtogroup CANOpen_Read_Functions Specific CANOpen Read Functions
+  * @{
+  */
+	long	GetGuardTime(int& error);
+	long	GetGuardTime();
+	long	GetLifeTimeFactor(int& error);
+	long	GetLifeTimeFactor();
+	long	GetProducerHeartbeatTime(int& error);
+	long	GetProducerHeartbeatTime();
+/**
+  * @}
+  */
+
+/** @addtogroup CANOpen_Read_Functions Standard CANOpen Read Functions
   * @{
   */
 	//----------Read SOLOMotorControllers----------
-	long  GetReadErrorRegister(int& error);
-	long  GetReadErrorRegister();
-	long  GetGuardTime(int& error);
-	long  GetGuardTime();
-	long  GetLifeTimeFactor(int& error);
-	long  GetLifeTimeFactor();
-	long  GetProducerHeartbeatTime(int& error);
-	long  GetProducerHeartbeatTime();
-	long  GetDeviceAddress(int& error);
-	long  GetDeviceAddress();
-	float GetPhaseAVoltage(int& error);
-	float GetPhaseAVoltage();
-	float GetPhaseBVoltage(int& error);
-	float GetPhaseBVoltage();
-	float GetPhaseACurrent(int& error);
-	float GetPhaseACurrent();
-	float GetPhaseBCurrent(int& error);
-	float GetPhaseBCurrent();
-	float GetBusVoltage(int& error); //Battery Voltage
-	float GetBusVoltage();
-	float GetDcMotorCurrentIm(int& error);
-	float GetDcMotorCurrentIm();
-	float GetDcMotorVoltageVm(int& error);
-	float GetDcMotorVoltageVm();
-	float GetSpeedControllerKp(int& error);
-	float GetSpeedControllerKp();
-	float GetSpeedControllerKi(int& error);
-	float GetSpeedControllerKi();
-	long  GetOutputPwmFrequencyKhz(int& error);
-	long  GetOutputPwmFrequencyKhz();
-	float GetCurrentLimit(int& error);
-	float GetCurrentLimit();
-	float GetQuadratureCurrentIqFeedback(int& error);
-	float GetQuadratureCurrentIqFeedback();
-	float GetMagnetizingCurrentIdFeedback(int& error); //Magnetizing
-	float GetMagnetizingCurrentIdFeedback();
-	long  GetMotorPolesCounts(int& error);
-	long  GetMotorPolesCounts();
-	long  GetIncrementalEncoderLines(int& error);
-	long  GetIncrementalEncoderLines();
-	float GetCurrentControllerKp(int& error);
-	float GetCurrentControllerKp();
-	float GetCurrentControllerKi(int& error);
-	float GetCurrentControllerKi();
-	float GetBoardTemperature(int& error);
-	float GetBoardTemperature();
-	float GetMotorResistance(int& error);
-	float GetMotorResistance();
-	float GetMotorInductance(int& error);
-	float GetMotorInductance();
-	long  GetSpeedFeedback(int& error);
-	long  GetSpeedFeedback();
-	long  GetMotorType(int& error);
-	long  GetMotorType();
-	long  GetFeedbackControlMode(int& error);
-	long  GetFeedbackControlMode();
-	long  GetCommandMode(int& error);
-	long  GetCommandMode();
-	long  GetControlMode(int& error);
-	long  GetControlMode();
-	long  GetSpeedLimit(int& error);
-	long  GetSpeedLimit();
-	float GetPositionControllerKp(int& error);
-	float GetPositionControllerKp();
-	float GetPositionControllerKi(int& error);
-	float GetPositionControllerKi();
-	long  GetPositionCountsFeedback(int& error);
-	long  GetPositionCountsFeedback();
-	long  GetErrorRegister(int& error);
-	long  GetErrorRegister();
-	long  GetDeviceFirmwareVersion(int& error);
-	long  GetDeviceFirmwareVersion();
-	long  GetDeviceHardwareVersion(int& error);
-	long  GetDeviceHardwareVersion();
-	float GetTorqueReferenceIq(int& error);
-	float GetTorqueReferenceIq();
-	long  GetSpeedReference(int& error);
-	long  GetSpeedReference();
-	float GetMagnetizingCurrentIdReference(int& error);
-	float GetMagnetizingCurrentIdReference();
-	long  GetPositionReference(int& error);
-	long  GetPositionReference();
-	float GetPowerReference(int& error);
-	float GetPowerReference();
-	long  GetMotorDirection(int& error);
-	long  GetMotorDirection();
-	float GetObserverGainBldcPmsm(int& error);
-	float GetObserverGainBldcPmsm();
-	float GetObserverGainBldcPmsmUltrafast(int& error);
-	float GetObserverGainBldcPmsmUltrafast();
-	float GetObserverGainDc(int& error);
-	float GetObserverGainDc();
-	float GetFilterGainBldcPmsm(int& error);
-	float GetFilterGainBldcPmsm();
-	float GetFilterGainBldcPmsmUltrafast(int& error);
-	float GetFilterGainBldcPmsmUltrafast();
-	float Get3PhaseMotorAngle(int& error); // Read Estimated or Measured Rotor Angle
-	float Get3PhaseMotorAngle();
-	float GetEncoderHallCcwOffset(int& error);
-	float GetEncoderHallCcwOffset();
-	float GetEncoderHallCwOffset(int& error);
-	float GetEncoderHallCwOffset();
-	long  GetUartBaudrate(int& error);
-	long  GetUartBaudrate();
-	float GetSpeedAccelerationValue(int& error);
-	float GetSpeedAccelerationValue();
-	float GetSpeedDecelerationValue(int& error);
-	float GetSpeedDecelerationValue();
-	long  GetAnalogueSpeedResolutionDivisionCoefficient(int &error);
-    long  GetAnalogueSpeedResolutionDivisionCoefficient();
-	bool  CommunicationIsWorking(int& error);
-	bool  CommunicationIsWorking();
-	long  GetEncoderIndexCounts(int& error);
-	long  GetEncoderIndexCounts();
-	long GetMotionProfileMode(int &error);
-    long GetMotionProfileMode();
-    float GetMotionProfileVariable1(int &error);
-    float GetMotionProfileVariable1();
-    float GetMotionProfileVariable2(int &error);
-    float GetMotionProfileVariable2();
-    float GetMotionProfileVariable3(int &error);
-    float GetMotionProfileVariable3();
-    float GetMotionProfileVariable4(int &error);
-    float GetMotionProfileVariable4();
-    float GetMotionProfileVariable5(int &error);
-    float GetMotionProfileVariable5();
-	void GeneralCanbusRead(uint16_t *ID , uint8_t *DLC, uint8_t *Data);
-	void GeneralCanbusWrite(uint16_t ID, uint8_t *DLC, uint8_t *Data, int &error);
+	long	GetReadErrorRegister(int& error);
+	long	GetReadErrorRegister();
+	long	GetDeviceAddress(int& error);
+	long	GetDeviceAddress();
+	float	GetPhaseAVoltage(int& error);
+	float	GetPhaseAVoltage();
+	float	GetPhaseBVoltage(int& error);
+	float	GetPhaseBVoltage();
+	float	GetPhaseACurrent(int& error);
+	float	GetPhaseACurrent();
+	float	GetPhaseBCurrent(int& error);
+	float	GetPhaseBCurrent();
+	float	GetBusVoltage(int& error); //Battery Voltage
+	float	GetBusVoltage();
+	float	GetDcMotorCurrentIm(int& error);
+	float	GetDcMotorCurrentIm();
+	float	GetDcMotorVoltageVm(int& error);
+	float	GetDcMotorVoltageVm();
+	float	GetSpeedControllerKp(int& error);
+	float	GetSpeedControllerKp();
+	float	GetSpeedControllerKi(int& error);
+	float	GetSpeedControllerKi();
+	long	GetOutputPwmFrequencyKhz(int& error);
+	long	GetOutputPwmFrequencyKhz();
+	float	GetCurrentLimit(int& error);
+	float	GetCurrentLimit();
+	float	GetQuadratureCurrentIqFeedback(int& error);
+	float	GetQuadratureCurrentIqFeedback();
+	float	GetMagnetizingCurrentIdFeedback(int& error); //Magnetizing
+	float	GetMagnetizingCurrentIdFeedback();
+	long	GetMotorPolesCounts(int& error);
+	long	GetMotorPolesCounts();
+	long	GetIncrementalEncoderLines(int& error);
+	long	GetIncrementalEncoderLines();
+	float	GetCurrentControllerKp(int& error);
+	float	GetCurrentControllerKp();
+	float	GetCurrentControllerKi(int& error);
+	float	GetCurrentControllerKi();
+	float	GetBoardTemperature(int& error);
+	float	GetBoardTemperature();
+	float	GetMotorResistance(int& error);
+	float	GetMotorResistance();
+	float	GetMotorInductance(int& error);
+	float	GetMotorInductance();
+	long	GetSpeedFeedback(int& error);
+	long 	GetSpeedFeedback();
+	long	GetMotorType(int& error);
+	long	GetMotorType();
+	long	GetFeedbackControlMode(int& error);
+	long	GetFeedbackControlMode();
+	long	GetCommandMode(int& error);
+	long	GetCommandMode();
+	long	GetControlMode(int& error);
+	long	GetControlMode();
+	long	GetSpeedLimit(int& error);
+	long	GetSpeedLimit();
+	float	GetPositionControllerKp(int& error);
+	float	GetPositionControllerKp();
+	float	GetPositionControllerKi(int& error);
+	float	GetPositionControllerKi();
+	long	GetPositionCountsFeedback(int& error);
+	long	GetPositionCountsFeedback();
+	long	GetErrorRegister(int& error);
+	long	GetErrorRegister();
+	long	GetDeviceFirmwareVersion(int& error);
+	long	GetDeviceFirmwareVersion();
+	long	GetDeviceHardwareVersion(int& error);
+	long	GetDeviceHardwareVersion();
+	float	GetTorqueReferenceIq(int& error);
+	float	GetTorqueReferenceIq();
+	long	GetSpeedReference(int& error);
+	long 	GetSpeedReference();
+	float 	GetMagnetizingCurrentIdReference(int& error);
+	float 	GetMagnetizingCurrentIdReference();
+	long  	GetPositionReference(int& error);
+	long  	GetPositionReference();
+	float 	GetPowerReference(int& error);
+	float 	GetPowerReference();
+	long  	GetMotorDirection(int& error);
+	long  	GetMotorDirection();
+	float 	GetObserverGainBldcPmsm(int& error);
+	float 	GetObserverGainBldcPmsm();
+	float 	GetObserverGainBldcPmsmUltrafast(int& error);
+	float 	GetObserverGainBldcPmsmUltrafast();
+	float 	GetObserverGainDc(int& error);
+	float 	GetObserverGainDc();
+	float 	GetFilterGainBldcPmsm(int& error);
+	float 	GetFilterGainBldcPmsm();
+	float 	GetFilterGainBldcPmsmUltrafast(int& error);
+	float 	GetFilterGainBldcPmsmUltrafast();
+	float 	Get3PhaseMotorAngle(int& error); // Read Estimated or Measured Rotor Angle
+	float 	Get3PhaseMotorAngle();
+	float 	GetEncoderHallCcwOffset(int& error);
+	float 	GetEncoderHallCcwOffset();
+	float 	GetEncoderHallCwOffset(int& error);
+	float 	GetEncoderHallCwOffset();
+	long  	GetUartBaudrate(int& error);
+	long  	GetUartBaudrate();
+	float 	GetSpeedAccelerationValue(int& error);
+	float 	GetSpeedAccelerationValue();
+	float	GetSpeedDecelerationValue(int& error);
+	float 	GetSpeedDecelerationValue();
+	long  	GetAnalogueSpeedResolutionDivisionCoefficient(int &error);
+    long  	GetAnalogueSpeedResolutionDivisionCoefficient();
+	bool  	CommunicationIsWorking(int& error);
+	bool  	CommunicationIsWorking();
+	long  	GetEncoderIndexCounts(int& error);
+	long  	GetEncoderIndexCounts();
+	long 	GetMotionProfileMode(int &error);
+    long 	GetMotionProfileMode();
+    float 	GetMotionProfileVariable1(int &error);
+    float 	GetMotionProfileVariable1();
+    float 	GetMotionProfileVariable2(int &error);
+    float 	GetMotionProfileVariable2();
+    float 	GetMotionProfileVariable3(int &error);
+    float 	GetMotionProfileVariable3();
+    float 	GetMotionProfileVariable4(int &error);
+    float 	GetMotionProfileVariable4();
+    float 	GetMotionProfileVariable5(int &error);
+    float 	GetMotionProfileVariable5();
+	void 	GeneralCanbusRead(uint16_t *ID , uint8_t *DLC, uint8_t *Data);
+	void 	GeneralCanbusWrite(uint16_t ID, uint8_t *DLC, uint8_t *Data, int &error);
 };
 /**
   * @}

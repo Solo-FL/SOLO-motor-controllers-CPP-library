@@ -4,8 +4,8 @@
 /*
 *    Title: SOLO Motor Controllers CPP Library
 *    Author: SOLOMotorControllers
-*    Date: 2022
-*    Code version: 1.0.0
+*    Date: 2023
+*    Code version: 1.2.0
 *    Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
 This Library is made by SOLOMotorControllers.com
 To learn more please visit:  https://www.SOLOMotorControllers.com/
@@ -18,7 +18,7 @@ using std::cout;
 using std::endl;
 
 #include <conio.h>
-#include "SOLOMotorControllersSerial.h" 
+#include "SOLOMotorControllersKvaser.h" 
 
 //For this Test, make sure you have calibrated your Encoder before
 //to know more please read: https://www.solomotorcontrollers.com/how-to-connect-calibrate-incremental-encoder-with-solo/
@@ -70,8 +70,8 @@ void soloConfigInit() {
   // pressing the Piano Switch NO# 5 DOWN. in SOLO UNO
   
   //Initialize the SOLO object
-  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersSerial((char*)"COM3",0);
-  solo = new SOLOMotorControllersSerial((char*)"COM3");
+  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
+  solo = new SOLOMotorControllersKvaser();
 
   //TRY CONNECT LOOP
   while(solo->CommunicationIsWorking() == false ){

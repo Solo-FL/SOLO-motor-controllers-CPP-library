@@ -3,10 +3,10 @@
  * @file    SOLOMotorControllersSerial.h
  * @authors SOLO Motor Controllers
  * @brief   This file contains all the base functions prototypes for the Solo Drivers
- *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-ARDUINO-library
+ *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
  * 
  * @date    Date: 2023
- * @version 1.1.0
+ * @version 1.2.0
  * *******************************************************************************    
  * @attention
  * Copyright: (c) 2021-2023, SOLO motor controllers project
@@ -161,7 +161,7 @@ extern "C"
 		UINT8 addr = 0;
 		char* portName;
 		bool isConnected = false;
-		HANDLE hComm;
+		HANDLE hSerial;
 		UINT32 uartBaudrate;
 		UINT32 timeout;
 		UINT32 trialCount;
@@ -211,7 +211,7 @@ extern "C"
 
 		bool Test();
 
-    /** @addtogroup SOLOMotorControllersSerial_Write_Functions SOLOMotorControllersSerial Write Functions
+    /** @addtogroup Serial_Write_Functions Standard Serial Write Functions
      * @{
      */
 		//----------Write----------
@@ -419,7 +419,7 @@ extern "C"
      * @}
      */
 
-    /** @addtogroup SOLOMotorControllersSerial_Read_Functions SOLOMotorControllersSerial Read Functions
+    /** @addtogroup Serial_Read_Functions Standard Serial Read Functions
      * @{
      */
 		////----------Read----------

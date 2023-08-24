@@ -3,10 +3,10 @@
  * @file    SOLOMotorControllersUtils.h
  * @authors SOLO Motor Controllers
  * @brief   This file contains all the base functions prototypes for the Solo Drivers
- *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-ARDUINO-library
+ *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
  * 
  * @date    Date: 2023
- * @version 1.1.0
+ * @version 1.2.0
  * *******************************************************************************    
  * @attention
  * Copyright: (c) 2021-2023, SOLO motor controllers project
@@ -24,7 +24,6 @@ public:
 	long  ConvertToLong(unsigned char data[]);
 	void  ConvertToData(float f, unsigned char data[]);
 	void  ConvertToData(long l, unsigned char data[]);
-	void  SplitData(unsigned char data[], unsigned char cmd[]);
 	void  ExtractData(unsigned char _Data[], unsigned char _ExtractedData[]);
 
 	//-- input Validation

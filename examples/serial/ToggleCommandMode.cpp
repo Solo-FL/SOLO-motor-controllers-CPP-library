@@ -5,8 +5,8 @@
 /*
 *    Title: SOLO Motor Controllers CPP Library
 *    Author: SOLOMotorControllers
-*    Date: 2022
-*    Code version: 1.0.0
+*    Date: 2023
+*    Code version: 1.2.0
 *    Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
 This Library is made by SOLOMotorControllers.com
 To learn more please visit:  https://www.SOLOMotorControllers.com/
@@ -20,7 +20,7 @@ using std::cout;
 using std::endl;
 
 #include <conio.h>
-#include "SOLOMotorControllersSerial.h" 
+#include "SOLOMotorControllersKvaser.h" 
 
 SOLOMotorControllers *solo; 
 int error;
@@ -28,7 +28,7 @@ long commandMode;
 bool setIsSuccesfull;
 
 int main(void) {
-  solo = new SOLOMotorControllersSerial((char*)"COM3");
+  solo = new SOLOMotorControllersKvaser();
   
   //Infinite Loop
   while(true){

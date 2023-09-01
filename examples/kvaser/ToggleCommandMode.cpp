@@ -16,10 +16,9 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 //    STEP 1: to print the command mode of SOLO and the error status of the reading operation
 //    STEP 2: if we read the command mode without error we want to change the command mode of SOLO.
 #include <iostream>
-using std::cout;
-using std::endl;
 
 #include <conio.h>
+#include "Kvaser.h"
 #include "SOLOMotorControllersKvaser.h" 
 
 SOLOMotorControllers *solo; 
@@ -28,7 +27,11 @@ long commandMode;
 bool setIsSuccesfull;
 
 int main(void) {
-  solo = new SOLOMotorControllersKvaser();
+	CommunicationInterface* ci = new Kvaser(SOLOMotorControllers::CanbusBaudrate::rate1000);
+
+    //Initialize the SOLO object
+    //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
+    solo = new SOLOMotorControllersKvaser(ci);
   
   //Infinite Loop
   while(true){

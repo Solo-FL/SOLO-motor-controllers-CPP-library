@@ -12,17 +12,21 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 */
 
 #include <iostream>
-using std::cout;
-using std::endl;
 
 #include <conio.h>
+#include "Kvaser.h"
 #include "SOLOMotorControllersKvaser.h"
 
 int main(void)
 {
     float readingValue;
     int error;
-    SOLOMotorControllers *solo = new SOLOMotorControllersKvaser();
+
+	CommunicationInterface* ci = new Kvaser(SOLOMotorControllers::CanbusBaudrate::rate1000);
+
+    //Initialize the SOLO object
+    //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
+    SOLOMotorControllers *solo = new SOLOMotorControllersKvaser(ci);
 
     //TRY CONNECT LOOP
     while(solo->CommunicationIsWorking() == false ){
@@ -47,7 +51,7 @@ int main(void)
     }
     solo->Disconnect();
 
-    cout << "Press Enter to Exit";
+    std::cout << "Press Enter to Exit";
     getch();
     return 0;
 }

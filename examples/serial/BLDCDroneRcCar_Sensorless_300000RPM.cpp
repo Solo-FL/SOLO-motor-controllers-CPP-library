@@ -13,12 +13,14 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 
 //Arduino Article about the same topic: https://www.solomotorcontrollers.com/drive-fast-drone-rc-car-brushless-motors-arduino-solo-sensorless
 #include <iostream>
-using std::cout;
-using std::endl;
+//using std::cout;
+//using std::endl;
 
 #include <conio.h>
 // FIXME: shouldn't it be #include "SOLOMotorControllersSerial.h" 
-#include "SOLOMotorControllersKvaser.h" 
+#include "Kvaser.h"
+#include "SOLOMotorControllersKvaser.h"  // weg damit?
+#include "CommunicationInterface.h"
 
 //instanciate a SOLO object:
 SOLOMotorControllers *solo;  
@@ -52,10 +54,12 @@ void soloConfigInit() {
   //In this example, make sure you put SOLO into Closed-Loop by
   // pressing the Piano Switch NO# 5 DOWN. in SOLO UNO
   
+	CommunicationInterface* ci = new Kvaser(SOLOMotorControllers::CanbusBaudrate::rate1000);
+
   //Initialize the SOLO object
   //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
   // FIXME: should it not be solo = new SOLOMotorControllersSerial(some params!!);
-  solo = new SOLOMotorControllersKvaser();
+  solo = new SOLOMotorControllersKvaser(ci);
 
   //TRY CONNECT LOOP
   while(solo->CommunicationIsWorking() == false ){

@@ -17,6 +17,7 @@ using std::cout;
 using std::endl;
 
 #include <conio.h>
+#include "Kvaser.h"
 #include "SOLOMotorControllersKvaser.h" 
 
 //instanciate a SOLO object:
@@ -50,10 +51,12 @@ long actualMotorSpeed = 0;
 void soloConfigInit() {
   //In this example, make sure you put SOLO into Closed-Loop by
   // pressing the Piano Switch NO# 5 DOWN. in SOLO UNO
-  
+
+	CommunicationInterface* ci = new Kvaser(SOLOMotorControllers::CanbusBaudrate::rate1000);
+
   //Initialize the SOLO object
   //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
-  solo = new SOLOMotorControllersKvaser();
+  solo = new SOLOMotorControllersKvaser(ci);
 
   //TRY CONNECT LOOP
   while(solo->CommunicationIsWorking() == false ){

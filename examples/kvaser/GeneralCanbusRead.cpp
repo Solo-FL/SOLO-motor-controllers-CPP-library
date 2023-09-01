@@ -19,6 +19,7 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 #include <string>
 using namespace std;
 #include "canlib.h"
+#include "Kvaser.h"
 #include "SOLOMotorControllersKvaser.h"
 
 // instanciate a SOLO object as Canopen IMPORTANT
@@ -34,9 +35,11 @@ int cnt = 0;
 
 int main(void)
 {
-	//Initialize the SOLO object
-	//Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
-	solo = new SOLOMotorControllersKvaser();
+	CommunicationInterface* ci = new Kvaser(SOLOMotorControllers::CanbusBaudrate::rate1000);
+
+    //Initialize the SOLO object
+    //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
+    solo = new SOLOMotorControllersKvaser(ci);
 
 	//TRY CONNECT LOOP
 	while(solo->CommunicationIsWorking() == false ){

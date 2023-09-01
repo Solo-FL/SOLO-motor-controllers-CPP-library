@@ -14,10 +14,9 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 // EXAMPLE of how read the SOLO board temperature, 
 // every second we print the value of the temperature
 #include <iostream>
-using std::cout;
-using std::endl;
 
 #include <conio.h>
+#include "Kvaser.h"
 #include "SOLOMotorControllersKvaser.h" 
 
 // instanciate a SOLO object
@@ -27,9 +26,11 @@ float temperature=0;
 int error;
 
 int main(void) {
-  //Initialize the SOLO object
-  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
-  solo = new SOLOMotorControllersKvaser();
+	CommunicationInterface* ci = new Kvaser(SOLOMotorControllers::CanbusBaudrate::rate1000);
+
+    //Initialize the SOLO object
+    //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
+    solo = new SOLOMotorControllersKvaser(ci);
   
   //Infinite Loop
   while (true)

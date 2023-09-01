@@ -13,10 +13,9 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 
 // The Motor used for Testings: teknic m-2310P-LN-04K
 #include <iostream>
-using std::cout;
-using std::endl;
 
 #include <conio.h>
+#include "Kvaser.h"
 #include "SOLOMotorControllersKvaser.h" 
 
 //For this Test, make sure you have calibrated your Motor and Hall sensors before
@@ -52,9 +51,11 @@ long actualMotorPosition = 0;
 void soloConfigInit() {
   //In this example, make sure you put SOLO into Closed-Loop Mode
   
-  //Initialize the SOLO object
-  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
-  solo = new SOLOMotorControllersKvaser();
+	CommunicationInterface* ci = new Kvaser(SOLOMotorControllers::CanbusBaudrate::rate1000);
+
+    //Initialize the SOLO object
+    //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
+    solo = new SOLOMotorControllersKvaser(ci);
 
   //TRY CONNECT LOOP
   while(solo->CommunicationIsWorking() == false ){

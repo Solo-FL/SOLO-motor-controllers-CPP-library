@@ -26,11 +26,38 @@
 // using std::endl;
 
 
-Kvaser::Kvaser()
+Kvaser::Kvaser(long canBaudrate, bool autoConnect)
 {
+    switch (canBaudrate)
+	{
+	case SOLOMotorControllers::CanbusBaudrate::rate1000:
+		canBaudrate = canBITRATE_1M;
+		break;
+	case SOLOMotorControllers::CanbusBaudrate::rate500:
+		canBaudrate = canBITRATE_500K;
+		break;
+	case SOLOMotorControllers::CanbusBaudrate::rate250:
+		canBaudrate = canBITRATE_250K;
+		break;
+	case SOLOMotorControllers::CanbusBaudrate::rate125:
+		canBaudrate = canBITRATE_125K;
+		break;
+	case SOLOMotorControllers::CanbusBaudrate::rate100:
+		canBaudrate = canBITRATE_100K;
+		break;
+	default:
+		canBaudrate = canBITRATE_1M;
+		break;
+	}
+    mCanBaudrate = canBaudrate;
+
 	canInitializeLibrary();
+    if(autoConnect) {
+        Connect();
+    }	
 }
-bool Kvaser::PDOReceive(int hnd, int _address,  uint8_t* _informationReceived, int& error){
+
+bool Kvaser::PDOReceive(int _address,  uint8_t* _informationReceived, int& error){
 	canStatus stat;
 	long ID_Read;
 	uint8_t  DLC_Read;
@@ -64,7 +91,7 @@ bool Kvaser::PDOReceive(int hnd, int _address,  uint8_t* _informationReceived, i
 
 	return true;
 }
-bool Kvaser::PDOTransmit(int hnd, int _address, uint8_t* _informatrionToSend, int& error)
+bool Kvaser::PDOTransmit(int _address, uint8_t* _informatrionToSend, int& error)
 {
 	//std::cout << "PDOTransmit - _address: "<< _address << " \n";
 	canStatus stat;
@@ -84,7 +111,7 @@ bool Kvaser::PDOTransmit(int hnd, int _address, uint8_t* _informatrionToSend, in
 	error = SOLOMotorControllers::Error::noErrorDetected;
 	return true;
 }
-bool Kvaser::SendPdoSync(int hnd, int& error)
+bool Kvaser::SendPdoSync(int& error)
 {
 	canStatus stat;
 	stat = canWriteWait(hnd, 128, NULL, 0, 0, 100);
@@ -99,7 +126,7 @@ bool Kvaser::SendPdoSync(int hnd, int& error)
 	return true;
 }
 
-bool Kvaser::SendPdoRtr(int hnd,int _address, int& error)
+bool Kvaser::SendPdoRtr(int _address, int& error)
 {
 	canStatus stat;
 	stat = canWriteWait(hnd, _address, NULL, 0, canMSG_RTR, 100);
@@ -114,7 +141,7 @@ bool Kvaser::SendPdoRtr(int hnd,int _address, int& error)
 	return true;
 }
 
-bool Kvaser::CANOpenTransmit(int hnd, uint8_t _address, uint16_t _object,uint8_t _subIndex, uint8_t* _informatrionToSend, int& error)
+bool Kvaser::CANOpenTransmit(uint8_t _address, uint16_t _object,uint8_t _subIndex, uint8_t* _informatrionToSend, int& error)
 {
 	canStatus stat;
 	long ID_Read;
@@ -193,7 +220,7 @@ bool Kvaser::CANOpenTransmit(int hnd, uint8_t _address, uint16_t _object,uint8_t
 	return false;
 }
 
-bool Kvaser::CANOpenGenericTransmit(int hnd, uint16_t _ID , uint8_t *_DLC, uint8_t* _Data, int& error)
+bool Kvaser::CANOpenGenericTransmit(uint16_t _ID , uint8_t *_DLC, uint8_t* _Data, int& error)
 {
 	canStatus stat;
 	uint8_t ID_High , ID_Low ;
@@ -214,7 +241,7 @@ bool Kvaser::CANOpenGenericTransmit(int hnd, uint16_t _ID , uint8_t *_DLC, uint8
 
 
 
-bool Kvaser::CANOpenReceive(int hnd, uint8_t _address, uint16_t _object,uint8_t _subIndex, uint8_t* _informatrionToSend, uint8_t* _informationReceived, int& error)
+bool Kvaser::CANOpenReceive(uint8_t _address, uint16_t _object,uint8_t _subIndex, uint8_t* _informatrionToSend, uint8_t* _informationReceived, int& error)
 {
 	canStatus stat;
 	long ID_Read;
@@ -288,7 +315,7 @@ bool Kvaser::CANOpenReceive(int hnd, uint8_t _address, uint16_t _object,uint8_t 
 	return true;
 }
 
-bool Kvaser::CANOpenGenericReceive(int hnd, uint16_t *_ID , uint8_t *_DLC, uint8_t* _Data)
+bool Kvaser::CANOpenGenericReceive(uint16_t *_ID , uint8_t *_DLC, uint8_t* _Data)
 {
 	canStatus stat;
 	long ID_Read;

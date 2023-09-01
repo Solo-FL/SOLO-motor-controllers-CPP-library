@@ -17,6 +17,7 @@ using std::cout;
 using std::endl;
 
 #include <conio.h>
+// FIXME: shouldn't it be #include "SOLOMotorControllersSerial.h" 
 #include "SOLOMotorControllersKvaser.h" 
 
 //instanciate a SOLO object:
@@ -53,6 +54,7 @@ void soloConfigInit() {
   
   //Initialize the SOLO object
   //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
+  // FIXME: should it not be solo = new SOLOMotorControllersSerial(some params!!);
   solo = new SOLOMotorControllersKvaser();
 
   //TRY CONNECT LOOP

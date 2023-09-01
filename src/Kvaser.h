@@ -17,18 +17,54 @@
 #pragma once
 
 #include "canlib.h"
+#include "CommunicationInterface.h"
 #include <stdint.h>
 
 class Kvaser
+    : public CommunicationInterface
 {
 public:
-	Kvaser();
-	bool CANOpenTransmit(int hnd, uint8_t _address, uint16_t _object,uint8_t _subIndex, uint8_t* _informatrionToSend, int& error);
-	bool CANOpenReceive(int hnd, uint8_t _address, uint16_t _object,uint8_t _subIndex, uint8_t* _informatrionToSend, uint8_t* _informationReceived, int& error);
-	bool CANOpenGenericTransmit(int hnd, uint16_t _ID , uint8_t *_DLC, uint8_t* _Data, int& error);
-	bool CANOpenGenericReceive(int hnd, uint16_t *_ID , uint8_t *_DLC, uint8_t* _Data);
-	bool SendPdoSync(int hnd, int& error);
-	bool SendPdoRtr(int hnd, int _address, int& error);
-	bool PDOTransmit(int hnd, int _address, uint8_t* _informatrionToSend, int& error);
-	bool PDOReceive(int hnd, int _address,  uint8_t* _informationReceived, int& error);
+	Kvaser(long canBaudrate, bool autoConnect = true);
+    ~Kvaser() = default;
+
+	bool CANOpenTransmit(uint8_t _address, uint16_t _object,uint8_t _subIndex, uint8_t* informatrionToSend, int& error) override;
+	bool CANOpenReceive(uint8_t _address, uint16_t _object,uint8_t _subIndex, uint8_t* informatrionToSend, uint8_t* _informationReceived, int& error) override;
+
+	bool CANOpenGenericTransmit(uint16_t _ID , uint8_t *_DLC, uint8_t* _Data, int& error) override;
+	bool CANOpenGenericReceive(uint16_t *_ID , uint8_t *_DLC, uint8_t* _Data) override;
+
+	bool SendPdoSync(int& error) override;
+	bool SendPdoRtr(int _address, int& error) override;
+	bool PDOTransmit(int _address, uint8_t* _informatrionToSend, int& error) override;
+	bool PDOReceive(int _address,  uint8_t* _informationReceived, int& error) override;
+
+    bool Connect() override
+    {
+        canStatus stat;
+        canInitializeLibrary();
+        hnd = canOpenChannel(0, 0);
+        if (hnd < 0)
+            {
+                return false;
+            }
+        stat = canSetBusParams(hnd, mCanBaudrate, 0, 0, 0, 0, 0);
+        if(stat == canOK){
+            canBusOn(hnd);
+            return true;
+        }
+        else
+            {
+                canClose(hnd);
+                return false;
+            }
+    }
+
+    void Disconnect() override
+    {
+        canClose(hnd);
+    }
+
+private:
+    canHandle hnd;		
+	long mCanBaudrate;
 };

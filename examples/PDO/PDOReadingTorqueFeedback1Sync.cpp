@@ -15,8 +15,11 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 //Getting the Torque Feedback after 1 SYNC Message
 
 #include <iostream>
-using std::cout;
-using std::endl;
+#ifdef ARDUINO
+#include "MCP2515.hpp"
+#else
+#include "Kvaser.h"
+#endif
 #include <conio.h>
 
 #include "SOLOMotorControllersImpl.h"
@@ -25,10 +28,15 @@ SOLOMotorControllersImpl *solo;
 int error;
 
 int main(void){
-	solo = new SOLOMotorControllersImpl(0, SOLOMotorControllers::CanbusBaudrate::rate1000);
+#ifdef ARDUINO
+	CommunicationInterface* ci = new MCP2515(CommunicationInterface::CanbusBaudrate::rate1000);
+#else
+	CommunicationInterface* ci = new Kvaser(CommunicationInterface::CanbusBaudrate::rate1000);
+#endif
+	solo = new SOLOMotorControllersImpl(ci, 0, CommunicationInterface::CanbusBaudrate::rate1000);
 
 	// 1 time needed CONFIGURATION:
-	cout << "PdoParameterConfig:" << std::endl;
+    std::cout << "PdoParameterConfig:" << std::endl;
 	PdoParameterConfig config;
 	config.parameterName = PdoParameterName::quadratureCurrentIqFeedback;
 	config.parameterCobId = 0x280;

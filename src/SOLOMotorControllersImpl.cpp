@@ -1,6 +1,6 @@
 /**
  *******************************************************************************
- * @file    SOLOMotorControllersKvaser.cpp
+ * @file    SOLOMotorControllersImpl.cpp
  * @authors SOLO Motor Controllers
  * @brief   This file contains all the base functions prototypes for the Solo Drivers
  *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
@@ -14,7 +14,7 @@
  ******************************************************************************* 
  */
 
-#include "SOLOMotorControllersKvaser.h"
+#include "SOLOMotorControllersImpl.h"
 
 //DEBUG
 // #include "stdio.h"
@@ -23,10 +23,10 @@
 // using std::endl;
 // using std::hex; 
 
-SOLOMotorControllersKvaser::SOLOMotorControllersKvaser(CommunicationInterface* ci,
-        UINT8 deviceAddress, SOLOMotorControllers::CanbusBaudrate baudrate,
+SOLOMotorControllersImpl::SOLOMotorControllersImpl(CommunicationInterface* ci,
+        UINT8 deviceAddress, CommunicationInterface::CanbusBaudrate baudrate,
         long millisecondsTimeout, bool autoConnect)
-	:Address(deviceAddress)
+	: Address(deviceAddress)
 	, timeout(millisecondsTimeout)
     , comIf(ci)
 {
@@ -38,42 +38,19 @@ SOLOMotorControllersKvaser::SOLOMotorControllersKvaser(CommunicationInterface* c
 	InitPdoConfig();
 }
 
-SOLOMotorControllersKvaser::~SOLOMotorControllersKvaser()
+SOLOMotorControllersImpl::~SOLOMotorControllersImpl()
 {
 	comIf->Disconnect();
 }
 
-bool SOLOMotorControllersKvaser::Connect(UINT8 deviceAddress, 
-		SOLOMotorControllers::CanbusBaudrate baudrate, long millisecondsTimeout)
+bool SOLOMotorControllersImpl::Connect(UINT8 deviceAddress, 
+		CommunicationInterface::CanbusBaudrate baudrate, long millisecondsTimeout)
 {
-	Address = deviceAddress;
-	switch (baudrate)
-	{
-	case SOLOMotorControllers::CanbusBaudrate::rate1000:
-		canBaudrate = canBITRATE_1M;
-		break;
-	case SOLOMotorControllers::CanbusBaudrate::rate500:
-		canBaudrate = canBITRATE_500K;
-		break;
-	case SOLOMotorControllers::CanbusBaudrate::rate250:
-		canBaudrate = canBITRATE_250K;
-		break;
-	case SOLOMotorControllers::CanbusBaudrate::rate125:
-		canBaudrate = canBITRATE_125K;
-		break;
-	case SOLOMotorControllers::CanbusBaudrate::rate100:
-		canBaudrate = canBITRATE_100K;
-		break;
-	default:
-		canBaudrate = canBITRATE_1M;
-		break;
-	}
-	timeout = millisecondsTimeout;
-
-	return comIf->Connect();
+    Address = deviceAddress;
+	return comIf->Connect(deviceAddress, baudrate, millisecondsTimeout);
 }
 
-bool SOLOMotorControllersKvaser::SetGuardTime(long guardtime, int &error)
+bool SOLOMotorControllersImpl::SetGuardTime(long guardtime, int &error)
 {
     uint8_t informatrionToSend[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -85,13 +62,13 @@ bool SOLOMotorControllersKvaser::SetGuardTime(long guardtime, int &error)
 	return comIf->CANOpenTransmit(Address, Object_GuardTime, 0x00, informatrionToSend, error);
 }
 
-bool SOLOMotorControllersKvaser::SetGuardTime(long guardtime)
+bool SOLOMotorControllersImpl::SetGuardTime(long guardtime)
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::SetGuardTime(guardtime,error);
+    return SetGuardTime(guardtime,error);
 }
 
-bool SOLOMotorControllersKvaser::SetLifeTimeFactor(long lifeTimeFactor, int &error)
+bool SOLOMotorControllersImpl::SetLifeTimeFactor(long lifeTimeFactor, int &error)
 {
     uint8_t informatrionToSend[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -103,12 +80,13 @@ bool SOLOMotorControllersKvaser::SetLifeTimeFactor(long lifeTimeFactor, int &err
 	return comIf->CANOpenTransmit(Address, Object_LifeTimeFactor, 0x00, informatrionToSend, error);
 }
 
-bool SOLOMotorControllersKvaser::SetLifeTimeFactor(long lifeTimeFactor)
+bool SOLOMotorControllersImpl::SetLifeTimeFactor(long lifeTimeFactor)
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::SetLifeTimeFactor(lifeTimeFactor,error);
+    return SetLifeTimeFactor(lifeTimeFactor,error);
 }
-bool SOLOMotorControllersKvaser::SetProducerHeartbeatTime(long producerHeartbeatTime, int &error)
+
+bool SOLOMotorControllersImpl::SetProducerHeartbeatTime(long producerHeartbeatTime, int &error)
 {
     uint8_t informatrionToSend[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -120,10 +98,10 @@ bool SOLOMotorControllersKvaser::SetProducerHeartbeatTime(long producerHeartbeat
 	return comIf->CANOpenTransmit(Address, Object_ProducerHeartbeatTime, 0x00, informatrionToSend, error);
 }
 
-bool SOLOMotorControllersKvaser::SetProducerHeartbeatTime(long producerHeartbeatTime)
+bool SOLOMotorControllersImpl::SetProducerHeartbeatTime(long producerHeartbeatTime)
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::SetProducerHeartbeatTime(producerHeartbeatTime,error);
+    return SetProducerHeartbeatTime(producerHeartbeatTime,error);
 }
 
 /**
@@ -133,7 +111,7 @@ bool SOLOMotorControllersKvaser::SetProducerHeartbeatTime(long producerHeartbeat
   * @param[out]  error   pointer to an integer that specifies the result of the function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoParameterCobbIdInputValidation(PdoParameterName parameterName, int parameterCobbId, int &error)
+bool SOLOMotorControllersImpl::SetPdoParameterCobbIdInputValidation(PdoParameterName parameterName, int parameterCobbId, int &error)
 {
 	if(parameterName < PdoParameterName::positionCountsFeedback)
 	{
@@ -157,7 +135,7 @@ bool SOLOMotorControllersKvaser::SetPdoParameterCobbIdInputValidation(PdoParamet
   * @param[out]  error   pointer to an integer that specifies the result of the function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetSyncParameterCountInputValidation(uint8_t parameterCount, int &error)
+bool SOLOMotorControllersImpl::SetSyncParameterCountInputValidation(uint8_t parameterCount, int &error)
 {
 	if((parameterCount >= 0 && parameterCount < 12) || parameterCount == 0xFF)
 		return true;
@@ -171,7 +149,7 @@ bool SOLOMotorControllersKvaser::SetSyncParameterCountInputValidation(uint8_t pa
   * @param[out]  error   pointer to an integer that specifies the result of the function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoParameterConfig(PdoParameterConfig config, int &error)
+bool SOLOMotorControllersImpl::SetPdoParameterConfig(PdoParameterConfig config, int &error)
 {
 	//std::cout << "SetPdoParameterConfiguration \n";
 	uint8_t informatrionToSend[4] = {0x00,0x00,0x00,0x00};
@@ -222,7 +200,7 @@ bool SOLOMotorControllersKvaser::SetPdoParameterConfig(PdoParameterConfig config
   * @param[out]  error   pointer to an integer that specifies the result of the function       
   * @retval PdoParameterConfig enum @ref PdoParameterConfig
   */
-PdoParameterConfig SOLOMotorControllersKvaser::GetPdoParameterConfig(PdoParameterName parameterName, int &error)
+PdoParameterConfig SOLOMotorControllersImpl::GetPdoParameterConfig(PdoParameterName parameterName, int &error)
 {
 	PdoParameterConfig config;
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
@@ -260,7 +238,7 @@ PdoParameterConfig SOLOMotorControllersKvaser::GetPdoParameterConfig(PdoParamete
   * @param[out]  error   pointer to an integer that specifies the result of the function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SendPdoSync(int &error)
+bool SOLOMotorControllersImpl::SendPdoSync(int &error)
 {
 	return comIf->SendPdoSync(error);
 }
@@ -269,7 +247,7 @@ bool SOLOMotorControllersKvaser::SendPdoSync(int &error)
   * @brief  This command send a SYNC message on bus
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SendPdoSync()
+bool SOLOMotorControllersImpl::SendPdoSync()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return comIf->SendPdoSync(error);
@@ -281,9 +259,9 @@ bool SOLOMotorControllersKvaser::SendPdoSync()
   * @param[out]  error   pointer to an integer that specifies the result of the function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SendPdoRtr(PdoParameterName parameterName, int &error)
+bool SOLOMotorControllersImpl::SendPdoRtr(PdoParameterName parameterName, int &error)
 {
-	SOLOMotorControllersKvaser::PdoRtrValidParameter(parameterName, error);
+	SOLOMotorControllersImpl::PdoRtrValidParameter(parameterName, error);
 	if(error != SOLOMotorControllers::Error::noErrorDetected){
 		return false;
 	}
@@ -301,10 +279,10 @@ bool SOLOMotorControllersKvaser::SendPdoRtr(PdoParameterName parameterName, int 
   * @param[in]  parameterName	enum that specifies the name of the PDO parameter that wants to send RTR      
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SendPdoRtr(PdoParameterName parameterName)
+bool SOLOMotorControllersImpl::SendPdoRtr(PdoParameterName parameterName)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SendPdoRtr(parameterName, error);
+	return SOLOMotorControllersImpl::SendPdoRtr(parameterName, error);
 }
 
 /**
@@ -313,7 +291,7 @@ bool SOLOMotorControllersKvaser::SendPdoRtr(PdoParameterName parameterName)
   * @param[out]  error   pointer to an integer that specifies the result of the function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::PdoRtrValidParameter(PdoParameterName parameterName, int &error)
+bool SOLOMotorControllersImpl::PdoRtrValidParameter(PdoParameterName parameterName, int &error)
 {
 	if(parameterName >= PdoParameterName::positionCountsFeedback ){
 		error = SOLOMotorControllers::Error::noErrorDetected;
@@ -329,7 +307,7 @@ bool SOLOMotorControllersKvaser::PdoRtrValidParameter(PdoParameterName parameter
   * @param[out]  error   pointer to an integer that specifies the result of the function       
   * @retval long
   */
-long SOLOMotorControllersKvaser::GetPdoParameterCobId(PdoParameterName parameterName, int &error)
+long SOLOMotorControllersImpl::GetPdoParameterCobId(PdoParameterName parameterName, int &error)
 {
 	int pdoParameterCobId =  pdoParameterCobIdByPdoParameterName[parameterName];
 	if(pdoParameterCobId==0)
@@ -344,7 +322,7 @@ long SOLOMotorControllersKvaser::GetPdoParameterCobId(PdoParameterName parameter
   * @brief  This command initializes all PDO parameter names addresses in @ref pdoParameterObjectByPdoParameterName array    
   * @retval void
   */
-void SOLOMotorControllersKvaser::InitPdoConfig()
+void SOLOMotorControllersImpl::InitPdoConfig()
 {
 	for(int i = 0; i < PdoParameterNameCount; i++){
 		pdoParameterCobIdByPdoParameterName[i] = 0;
@@ -368,7 +346,7 @@ void SOLOMotorControllersKvaser::InitPdoConfig()
   * @brief  This command update all CobId values for PDO parameters       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::UpdatePdoParameterCobIdByPdoParameterName()
+bool SOLOMotorControllersImpl::UpdatePdoParameterCobIdByPdoParameterName()
 {
 	int error;
 	for(int i = 0; i < PdoParameterNameCount; i++){
@@ -384,7 +362,7 @@ bool SOLOMotorControllersKvaser::UpdatePdoParameterCobIdByPdoParameterName()
   * @param[out]  error   pointer to an integer that specifies the result of the function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName parameterName, long value,
+bool SOLOMotorControllersImpl::SetPdoParameterValue(PdoParameterName parameterName, long value,
 		int &error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
@@ -406,10 +384,10 @@ bool SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName parameter
   * @param[in]  value	long value that wants to be set for the PDO parameter       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName parameterName, long value)
+bool SOLOMotorControllersImpl::SetPdoParameterValue(PdoParameterName parameterName, long value)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPdoParameterValue(parameterName, value, error);
+	return SOLOMotorControllersImpl::SetPdoParameterValue(parameterName, value, error);
 }
 
 /**
@@ -419,7 +397,7 @@ bool SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName parameter
   * @param[out]  error   pointer to an integer that specifies the result of the function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName parameterName, float value,
+bool SOLOMotorControllersImpl::SetPdoParameterValue(PdoParameterName parameterName, float value,
 		int &error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
@@ -441,10 +419,10 @@ bool SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName parameter
   * @param[in]  value	the value that wants to be set for the PDO parameter     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName parameterName, float value)
+bool SOLOMotorControllersImpl::SetPdoParameterValue(PdoParameterName parameterName, float value)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPdoParameterValue(parameterName, value, error);
+	return SOLOMotorControllersImpl::SetPdoParameterValue(parameterName, value, error);
 }
 
 /**
@@ -453,7 +431,7 @@ bool SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName parameter
   * @param[out]  error   pointer to an integer that specifies the result of the function       
   * @retval long
   */
-long SOLOMotorControllersKvaser::GetPdoParameterValueLong(PdoParameterName parameterName,
+long SOLOMotorControllersImpl::GetPdoParameterValueLong(PdoParameterName parameterName,
 		int &error)
 {
 	uint8_t informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -476,7 +454,7 @@ long SOLOMotorControllersKvaser::GetPdoParameterValueLong(PdoParameterName param
   * @param[out]  error   pointer to an integer that specifies the result of the function      
   * @retval float
   */
-float SOLOMotorControllersKvaser::GetPdoParameterValueFloat(PdoParameterName parameterName,
+float SOLOMotorControllersImpl::GetPdoParameterValueFloat(PdoParameterName parameterName,
 		int &error)
 {
 	uint8_t informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -500,7 +478,7 @@ float SOLOMotorControllersKvaser::GetPdoParameterValueFloat(PdoParameterName par
   * @param[out]  error   pointer to an integer that specify result of function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetDeviceAddress(unsigned char deviceAddress, int& error)
+bool SOLOMotorControllersImpl::SetDeviceAddress(unsigned char deviceAddress, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -519,10 +497,10 @@ bool SOLOMotorControllersKvaser::SetDeviceAddress(unsigned char deviceAddress, i
   * @param[in]  deviceAddress  address want to set for board      
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetDeviceAddress(unsigned char deviceAddress)
+bool SOLOMotorControllersImpl::SetDeviceAddress(unsigned char deviceAddress)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetDeviceAddress(deviceAddress, error);
+	return SOLOMotorControllersImpl::SetDeviceAddress(deviceAddress, error);
 }
 
 /**
@@ -533,7 +511,7 @@ bool SOLOMotorControllersKvaser::SetDeviceAddress(unsigned char deviceAddress)
   * @param[out]  error   pointer to an integer that specify result of function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetCommandMode(SOLOMotorControllers::CommandMode mode, int& error)
+bool SOLOMotorControllersImpl::SetCommandMode(SOLOMotorControllers::CommandMode mode, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -549,10 +527,10 @@ bool SOLOMotorControllersKvaser::SetCommandMode(SOLOMotorControllers::CommandMod
   * @param[in] mode  enum that specify mode of the operation of SOLO      
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetCommandMode(SOLOMotorControllers::CommandMode mode)
+bool SOLOMotorControllersImpl::SetCommandMode(SOLOMotorControllers::CommandMode mode)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetCommandMode(mode, error);
+	return SOLOMotorControllersImpl::SetCommandMode(mode, error);
 }
 
 /**
@@ -562,7 +540,7 @@ bool SOLOMotorControllersKvaser::SetCommandMode(SOLOMotorControllers::CommandMod
   * @param[out]  error   pointer to an integer that specify result of function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetCurrentLimit(float currentLimit, int& error)
+bool SOLOMotorControllersImpl::SetCurrentLimit(float currentLimit, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -581,10 +559,10 @@ bool SOLOMotorControllersKvaser::SetCurrentLimit(float currentLimit, int& error)
   * @param[in] currentLimit  a float value between 0 to 32      
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetCurrentLimit(float currentLimit)
+bool SOLOMotorControllersImpl::SetCurrentLimit(float currentLimit)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetCurrentLimit(currentLimit, error);
+	return SOLOMotorControllersImpl::SetCurrentLimit(currentLimit, error);
 }
 
 /**
@@ -594,7 +572,7 @@ bool SOLOMotorControllersKvaser::SetCurrentLimit(float currentLimit)
   * @param[out]  error   pointer to an integer that specify result of function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetTorqueReferenceIq(float torqueReferenceIq, int& error)
+bool SOLOMotorControllersImpl::SetTorqueReferenceIq(float torqueReferenceIq, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -613,10 +591,10 @@ bool SOLOMotorControllersKvaser::SetTorqueReferenceIq(float torqueReferenceIq, i
   * @param[in] torqueReferenceIq  a float value between 0 to 32      
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetTorqueReferenceIq(float torqueReferenceIq)
+bool SOLOMotorControllersImpl::SetTorqueReferenceIq(float torqueReferenceIq)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetTorqueReferenceIq(torqueReferenceIq, error);
+	return SOLOMotorControllersImpl::SetTorqueReferenceIq(torqueReferenceIq, error);
 }
 
 /**
@@ -626,7 +604,7 @@ bool SOLOMotorControllersKvaser::SetTorqueReferenceIq(float torqueReferenceIq)
   * @param[out]  error   pointer to an integer that specify result of function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetSpeedReference(long speedReference, int& error)
+bool SOLOMotorControllersImpl::SetSpeedReference(long speedReference, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -645,10 +623,10 @@ bool SOLOMotorControllersKvaser::SetSpeedReference(long speedReference, int& err
   * @param[in] speedReference  a long value between 0 to 30000      
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetSpeedReference(long speedReference)
+bool SOLOMotorControllersImpl::SetSpeedReference(long speedReference)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetSpeedReference(speedReference, error);
+	return SOLOMotorControllersImpl::SetSpeedReference(speedReference, error);
 }
 
 /**
@@ -659,7 +637,7 @@ bool SOLOMotorControllersKvaser::SetSpeedReference(long speedReference)
   * @param[out]  error   pointer to an integer that specify result of function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPowerReference(float powerReference, int& error)
+bool SOLOMotorControllersImpl::SetPowerReference(float powerReference, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -679,10 +657,10 @@ bool SOLOMotorControllersKvaser::SetPowerReference(float powerReference, int& er
   * @param[in] powerReference  a float value between 0 to 100      
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPowerReference(float powerReference)
+bool SOLOMotorControllersImpl::SetPowerReference(float powerReference)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPowerReference(powerReference, error);
+	return SOLOMotorControllersImpl::SetPowerReference(powerReference, error);
 }
 
 /**
@@ -693,7 +671,7 @@ bool SOLOMotorControllersKvaser::SetPowerReference(float powerReference)
   * @param[out]  error   pointer to an integer that specify result of function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::MotorParametersIdentification(SOLOMotorControllers::Action identification, int& error)
+bool SOLOMotorControllersImpl::MotorParametersIdentification(SOLOMotorControllers::Action identification, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -709,10 +687,10 @@ bool SOLOMotorControllersKvaser::MotorParametersIdentification(SOLOMotorControll
   * @param[in] powerReference  enum that specify Start or Stop of something in SOLO   
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::MotorParametersIdentification(SOLOMotorControllers::Action identification)
+bool SOLOMotorControllersImpl::MotorParametersIdentification(SOLOMotorControllers::Action identification)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::MotorParametersIdentification(identification, error);
+	return SOLOMotorControllersImpl::MotorParametersIdentification(identification, error);
 }
 
 /**
@@ -722,7 +700,7 @@ bool SOLOMotorControllersKvaser::MotorParametersIdentification(SOLOMotorControll
   * @param[out]  error   pointer to an integer that specify result of function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::EmergencyStop(int& error)
+bool SOLOMotorControllersImpl::EmergencyStop(int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -736,10 +714,10 @@ bool SOLOMotorControllersKvaser::EmergencyStop(int& error)
 				.The method refers to the Object Dictionary: 0x3008
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::EmergencyStop()
+bool SOLOMotorControllersImpl::EmergencyStop()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::EmergencyStop(error);
+	return SOLOMotorControllersImpl::EmergencyStop(error);
 }
 
 /**
@@ -749,7 +727,7 @@ bool SOLOMotorControllersKvaser::EmergencyStop()
   * @param[out]  error   pointer to an integer that specify result of function     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz, int& error)
+bool SOLOMotorControllersImpl::SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -768,10 +746,10 @@ bool SOLOMotorControllersKvaser::SetOutputPwmFrequencyKhz(long outputPwmFrequenc
   * @param[in] outputPwmFrequencyKhz  switching frequencies in kHz. a long value between 8 to 80      
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz)
+bool SOLOMotorControllersImpl::SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetOutputPwmFrequencyKhz(outputPwmFrequencyKhz, error);
+	return SOLOMotorControllersImpl::SetOutputPwmFrequencyKhz(outputPwmFrequencyKhz, error);
 }
 
 /**
@@ -782,7 +760,7 @@ bool SOLOMotorControllersKvaser::SetOutputPwmFrequencyKhz(long outputPwmFrequenc
   * @param[out]  error   pointer to an integer that specify result of function     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetSpeedControllerKp(float speedControllerKp, int& error)
+bool SOLOMotorControllersImpl::SetSpeedControllerKp(float speedControllerKp, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -802,10 +780,10 @@ bool SOLOMotorControllersKvaser::SetSpeedControllerKp(float speedControllerKp, i
   * @param[in] speedControllerKp  a float value between 0 to 300     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetSpeedControllerKp(float speedControllerKp)
+bool SOLOMotorControllersImpl::SetSpeedControllerKp(float speedControllerKp)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetSpeedControllerKp(speedControllerKp, error);
+	return SOLOMotorControllersImpl::SetSpeedControllerKp(speedControllerKp, error);
 }
 
 /**
@@ -816,7 +794,7 @@ bool SOLOMotorControllersKvaser::SetSpeedControllerKp(float speedControllerKp)
   * @param[out]  error   pointer to an integer that specify result of function     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetSpeedControllerKi(float speedControllerKi, int& error)
+bool SOLOMotorControllersImpl::SetSpeedControllerKi(float speedControllerKi, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -836,10 +814,10 @@ bool SOLOMotorControllersKvaser::SetSpeedControllerKi(float speedControllerKi, i
   * @param[in] speedControllerKi  a float value between 0 to 300     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetSpeedControllerKi(float speedControllerKi)
+bool SOLOMotorControllersImpl::SetSpeedControllerKi(float speedControllerKi)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetSpeedControllerKi(speedControllerKi, error);
+	return SOLOMotorControllersImpl::SetSpeedControllerKi(speedControllerKi, error);
 }
 
 /**
@@ -850,7 +828,7 @@ bool SOLOMotorControllersKvaser::SetSpeedControllerKi(float speedControllerKi)
   * @param[out]  error   pointer to an integer that specify result of function     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotorDirection(SOLOMotorControllers::Direction motorDirection, int& error)
+bool SOLOMotorControllersImpl::SetMotorDirection(SOLOMotorControllers::Direction motorDirection, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -866,10 +844,10 @@ bool SOLOMotorControllersKvaser::SetMotorDirection(SOLOMotorControllers::Directi
   * @param[in] motorDirection  enum that specify the direction of the rotation of the motor    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotorDirection(SOLOMotorControllers::Direction motorDirection)
+bool SOLOMotorControllersImpl::SetMotorDirection(SOLOMotorControllers::Direction motorDirection)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetMotorDirection(motorDirection, error);
+	return SOLOMotorControllersImpl::SetMotorDirection(motorDirection, error);
 }
 
 /**
@@ -880,7 +858,7 @@ bool SOLOMotorControllersKvaser::SetMotorDirection(SOLOMotorControllers::Directi
   * @param[out]  error   pointer to an integer that specify result of function     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotorResistance(float motorResistance, int& error)
+bool SOLOMotorControllersImpl::SetMotorResistance(float motorResistance, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -900,10 +878,10 @@ bool SOLOMotorControllersKvaser::SetMotorResistance(float motorResistance, int& 
   * @param[in] motorResistance  a float value between 0.001 to 50    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotorResistance(float motorResistance)
+bool SOLOMotorControllersImpl::SetMotorResistance(float motorResistance)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetMotorResistance(motorResistance, error);
+	return SOLOMotorControllersImpl::SetMotorResistance(motorResistance, error);
 }
 
 /**
@@ -914,7 +892,7 @@ bool SOLOMotorControllersKvaser::SetMotorResistance(float motorResistance)
   * @param[out]  error   pointer to an integer that specify result of function     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotorInductance(float motorInductance, int& error)
+bool SOLOMotorControllersImpl::SetMotorInductance(float motorInductance, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -934,10 +912,10 @@ bool SOLOMotorControllersKvaser::SetMotorInductance(float motorInductance, int& 
   * @param[in] motorInductance  a float value between 0.00005 to 0.2    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotorInductance(float motorInductance)
+bool SOLOMotorControllersImpl::SetMotorInductance(float motorInductance)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetMotorInductance(motorInductance, error);
+	return SOLOMotorControllersImpl::SetMotorInductance(motorInductance, error);
 }
 
 /**
@@ -947,7 +925,7 @@ bool SOLOMotorControllersKvaser::SetMotorInductance(float motorInductance)
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotorPolesCounts(long motorPolesCounts, int& error)
+bool SOLOMotorControllersImpl::SetMotorPolesCounts(long motorPolesCounts, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -967,10 +945,10 @@ bool SOLOMotorControllersKvaser::SetMotorPolesCounts(long motorPolesCounts, int&
   * @param[in] motorPolesCounts  a long value between 1 to 254    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotorPolesCounts(long motorPolesCounts)
+bool SOLOMotorControllersImpl::SetMotorPolesCounts(long motorPolesCounts)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetMotorPolesCounts(motorPolesCounts, error);
+	return SOLOMotorControllersImpl::SetMotorPolesCounts(motorPolesCounts, error);
 }
 
 /**
@@ -981,7 +959,7 @@ bool SOLOMotorControllersKvaser::SetMotorPolesCounts(long motorPolesCounts)
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetIncrementalEncoderLines(long incrementalEncoderLines, int& error)
+bool SOLOMotorControllersImpl::SetIncrementalEncoderLines(long incrementalEncoderLines, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1001,10 +979,10 @@ bool SOLOMotorControllersKvaser::SetIncrementalEncoderLines(long incrementalEnco
   * @param[in] incrementalEncoderLines  a long value between 1 to 200000    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetIncrementalEncoderLines(long incrementalEncoderLines)
+bool SOLOMotorControllersImpl::SetIncrementalEncoderLines(long incrementalEncoderLines)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetIncrementalEncoderLines(incrementalEncoderLines, error);
+	return SOLOMotorControllersImpl::SetIncrementalEncoderLines(incrementalEncoderLines, error);
 }
 
 /**
@@ -1015,7 +993,7 @@ bool SOLOMotorControllersKvaser::SetIncrementalEncoderLines(long incrementalEnco
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetSpeedLimit(long speedLimit, int& error)
+bool SOLOMotorControllersImpl::SetSpeedLimit(long speedLimit, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1035,10 +1013,10 @@ bool SOLOMotorControllersKvaser::SetSpeedLimit(long speedLimit, int& error)
   * @param[in] speedLimit  a long value between 0 to 30000    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetSpeedLimit(long speedLimit)
+bool SOLOMotorControllersImpl::SetSpeedLimit(long speedLimit)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetSpeedLimit(speedLimit, error);
+	return SOLOMotorControllersImpl::SetSpeedLimit(speedLimit, error);
 }
 
 /**
@@ -1048,7 +1026,7 @@ bool SOLOMotorControllersKvaser::SetSpeedLimit(long speedLimit)
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetFeedbackControlMode(SOLOMotorControllers::FeedbackControlMode mode, int& error)
+bool SOLOMotorControllersImpl::SetFeedbackControlMode(SOLOMotorControllers::FeedbackControlMode mode, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1063,10 +1041,10 @@ bool SOLOMotorControllersKvaser::SetFeedbackControlMode(SOLOMotorControllers::Fe
   * @param[in] mode  enum that specify the type of the feedback control SOLO  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetFeedbackControlMode(SOLOMotorControllers::FeedbackControlMode mode)
+bool SOLOMotorControllersImpl::SetFeedbackControlMode(SOLOMotorControllers::FeedbackControlMode mode)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetFeedbackControlMode(mode, error);
+	return SOLOMotorControllersImpl::SetFeedbackControlMode(mode, error);
 }
 
 /**
@@ -1075,7 +1053,7 @@ bool SOLOMotorControllersKvaser::SetFeedbackControlMode(SOLOMotorControllers::Fe
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::ResetFactory(int& error)
+bool SOLOMotorControllersImpl::ResetFactory(int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x01 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1088,17 +1066,17 @@ bool SOLOMotorControllersKvaser::ResetFactory(int& error)
 				.The method refers to the Object Dictionary: 0x3014
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::ResetFactory()
+bool SOLOMotorControllersImpl::ResetFactory()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::ResetFactory(error);
+	return SOLOMotorControllersImpl::ResetFactory(error);
 }
 
-bool SOLOMotorControllersKvaser::ResetDeviceAddress(int& error)
+bool SOLOMotorControllersImpl::ResetDeviceAddress(int& error)
 {
 	return false;
 }
-bool SOLOMotorControllersKvaser::ResetDeviceAddress()
+bool SOLOMotorControllersImpl::ResetDeviceAddress()
 {
 	return false;
 }
@@ -1110,7 +1088,7 @@ bool SOLOMotorControllersKvaser::ResetDeviceAddress()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotorType(SOLOMotorControllers::MotorType motorType, int& error)
+bool SOLOMotorControllersImpl::SetMotorType(SOLOMotorControllers::MotorType motorType, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1125,10 +1103,10 @@ bool SOLOMotorControllersKvaser::SetMotorType(SOLOMotorControllers::MotorType mo
   * @param[in] motorType  enum that specify the Motor type that is connected to SOLO in Digital Mode
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotorType(SOLOMotorControllers::MotorType motorType)
+bool SOLOMotorControllersImpl::SetMotorType(SOLOMotorControllers::MotorType motorType)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetMotorType(motorType, error);
+	return SOLOMotorControllersImpl::SetMotorType(motorType, error);
 }
 
 /**
@@ -1140,7 +1118,7 @@ bool SOLOMotorControllersKvaser::SetMotorType(SOLOMotorControllers::MotorType mo
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetControlMode(SOLOMotorControllers::ControlMode controlMode, int& error)
+bool SOLOMotorControllersImpl::SetControlMode(SOLOMotorControllers::ControlMode controlMode, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1157,10 +1135,10 @@ bool SOLOMotorControllersKvaser::SetControlMode(SOLOMotorControllers::ControlMod
   *                       Speed or Position only in Digital Mode
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetControlMode(SOLOMotorControllers::ControlMode controlMode)
+bool SOLOMotorControllersImpl::SetControlMode(SOLOMotorControllers::ControlMode controlMode)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetControlMode(controlMode, error);
+	return SOLOMotorControllersImpl::SetControlMode(controlMode, error);
 }
 
 /**
@@ -1170,7 +1148,7 @@ bool SOLOMotorControllersKvaser::SetControlMode(SOLOMotorControllers::ControlMod
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetCurrentControllerKp(float currentControllerKp, int& error)
+bool SOLOMotorControllersImpl::SetCurrentControllerKp(float currentControllerKp, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1189,10 +1167,10 @@ bool SOLOMotorControllersKvaser::SetCurrentControllerKp(float currentControllerK
   * @param[in] currentControllerKp  a float value between 0 to 16000   
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetCurrentControllerKp(float currentControllerKp)
+bool SOLOMotorControllersImpl::SetCurrentControllerKp(float currentControllerKp)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetCurrentControllerKp(currentControllerKp, error);
+	return SOLOMotorControllersImpl::SetCurrentControllerKp(currentControllerKp, error);
 }
 
 /**
@@ -1202,7 +1180,7 @@ bool SOLOMotorControllersKvaser::SetCurrentControllerKp(float currentControllerK
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetCurrentControllerKi(float currentControllerKi, int& error)
+bool SOLOMotorControllersImpl::SetCurrentControllerKi(float currentControllerKi, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1221,16 +1199,16 @@ bool SOLOMotorControllersKvaser::SetCurrentControllerKi(float currentControllerK
   * @param[in] motorInductance  a float value between 0 to 16000    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetCurrentControllerKi(float currentControllerKi)
+bool SOLOMotorControllersImpl::SetCurrentControllerKi(float currentControllerKi)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetCurrentControllerKi(currentControllerKi, error);
+	return SOLOMotorControllersImpl::SetCurrentControllerKi(currentControllerKi, error);
 }
-bool SOLOMotorControllersKvaser::SetMonitoringMode(bool mode, int& error)
+bool SOLOMotorControllersImpl::SetMonitoringMode(bool mode, int& error)
 {
 	return false;
 }
-bool SOLOMotorControllersKvaser::SetMonitoringMode(bool mode)
+bool SOLOMotorControllersImpl::SetMonitoringMode(bool mode)
 {
 	return false;
 }
@@ -1245,7 +1223,7 @@ bool SOLOMotorControllersKvaser::SetMonitoringMode(bool mode)
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference, int& error)
+bool SOLOMotorControllersImpl::SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1267,10 +1245,10 @@ bool SOLOMotorControllersKvaser::SetMagnetizingCurrentIdReference(float magnetiz
   * @param[in] magnetizingCurrentIdReference  a float value between 0 to 32    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference)
+bool SOLOMotorControllersImpl::SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetMagnetizingCurrentIdReference(magnetizingCurrentIdReference, error);
+	return SOLOMotorControllersImpl::SetMagnetizingCurrentIdReference(magnetizingCurrentIdReference, error);
 }
 
 /**
@@ -1282,7 +1260,7 @@ bool SOLOMotorControllersKvaser::SetMagnetizingCurrentIdReference(float magnetiz
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPositionReference(long positionReference, int& error)
+bool SOLOMotorControllersImpl::SetPositionReference(long positionReference, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1303,10 +1281,10 @@ bool SOLOMotorControllersKvaser::SetPositionReference(long positionReference, in
   * @param[in] positionReference  a long value between -2,147,483,647 to 2,147,483,647    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPositionReference(long positionReference)
+bool SOLOMotorControllersImpl::SetPositionReference(long positionReference)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPositionReference(positionReference, error);
+	return SOLOMotorControllersImpl::SetPositionReference(positionReference, error);
 }
 
 /**
@@ -1316,7 +1294,7 @@ bool SOLOMotorControllersKvaser::SetPositionReference(long positionReference)
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPositionControllerKp(float positionControllerKp, int& error)
+bool SOLOMotorControllersImpl::SetPositionControllerKp(float positionControllerKp, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1335,10 +1313,10 @@ bool SOLOMotorControllersKvaser::SetPositionControllerKp(float positionControlle
   * @param[in] positionControllerKp  a float value between 0 to 16000   
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPositionControllerKp(float positionControllerKp)
+bool SOLOMotorControllersImpl::SetPositionControllerKp(float positionControllerKp)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPositionControllerKp(positionControllerKp, error);
+	return SOLOMotorControllersImpl::SetPositionControllerKp(positionControllerKp, error);
 }
 
 /**
@@ -1348,7 +1326,7 @@ bool SOLOMotorControllersKvaser::SetPositionControllerKp(float positionControlle
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPositionControllerKi(float positionControllerKi, int& error)
+bool SOLOMotorControllersImpl::SetPositionControllerKi(float positionControllerKi, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1367,10 +1345,10 @@ bool SOLOMotorControllersKvaser::SetPositionControllerKi(float positionControlle
   * @param[in] positionControllerKi  a float value between 0 to 16000    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPositionControllerKi(float positionControllerKi)
+bool SOLOMotorControllersImpl::SetPositionControllerKi(float positionControllerKi)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPositionControllerKi(positionControllerKi, error);
+	return SOLOMotorControllersImpl::SetPositionControllerKi(positionControllerKi, error);
 }
 
 /**
@@ -1379,7 +1357,7 @@ bool SOLOMotorControllersKvaser::SetPositionControllerKi(float positionControlle
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::ResetPositionToZero(int& error)
+bool SOLOMotorControllersImpl::ResetPositionToZero(int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x01 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1392,10 +1370,10 @@ bool SOLOMotorControllersKvaser::ResetPositionToZero(int& error)
 				.The method refers to the Object Dictionary: 0x301F
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::ResetPositionToZero()
+bool SOLOMotorControllersImpl::ResetPositionToZero()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::ResetPositionToZero(error);
+	return SOLOMotorControllersImpl::ResetPositionToZero(error);
 }
 
 /**
@@ -1405,7 +1383,7 @@ bool SOLOMotorControllersKvaser::ResetPositionToZero()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::OverwriteErrorRegister(int& error)
+bool SOLOMotorControllersImpl::OverwriteErrorRegister(int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1419,10 +1397,10 @@ bool SOLOMotorControllersKvaser::OverwriteErrorRegister(int& error)
 				.The method refers to the Object Dictionary: 0x3020
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::OverwriteErrorRegister()
+bool SOLOMotorControllersImpl::OverwriteErrorRegister()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::OverwriteErrorRegister(error);
+	return SOLOMotorControllersImpl::OverwriteErrorRegister(error);
 }
 
 /**
@@ -1434,7 +1412,7 @@ bool SOLOMotorControllersKvaser::OverwriteErrorRegister()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetObserverGainBldcPmsm(float observerGain, int& error)
+bool SOLOMotorControllersImpl::SetObserverGainBldcPmsm(float observerGain, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1455,10 +1433,10 @@ bool SOLOMotorControllersKvaser::SetObserverGainBldcPmsm(float observerGain, int
   * @param[in] observerGain  a float value between 0.01 to 1000   
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetObserverGainBldcPmsm(float observerGain)
+bool SOLOMotorControllersImpl::SetObserverGainBldcPmsm(float observerGain)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetObserverGainBldcPmsm(observerGain, error);
+	return SOLOMotorControllersImpl::SetObserverGainBldcPmsm(observerGain, error);
 }
 
 /**
@@ -1470,7 +1448,7 @@ bool SOLOMotorControllersKvaser::SetObserverGainBldcPmsm(float observerGain)
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetObserverGainBldcPmsmUltrafast(float observerGain, int& error)
+bool SOLOMotorControllersImpl::SetObserverGainBldcPmsmUltrafast(float observerGain, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1491,10 +1469,10 @@ bool SOLOMotorControllersKvaser::SetObserverGainBldcPmsmUltrafast(float observer
   * @param[in] observerGain  a float value between 0.01 to 1000    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetObserverGainBldcPmsmUltrafast(float observerGain)
+bool SOLOMotorControllersImpl::SetObserverGainBldcPmsmUltrafast(float observerGain)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetObserverGainBldcPmsmUltrafast(observerGain, error);
+	return SOLOMotorControllersImpl::SetObserverGainBldcPmsmUltrafast(observerGain, error);
 }
 
 /**
@@ -1506,7 +1484,7 @@ bool SOLOMotorControllersKvaser::SetObserverGainBldcPmsmUltrafast(float observer
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetObserverGainDc(float observerGain, int& error)
+bool SOLOMotorControllersImpl::SetObserverGainDc(float observerGain, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1527,10 +1505,10 @@ bool SOLOMotorControllersKvaser::SetObserverGainDc(float observerGain, int& erro
   * @param[in] observerGain  a float value between 0.01 to 1000    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetObserverGainDc(float observerGain)
+bool SOLOMotorControllersImpl::SetObserverGainDc(float observerGain)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetObserverGainDc(observerGain, error);
+	return SOLOMotorControllersImpl::SetObserverGainDc(observerGain, error);
 }
 
 /**
@@ -1541,7 +1519,7 @@ bool SOLOMotorControllersKvaser::SetObserverGainDc(float observerGain)
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetFilterGainBldcPmsm(float filterGain, int& error)
+bool SOLOMotorControllersImpl::SetFilterGainBldcPmsm(float filterGain, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1561,10 +1539,10 @@ bool SOLOMotorControllersKvaser::SetFilterGainBldcPmsm(float filterGain, int& er
   * @param[in] filterGain  a float value between 0.01 to 16000   
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetFilterGainBldcPmsm(float filterGain)
+bool SOLOMotorControllersImpl::SetFilterGainBldcPmsm(float filterGain)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetFilterGainBldcPmsm(filterGain, error);
+	return SOLOMotorControllersImpl::SetFilterGainBldcPmsm(filterGain, error);
 }
 
 /**
@@ -1575,7 +1553,7 @@ bool SOLOMotorControllersKvaser::SetFilterGainBldcPmsm(float filterGain)
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetFilterGainBldcPmsmUltrafast(float filterGain, int& error)
+bool SOLOMotorControllersImpl::SetFilterGainBldcPmsmUltrafast(float filterGain, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1595,10 +1573,10 @@ bool SOLOMotorControllersKvaser::SetFilterGainBldcPmsmUltrafast(float filterGain
   * @param[in] filterGain  a float value between 0.01 to 16000    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetFilterGainBldcPmsmUltrafast(float filterGain)
+bool SOLOMotorControllersImpl::SetFilterGainBldcPmsmUltrafast(float filterGain)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetFilterGainBldcPmsmUltrafast(filterGain, error);
+	return SOLOMotorControllersImpl::SetFilterGainBldcPmsmUltrafast(filterGain, error);
 }
 
 /**
@@ -1608,7 +1586,7 @@ bool SOLOMotorControllersKvaser::SetFilterGainBldcPmsmUltrafast(float filterGain
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetUartBaudrate(SOLOMotorControllers::UartBaudrate baudrate, int& error)
+bool SOLOMotorControllersImpl::SetUartBaudrate(SOLOMotorControllers::UartBaudrate baudrate, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1623,10 +1601,10 @@ bool SOLOMotorControllersKvaser::SetUartBaudrate(SOLOMotorControllers::UartBaudr
   * @param[in] baudrate  enum that specify the baud-rate of the UART line    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetUartBaudrate(SOLOMotorControllers::UartBaudrate baudrate)
+bool SOLOMotorControllersImpl::SetUartBaudrate(SOLOMotorControllers::UartBaudrate baudrate)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetUartBaudrate(baudrate, error);
+	return SOLOMotorControllersImpl::SetUartBaudrate(baudrate, error);
 }
 
 /**
@@ -1636,7 +1614,7 @@ bool SOLOMotorControllersKvaser::SetUartBaudrate(SOLOMotorControllers::UartBaudr
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SensorCalibration(SOLOMotorControllers::PositionSensorCalibrationAction calibrationAction, int& error)
+bool SOLOMotorControllersImpl::SensorCalibration(SOLOMotorControllers::PositionSensorCalibrationAction calibrationAction, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1651,10 +1629,10 @@ bool SOLOMotorControllersKvaser::SensorCalibration(SOLOMotorControllers::Positio
   * @param[in] calibrationAction  enum that specify the process of sensor calibration     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SensorCalibration(SOLOMotorControllers::PositionSensorCalibrationAction calibrationAction)
+bool SOLOMotorControllersImpl::SensorCalibration(SOLOMotorControllers::PositionSensorCalibrationAction calibrationAction)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SensorCalibration(calibrationAction, error);
+	return SOLOMotorControllersImpl::SensorCalibration(calibrationAction, error);
 }
 
 /**
@@ -1665,7 +1643,7 @@ bool SOLOMotorControllersKvaser::SensorCalibration(SOLOMotorControllers::Positio
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetEncoderHallCcwOffset(float encoderHallOffset, int& error)
+bool SOLOMotorControllersImpl::SetEncoderHallCcwOffset(float encoderHallOffset, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1685,10 +1663,10 @@ bool SOLOMotorControllersKvaser::SetEncoderHallCcwOffset(float encoderHallOffset
   * @param[in] encoderHallOffset  a float value between 0.0 to 1.0    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetEncoderHallCcwOffset(float encoderHallOffset)
+bool SOLOMotorControllersImpl::SetEncoderHallCcwOffset(float encoderHallOffset)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetEncoderHallCcwOffset(encoderHallOffset, error);
+	return SOLOMotorControllersImpl::SetEncoderHallCcwOffset(encoderHallOffset, error);
 }
 
 /**
@@ -1699,7 +1677,7 @@ bool SOLOMotorControllersKvaser::SetEncoderHallCcwOffset(float encoderHallOffset
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetEncoderHallCwOffset(float encoderHallOffset, int& error)
+bool SOLOMotorControllersImpl::SetEncoderHallCwOffset(float encoderHallOffset, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1719,10 +1697,10 @@ bool SOLOMotorControllersKvaser::SetEncoderHallCwOffset(float encoderHallOffset,
   * @param[in] encoderHallOffset  a float value between 0.0 to 1.0     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetEncoderHallCwOffset(float encoderHallOffset)
+bool SOLOMotorControllersImpl::SetEncoderHallCwOffset(float encoderHallOffset)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetEncoderHallCwOffset(encoderHallOffset, error);
+	return SOLOMotorControllersImpl::SetEncoderHallCwOffset(encoderHallOffset, error);
 }
 
 /**
@@ -1733,7 +1711,7 @@ bool SOLOMotorControllersKvaser::SetEncoderHallCwOffset(float encoderHallOffset)
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetSpeedAccelerationValue(float speedAccelerationValue, int& error)
+bool SOLOMotorControllersImpl::SetSpeedAccelerationValue(float speedAccelerationValue, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1753,10 +1731,10 @@ bool SOLOMotorControllersKvaser::SetSpeedAccelerationValue(float speedAccelerati
   * @param[in] speedAccelerationValue  a float value between 0 to 1600   
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetSpeedAccelerationValue(float speedAccelerationValue)
+bool SOLOMotorControllersImpl::SetSpeedAccelerationValue(float speedAccelerationValue)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetSpeedAccelerationValue(speedAccelerationValue, error);
+	return SOLOMotorControllersImpl::SetSpeedAccelerationValue(speedAccelerationValue, error);
 }
 
 /**
@@ -1767,7 +1745,7 @@ bool SOLOMotorControllersKvaser::SetSpeedAccelerationValue(float speedAccelerati
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetSpeedDecelerationValue(float speedDecelerationValue, int& error)
+bool SOLOMotorControllersImpl::SetSpeedDecelerationValue(float speedDecelerationValue, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1787,10 +1765,10 @@ bool SOLOMotorControllersKvaser::SetSpeedDecelerationValue(float speedDecelerati
   * @param[in] speedDecelerationValue  a float value between 0 to 1600    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetSpeedDecelerationValue(float speedDecelerationValue)
+bool SOLOMotorControllersImpl::SetSpeedDecelerationValue(float speedDecelerationValue)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetSpeedDecelerationValue(speedDecelerationValue, error);
+	return SOLOMotorControllersImpl::SetSpeedDecelerationValue(speedDecelerationValue, error);
 }
 
 /**
@@ -1800,7 +1778,7 @@ bool SOLOMotorControllersKvaser::SetSpeedDecelerationValue(float speedDecelerati
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetCanbusBaudrate(CanbusBaudrate canbusBaudrate, int& error)
+bool SOLOMotorControllersImpl::SetCanbusBaudrate(CommunicationInterface::CanbusBaudrate canbusBaudrate, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1815,10 +1793,10 @@ bool SOLOMotorControllersKvaser::SetCanbusBaudrate(CanbusBaudrate canbusBaudrate
   * @param[in] canbusBaudrate  enum that specify the baud rate of CAN bus in CANOpen network    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetCanbusBaudrate(CanbusBaudrate canbusBaudrate)
+bool SOLOMotorControllersImpl::SetCanbusBaudrate(CommunicationInterface::CanbusBaudrate canbusBaudrate)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetCanbusBaudrate(canbusBaudrate, error);
+	return SOLOMotorControllersImpl::SetCanbusBaudrate(canbusBaudrate, error);
 }
 
 /**
@@ -1829,7 +1807,7 @@ bool SOLOMotorControllersKvaser::SetCanbusBaudrate(CanbusBaudrate canbusBaudrate
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient, int &error)
+bool SOLOMotorControllersImpl::SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient, int &error)
 {	
     uint8_t informatrionToSend[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1848,10 +1826,10 @@ bool SOLOMotorControllersKvaser::SetAnalogueSpeedResolutionDivisionCoefficient(l
   * @param[in] divisionCoefficient  a long value     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient)
+bool SOLOMotorControllersImpl::SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient)
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::SetAnalogueSpeedResolutionDivisionCoefficient(divisionCoefficient, error);
+    return SOLOMotorControllersImpl::SetAnalogueSpeedResolutionDivisionCoefficient(divisionCoefficient, error);
 }
 
 /**
@@ -1862,7 +1840,7 @@ bool SOLOMotorControllersKvaser::SetAnalogueSpeedResolutionDivisionCoefficient(l
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotionProfileMode( MotionProfileMode motionProfileMode, int &error)
+bool SOLOMotorControllersImpl::SetMotionProfileMode( MotionProfileMode motionProfileMode, int &error)
 {
     uint8_t informatrionToSend[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1877,10 +1855,10 @@ bool SOLOMotorControllersKvaser::SetMotionProfileMode( MotionProfileMode motionP
   * @param[in] motionProfileMode enum that specify the type of the Motion Profile    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotionProfileMode( MotionProfileMode motionProfileMode)
+bool SOLOMotorControllersImpl::SetMotionProfileMode( MotionProfileMode motionProfileMode)
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::SetMotionProfileMode(motionProfileMode, error);
+    return SOLOMotorControllersImpl::SetMotionProfileMode(motionProfileMode, error);
 }
 
 /**
@@ -1890,7 +1868,7 @@ bool SOLOMotorControllersKvaser::SetMotionProfileMode( MotionProfileMode motionP
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotionProfileVariable1(float MotionProfileVariable1, int &error)
+bool SOLOMotorControllersImpl::SetMotionProfileVariable1(float MotionProfileVariable1, int &error)
 {
     uint8_t informatrionToSend[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1908,10 +1886,10 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable1(float MotionProfileVa
   * @param[in] MotionProfileVariable1 a float value     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotionProfileVariable1(float MotionProfileVariable1)
+bool SOLOMotorControllersImpl::SetMotionProfileVariable1(float MotionProfileVariable1)
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::SetMotionProfileVariable1(MotionProfileVariable1, error);
+    return SOLOMotorControllersImpl::SetMotionProfileVariable1(MotionProfileVariable1, error);
 }
 
 /**
@@ -1921,7 +1899,7 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable1(float MotionProfileVa
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotionProfileVariable2(float MotionProfileVariable2, int &error)
+bool SOLOMotorControllersImpl::SetMotionProfileVariable2(float MotionProfileVariable2, int &error)
 {
     uint8_t informatrionToSend[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1939,10 +1917,10 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable2(float MotionProfileVa
   * @param[in] MotionProfileVariable2 a float value     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotionProfileVariable2(float MotionProfileVariable2)
+bool SOLOMotorControllersImpl::SetMotionProfileVariable2(float MotionProfileVariable2)
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::SetMotionProfileVariable2(MotionProfileVariable2, error);
+    return SOLOMotorControllersImpl::SetMotionProfileVariable2(MotionProfileVariable2, error);
 }
 
 /**
@@ -1952,7 +1930,7 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable2(float MotionProfileVa
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotionProfileVariable3(float MotionProfileVariable3, int &error)
+bool SOLOMotorControllersImpl::SetMotionProfileVariable3(float MotionProfileVariable3, int &error)
 {
     uint8_t informatrionToSend[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -1970,10 +1948,10 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable3(float MotionProfileVa
   * @param[in] MotionProfileVariable3 a float value     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotionProfileVariable3(float MotionProfileVariable3)
+bool SOLOMotorControllersImpl::SetMotionProfileVariable3(float MotionProfileVariable3)
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::SetMotionProfileVariable3(MotionProfileVariable3, error);
+    return SOLOMotorControllersImpl::SetMotionProfileVariable3(MotionProfileVariable3, error);
 }
 
 /**
@@ -1983,7 +1961,7 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable3(float MotionProfileVa
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotionProfileVariable4(float MotionProfileVariable4, int &error)
+bool SOLOMotorControllersImpl::SetMotionProfileVariable4(float MotionProfileVariable4, int &error)
 {
     uint8_t informatrionToSend[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -2001,10 +1979,10 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable4(float MotionProfileVa
   * @param[in] MotionProfileVariable4 a float value     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotionProfileVariable4(float MotionProfileVariable4)
+bool SOLOMotorControllersImpl::SetMotionProfileVariable4(float MotionProfileVariable4)
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::SetMotionProfileVariable4(MotionProfileVariable4, error);
+    return SOLOMotorControllersImpl::SetMotionProfileVariable4(MotionProfileVariable4, error);
 }
 
 /**
@@ -2014,7 +1992,7 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable4(float MotionProfileVa
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotionProfileVariable5(float MotionProfileVariable5, int &error)
+bool SOLOMotorControllersImpl::SetMotionProfileVariable5(float MotionProfileVariable5, int &error)
 {
     uint8_t informatrionToSend[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -2032,10 +2010,10 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable5(float MotionProfileVa
   * @param[in] MotionProfileVariable5 a float value     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetMotionProfileVariable5(float MotionProfileVariable5)
+bool SOLOMotorControllersImpl::SetMotionProfileVariable5(float MotionProfileVariable5)
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::SetMotionProfileVariable5(MotionProfileVariable5, error);
+    return SOLOMotorControllersImpl::SetMotionProfileVariable5(MotionProfileVariable5, error);
 }
 
 /**
@@ -2047,7 +2025,7 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable5(float MotionProfileVa
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoPositionReference(long positionReference, int& error)
+bool SOLOMotorControllersImpl::SetPdoPositionReference(long positionReference, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -2055,7 +2033,7 @@ bool SOLOMotorControllersKvaser::SetPdoPositionReference(long positionReference,
 	{
 		return false;
 	}
-	return SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName::positionReference,positionReference, error);
+	return SOLOMotorControllersImpl::SetPdoParameterValue(PdoParameterName::positionReference,positionReference, error);
 }
 
 /**
@@ -2066,10 +2044,10 @@ bool SOLOMotorControllersKvaser::SetPdoPositionReference(long positionReference,
   * @param[in] positionReference  a long value between -2,147,483,647 to 2,147,483,647    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoPositionReference(long positionReference)
+bool SOLOMotorControllersImpl::SetPdoPositionReference(long positionReference)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPdoPositionReference(positionReference, error);
+	return SOLOMotorControllersImpl::SetPdoPositionReference(positionReference, error);
 }
 
 /**
@@ -2079,7 +2057,7 @@ bool SOLOMotorControllersKvaser::SetPdoPositionReference(long positionReference)
   * @param[out]  error   pointer that specify result of function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoSpeedReference(long speedReference, int& error)
+bool SOLOMotorControllersImpl::SetPdoSpeedReference(long speedReference, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -2088,7 +2066,7 @@ bool SOLOMotorControllersKvaser::SetPdoSpeedReference(long speedReference, int& 
 		return false;
 	}
 	
-	return SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName::speedReference,speedReference, error);
+	return SOLOMotorControllersImpl::SetPdoParameterValue(PdoParameterName::speedReference,speedReference, error);
 }
 
 /**
@@ -2097,10 +2075,10 @@ bool SOLOMotorControllersKvaser::SetPdoSpeedReference(long speedReference, int& 
   * @param[in] speedReference  a long value defining the speed (only positive)     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoSpeedReference(long speedReference)
+bool SOLOMotorControllersImpl::SetPdoSpeedReference(long speedReference)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPdoSpeedReference(speedReference, error);
+	return SOLOMotorControllersImpl::SetPdoSpeedReference(speedReference, error);
 }
 
 /**
@@ -2110,7 +2088,7 @@ bool SOLOMotorControllersKvaser::SetPdoSpeedReference(long speedReference)
   * @param[out]  error   pointer to an integer that specify result of function       
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoTorqueReferenceIq(float torqueReferenceIq, int& error)
+bool SOLOMotorControllersImpl::SetPdoTorqueReferenceIq(float torqueReferenceIq, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -2118,7 +2096,7 @@ bool SOLOMotorControllersKvaser::SetPdoTorqueReferenceIq(float torqueReferenceIq
 	{
 		return false;
 	}
-	return SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName::torqueReferenceIq,torqueReferenceIq, error);
+	return SOLOMotorControllersImpl::SetPdoParameterValue(PdoParameterName::torqueReferenceIq,torqueReferenceIq, error);
 }
 
 /**
@@ -2127,10 +2105,10 @@ bool SOLOMotorControllersKvaser::SetPdoTorqueReferenceIq(float torqueReferenceIq
   * @param[in] torqueReferenceIq  a float value between 0 to 32      
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoTorqueReferenceIq(float torqueReferenceIq)
+bool SOLOMotorControllersImpl::SetPdoTorqueReferenceIq(float torqueReferenceIq)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPdoTorqueReferenceIq(torqueReferenceIq, error);
+	return SOLOMotorControllersImpl::SetPdoTorqueReferenceIq(torqueReferenceIq, error);
 }
 
 /**
@@ -2143,7 +2121,7 @@ bool SOLOMotorControllersKvaser::SetPdoTorqueReferenceIq(float torqueReferenceIq
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoMagnetizingCurrentIdReference(float magnetizingCurrentIdReference, int& error)
+bool SOLOMotorControllersImpl::SetPdoMagnetizingCurrentIdReference(float magnetizingCurrentIdReference, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
@@ -2151,7 +2129,7 @@ bool SOLOMotorControllersKvaser::SetPdoMagnetizingCurrentIdReference(float magne
 	{
 		return false;
 	}
-	return SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName::magnetizingCurrentIdReference,magnetizingCurrentIdReference, error);
+	return SOLOMotorControllersImpl::SetPdoParameterValue(PdoParameterName::magnetizingCurrentIdReference,magnetizingCurrentIdReference, error);
 }
 
 /**
@@ -2163,10 +2141,10 @@ bool SOLOMotorControllersKvaser::SetPdoMagnetizingCurrentIdReference(float magne
   * @param[in] magnetizingCurrentIdReference  a float value between 0 to 32    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoMagnetizingCurrentIdReference(float magnetizingCurrentIdReference)
+bool SOLOMotorControllersImpl::SetPdoMagnetizingCurrentIdReference(float magnetizingCurrentIdReference)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPdoMagnetizingCurrentIdReference(magnetizingCurrentIdReference, error);
+	return SOLOMotorControllersImpl::SetPdoMagnetizingCurrentIdReference(magnetizingCurrentIdReference, error);
 }
 
 /**
@@ -2178,11 +2156,11 @@ bool SOLOMotorControllersKvaser::SetPdoMagnetizingCurrentIdReference(float magne
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoControlMode(SOLOMotorControllers::ControlMode controlMode, int& error)
+bool SOLOMotorControllersImpl::SetPdoControlMode(SOLOMotorControllers::ControlMode controlMode, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName::controlMode,(long)controlMode, error);
+	return SOLOMotorControllersImpl::SetPdoParameterValue(PdoParameterName::controlMode,(long)controlMode, error);
 }
 
 /**
@@ -2193,10 +2171,10 @@ bool SOLOMotorControllersKvaser::SetPdoControlMode(SOLOMotorControllers::Control
   *                       Speed or Position only in Digital Mode
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoControlMode(SOLOMotorControllers::ControlMode controlMode)
+bool SOLOMotorControllersImpl::SetPdoControlMode(SOLOMotorControllers::ControlMode controlMode)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPdoControlMode(controlMode, error);
+	return SOLOMotorControllersImpl::SetPdoControlMode(controlMode, error);
 }
 
 /**
@@ -2207,11 +2185,11 @@ bool SOLOMotorControllersKvaser::SetPdoControlMode(SOLOMotorControllers::Control
   * @param[out]  error   pointer to an integer that specify result of function     
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoMotorDirection(SOLOMotorControllers::Direction motorDirection, int& error)
+bool SOLOMotorControllersImpl::SetPdoMotorDirection(SOLOMotorControllers::Direction motorDirection, int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName::motorDirection,(long)motorDirection, error);
+	return SOLOMotorControllersImpl::SetPdoParameterValue(PdoParameterName::motorDirection,(long)motorDirection, error);
 }
 
 /**
@@ -2221,14 +2199,14 @@ bool SOLOMotorControllersKvaser::SetPdoMotorDirection(SOLOMotorControllers::Dire
   * @param[in] motorDirection  enum that specify the direction of the rotation of the motor    
   * @retval bool 0 fail / 1 for success
   */
-bool SOLOMotorControllersKvaser::SetPdoMotorDirection(SOLOMotorControllers::Direction motorDirection)
+bool SOLOMotorControllersImpl::SetPdoMotorDirection(SOLOMotorControllers::Direction motorDirection)
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::SetPdoMotorDirection(motorDirection, error);
+	return SOLOMotorControllersImpl::SetPdoMotorDirection(motorDirection, error);
 }
 
 ////---------------------Read---------------------
-long SOLOMotorControllersKvaser::GetReadErrorRegister(int& error)
+long SOLOMotorControllersImpl::GetReadErrorRegister(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2238,12 +2216,12 @@ long SOLOMotorControllersKvaser::GetReadErrorRegister(int& error)
 	}
 	return -1;
 }
-long SOLOMotorControllersKvaser::GetReadErrorRegister()
+long SOLOMotorControllersImpl::GetReadErrorRegister()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetReadErrorRegister(error);
+	return  SOLOMotorControllersImpl::GetReadErrorRegister(error);
 }
-long SOLOMotorControllersKvaser::GetGuardTime(int& error)
+long SOLOMotorControllersImpl::GetGuardTime(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2254,12 +2232,12 @@ long SOLOMotorControllersKvaser::GetGuardTime(int& error)
 	}
 	return -1;
 }
-long SOLOMotorControllersKvaser::GetGuardTime()
+long SOLOMotorControllersImpl::GetGuardTime()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetGuardTime(error);
+	return  SOLOMotorControllersImpl::GetGuardTime(error);
 }
-long SOLOMotorControllersKvaser::GetLifeTimeFactor(int& error)
+long SOLOMotorControllersImpl::GetLifeTimeFactor(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2270,12 +2248,12 @@ long SOLOMotorControllersKvaser::GetLifeTimeFactor(int& error)
 	}
 	return -1;
 }
-long SOLOMotorControllersKvaser::GetLifeTimeFactor()
+long SOLOMotorControllersImpl::GetLifeTimeFactor()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetLifeTimeFactor(error);
+	return  SOLOMotorControllersImpl::GetLifeTimeFactor(error);
 }
-long SOLOMotorControllersKvaser::GetProducerHeartbeatTime(int& error)
+long SOLOMotorControllersImpl::GetProducerHeartbeatTime(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2286,10 +2264,10 @@ long SOLOMotorControllersKvaser::GetProducerHeartbeatTime(int& error)
 	}
 	return -1;
 }
-long SOLOMotorControllersKvaser::GetProducerHeartbeatTime()
+long SOLOMotorControllersImpl::GetProducerHeartbeatTime()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetProducerHeartbeatTime(error);
+	return  SOLOMotorControllersImpl::GetProducerHeartbeatTime(error);
 }
 
 /**
@@ -2298,7 +2276,7 @@ long SOLOMotorControllersKvaser::GetProducerHeartbeatTime()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long device address connected on the line
   */
-long SOLOMotorControllersKvaser::GetDeviceAddress(int& error)
+long SOLOMotorControllersImpl::GetDeviceAddress(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2315,10 +2293,10 @@ long SOLOMotorControllersKvaser::GetDeviceAddress(int& error)
 				.The method refers to the Object Dictionary: 0x3001
   * @retval long device address connected on the line
   */
-long SOLOMotorControllersKvaser::GetDeviceAddress()
+long SOLOMotorControllersImpl::GetDeviceAddress()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetDeviceAddress(error);
+	return  SOLOMotorControllersImpl::GetDeviceAddress(error);
 }
 
 /**
@@ -2328,7 +2306,7 @@ long SOLOMotorControllersKvaser::GetDeviceAddress()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float phase-A voltage of the motor between -60 to 60
   */
-float SOLOMotorControllersKvaser::GetPhaseAVoltage(int& error)
+float SOLOMotorControllersImpl::GetPhaseAVoltage(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2346,10 +2324,10 @@ float SOLOMotorControllersKvaser::GetPhaseAVoltage(int& error)
 				.The method refers to the Object Dictionary: 0x302D
   * @retval float phase-A voltage of the motor between -60 to 60
   */
-float SOLOMotorControllersKvaser::GetPhaseAVoltage()
+float SOLOMotorControllersImpl::GetPhaseAVoltage()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPhaseAVoltage(error);
+	return  SOLOMotorControllersImpl::GetPhaseAVoltage(error);
 }
 
 /**
@@ -2359,7 +2337,7 @@ float SOLOMotorControllersKvaser::GetPhaseAVoltage()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float 0 phase-A voltage of the motor between -60 to 60
   */
-float SOLOMotorControllersKvaser::GetPhaseBVoltage(int& error)
+float SOLOMotorControllersImpl::GetPhaseBVoltage(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2377,10 +2355,10 @@ float SOLOMotorControllersKvaser::GetPhaseBVoltage(int& error)
 				.The method refers to the Object Dictionary: 0x302E
   * @retval float 0 phase-A voltage of the motor between -60 to 60
   */
-float SOLOMotorControllersKvaser::GetPhaseBVoltage()
+float SOLOMotorControllersImpl::GetPhaseBVoltage()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPhaseBVoltage(error);
+	return  SOLOMotorControllersImpl::GetPhaseBVoltage(error);
 }
 
 /**
@@ -2390,7 +2368,7 @@ float SOLOMotorControllersKvaser::GetPhaseBVoltage()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval phase-A current of the motor etween -32 to 32 Amps
   */
-float SOLOMotorControllersKvaser::GetPhaseACurrent(int& error)
+float SOLOMotorControllersImpl::GetPhaseACurrent(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2408,10 +2386,10 @@ float SOLOMotorControllersKvaser::GetPhaseACurrent(int& error)
 				.The method refers to the Object Dictionary: 0x302F
   * @retval phase-A current of the motor etween -32 to 32 Amps
   */
-float SOLOMotorControllersKvaser::GetPhaseACurrent()
+float SOLOMotorControllersImpl::GetPhaseACurrent()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPhaseACurrent(error);
+	return  SOLOMotorControllersImpl::GetPhaseACurrent(error);
 }
 
 /**
@@ -2421,7 +2399,7 @@ float SOLOMotorControllersKvaser::GetPhaseACurrent()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float phase-B current of the motor etween -32 to 32 Amps
   */
-float SOLOMotorControllersKvaser::GetPhaseBCurrent(int& error)
+float SOLOMotorControllersImpl::GetPhaseBCurrent(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2439,10 +2417,10 @@ float SOLOMotorControllersKvaser::GetPhaseBCurrent(int& error)
 				.The method refers to the Object Dictionary: 0x3030
   * @retval float phase-B current of the motor etween -32 to 32 Amps
   */
-float SOLOMotorControllersKvaser::GetPhaseBCurrent()
+float SOLOMotorControllersImpl::GetPhaseBCurrent()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPhaseBCurrent(error);
+	return  SOLOMotorControllersImpl::GetPhaseBCurrent(error);
 }
 
 /**
@@ -2451,7 +2429,7 @@ float SOLOMotorControllersKvaser::GetPhaseBCurrent()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float  BUS voltage between 0 to 60
   */
-float SOLOMotorControllersKvaser::GetBusVoltage(int& error)
+float SOLOMotorControllersImpl::GetBusVoltage(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2469,10 +2447,10 @@ float SOLOMotorControllersKvaser::GetBusVoltage(int& error)
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float  BUS voltage between 0 to 60
   */
-float SOLOMotorControllersKvaser::GetBusVoltage()
+float SOLOMotorControllersImpl::GetBusVoltage()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetBusVoltage(error);
+	return  SOLOMotorControllersImpl::GetBusVoltage(error);
 }
 
 /**
@@ -2482,7 +2460,7 @@ float SOLOMotorControllersKvaser::GetBusVoltage()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between -32 to 32
   */
-float SOLOMotorControllersKvaser::GetDcMotorCurrentIm(int& error)
+float SOLOMotorControllersImpl::GetDcMotorCurrentIm(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2500,10 +2478,10 @@ float SOLOMotorControllersKvaser::GetDcMotorCurrentIm(int& error)
 				.The method refers to the Object Dictionary: 0x3032
   * @retval float between -32 to 32
   */
-float SOLOMotorControllersKvaser::GetDcMotorCurrentIm()
+float SOLOMotorControllersImpl::GetDcMotorCurrentIm()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetDcMotorCurrentIm(error);
+	return  SOLOMotorControllersImpl::GetDcMotorCurrentIm(error);
 }
 
 /**
@@ -2513,7 +2491,7 @@ float SOLOMotorControllersKvaser::GetDcMotorCurrentIm()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between -60 to 60
   */
-float SOLOMotorControllersKvaser::GetDcMotorVoltageVm(int& error)
+float SOLOMotorControllersImpl::GetDcMotorVoltageVm(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2531,10 +2509,10 @@ float SOLOMotorControllersKvaser::GetDcMotorVoltageVm(int& error)
 				.The method refers to the Object Dictionary: 0x3033
   * @retval float between -60 to 60
   */
-float SOLOMotorControllersKvaser::GetDcMotorVoltageVm()
+float SOLOMotorControllersImpl::GetDcMotorVoltageVm()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetDcMotorVoltageVm(error);
+	return  SOLOMotorControllersImpl::GetDcMotorVoltageVm(error);
 }
 
 /**
@@ -2544,7 +2522,7 @@ float SOLOMotorControllersKvaser::GetDcMotorVoltageVm()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 16000
   */
-float SOLOMotorControllersKvaser::GetSpeedControllerKp(int& error)
+float SOLOMotorControllersImpl::GetSpeedControllerKp(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2562,10 +2540,10 @@ float SOLOMotorControllersKvaser::GetSpeedControllerKp(int& error)
 				.The method refers to the Object Dictionary: 0x300A
   * @retval float between 0 to 16000
   */
-float SOLOMotorControllersKvaser::GetSpeedControllerKp()
+float SOLOMotorControllersImpl::GetSpeedControllerKp()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetSpeedControllerKp(error);
+	return  SOLOMotorControllersImpl::GetSpeedControllerKp(error);
 }
 
 /**
@@ -2575,7 +2553,7 @@ float SOLOMotorControllersKvaser::GetSpeedControllerKp()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 16000
   */
-float SOLOMotorControllersKvaser::GetSpeedControllerKi(int& error)
+float SOLOMotorControllersImpl::GetSpeedControllerKi(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2593,10 +2571,10 @@ float SOLOMotorControllersKvaser::GetSpeedControllerKi(int& error)
 				.The method refers to the Object Dictionary: 0x300B
   * @retval float between 0 to 16000
   */
-float SOLOMotorControllersKvaser::GetSpeedControllerKi()
+float SOLOMotorControllersImpl::GetSpeedControllerKi()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetSpeedControllerKi(error);
+	return  SOLOMotorControllersImpl::GetSpeedControllerKi(error);
 }
 
 /**
@@ -2605,7 +2583,7 @@ float SOLOMotorControllersKvaser::GetSpeedControllerKi()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between 8000 to 80000 Hz
   */
-long SOLOMotorControllersKvaser::GetOutputPwmFrequencyKhz(int& error)
+long SOLOMotorControllersImpl::GetOutputPwmFrequencyKhz(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2622,10 +2600,10 @@ long SOLOMotorControllersKvaser::GetOutputPwmFrequencyKhz(int& error)
 				.The method refers to the Object Dictionary: 0x3009
   * @retval long between 8000 to 80000 Hz
   */
-long SOLOMotorControllersKvaser::GetOutputPwmFrequencyKhz()
+long SOLOMotorControllersImpl::GetOutputPwmFrequencyKhz()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetOutputPwmFrequencyKhz(error);
+	return  SOLOMotorControllersImpl::GetOutputPwmFrequencyKhz(error);
 }
 
 /**
@@ -2635,7 +2613,7 @@ long SOLOMotorControllersKvaser::GetOutputPwmFrequencyKhz()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 32
   */
-float SOLOMotorControllersKvaser::GetCurrentLimit(int& error)
+float SOLOMotorControllersImpl::GetCurrentLimit(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2653,10 +2631,10 @@ float SOLOMotorControllersKvaser::GetCurrentLimit(int& error)
 				.The method refers to the Object Dictionary: 0x3003
   * @retval float between 0 to 32
   */
-float SOLOMotorControllersKvaser::GetCurrentLimit()
+float SOLOMotorControllersImpl::GetCurrentLimit()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetCurrentLimit(error);
+	return  SOLOMotorControllersImpl::GetCurrentLimit(error);
 }
 
 /**
@@ -2666,7 +2644,7 @@ float SOLOMotorControllersKvaser::GetCurrentLimit()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between -64 to 64
   */
-float SOLOMotorControllersKvaser::GetQuadratureCurrentIqFeedback(int& error)
+float SOLOMotorControllersImpl::GetQuadratureCurrentIqFeedback(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2684,10 +2662,10 @@ float SOLOMotorControllersKvaser::GetQuadratureCurrentIqFeedback(int& error)
 				.The method refers to the Object Dictionary: 0x3034
   * @retval float between -64 to 64
   */
-float SOLOMotorControllersKvaser::GetQuadratureCurrentIqFeedback()
+float SOLOMotorControllersImpl::GetQuadratureCurrentIqFeedback()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetQuadratureCurrentIqFeedback(error);
+	return  SOLOMotorControllersImpl::GetQuadratureCurrentIqFeedback(error);
 }
 
 /**
@@ -2697,7 +2675,7 @@ float SOLOMotorControllersKvaser::GetQuadratureCurrentIqFeedback()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between -64 to 64
   */
-float SOLOMotorControllersKvaser::GetMagnetizingCurrentIdFeedback(int& error)
+float SOLOMotorControllersImpl::GetMagnetizingCurrentIdFeedback(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2715,10 +2693,10 @@ float SOLOMotorControllersKvaser::GetMagnetizingCurrentIdFeedback(int& error)
 				.The method refers to the Object Dictionary: 0x3035
   * @retval float between -64 to 64
   */
-float SOLOMotorControllersKvaser::GetMagnetizingCurrentIdFeedback()
+float SOLOMotorControllersImpl::GetMagnetizingCurrentIdFeedback()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetMagnetizingCurrentIdFeedback(error);
+	return  SOLOMotorControllersImpl::GetMagnetizingCurrentIdFeedback(error);
 }
 
 /**
@@ -2727,7 +2705,7 @@ float SOLOMotorControllersKvaser::GetMagnetizingCurrentIdFeedback()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between 1 to 254
   */
-long SOLOMotorControllersKvaser::GetMotorPolesCounts(int& error)
+long SOLOMotorControllersImpl::GetMotorPolesCounts(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2744,10 +2722,10 @@ long SOLOMotorControllersKvaser::GetMotorPolesCounts(int& error)
 				.The method refers to the Object Dictionary: 0x300F
   * @retval long between 1 to 254
   */
-long SOLOMotorControllersKvaser::GetMotorPolesCounts()
+long SOLOMotorControllersImpl::GetMotorPolesCounts()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetMotorPolesCounts(error);
+	return  SOLOMotorControllersImpl::GetMotorPolesCounts(error);
 }
 
 /**
@@ -2756,7 +2734,7 @@ long SOLOMotorControllersKvaser::GetMotorPolesCounts()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between 1 to 200000
   */
-long SOLOMotorControllersKvaser::GetIncrementalEncoderLines(int& error)
+long SOLOMotorControllersImpl::GetIncrementalEncoderLines(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2773,10 +2751,10 @@ long SOLOMotorControllersKvaser::GetIncrementalEncoderLines(int& error)
 				.The method refers to the Object Dictionary: 0x3010
   * @retval long between 1 to 200000
   */
-long SOLOMotorControllersKvaser::GetIncrementalEncoderLines()
+long SOLOMotorControllersImpl::GetIncrementalEncoderLines()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetIncrementalEncoderLines(error);
+	return  SOLOMotorControllersImpl::GetIncrementalEncoderLines(error);
 }
 
 /**
@@ -2786,7 +2764,7 @@ long SOLOMotorControllersKvaser::GetIncrementalEncoderLines()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 16000
   */
-float SOLOMotorControllersKvaser::GetCurrentControllerKp(int& error)
+float SOLOMotorControllersImpl::GetCurrentControllerKp(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2804,10 +2782,10 @@ float SOLOMotorControllersKvaser::GetCurrentControllerKp(int& error)
 				.The method refers to the Object Dictionary: 0x3017
   * @retval float between 0 to 16000
   */
-float SOLOMotorControllersKvaser::GetCurrentControllerKp()
+float SOLOMotorControllersImpl::GetCurrentControllerKp()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetCurrentControllerKp(error);
+	return  SOLOMotorControllersImpl::GetCurrentControllerKp(error);
 }
 
 /**
@@ -2817,7 +2795,7 @@ float SOLOMotorControllersKvaser::GetCurrentControllerKp()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 16000
   */
-float SOLOMotorControllersKvaser::GetCurrentControllerKi(int& error)
+float SOLOMotorControllersImpl::GetCurrentControllerKi(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2836,10 +2814,10 @@ float SOLOMotorControllersKvaser::GetCurrentControllerKi(int& error)
 				.The method refers to the Object Dictionary: 0x3018
   * @retval float between 0 to 16000
   */
-float SOLOMotorControllersKvaser::GetCurrentControllerKi()
+float SOLOMotorControllersImpl::GetCurrentControllerKi()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetCurrentControllerKi(error);
+	return  SOLOMotorControllersImpl::GetCurrentControllerKi(error);
 }
 
 /**
@@ -2848,7 +2826,7 @@ float SOLOMotorControllersKvaser::GetCurrentControllerKi()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between -30 to 150 Celsius
   */
-float SOLOMotorControllersKvaser::GetBoardTemperature(int& error)
+float SOLOMotorControllersImpl::GetBoardTemperature(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2865,10 +2843,10 @@ float SOLOMotorControllersKvaser::GetBoardTemperature(int& error)
 				.The method refers to the Object Dictionary: 0x3039
   * @retval float between -30 to 150 Celsius
   */
-float SOLOMotorControllersKvaser::GetBoardTemperature()
+float SOLOMotorControllersImpl::GetBoardTemperature()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetBoardTemperature(error);
+	return  SOLOMotorControllersImpl::GetBoardTemperature(error);
 }
 
 /**
@@ -2878,7 +2856,7 @@ float SOLOMotorControllersKvaser::GetBoardTemperature()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 100
   */
-float SOLOMotorControllersKvaser::GetMotorResistance(int& error)
+float SOLOMotorControllersImpl::GetMotorResistance(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2896,10 +2874,10 @@ float SOLOMotorControllersKvaser::GetMotorResistance(int& error)
 				.The method refers to the Object Dictionary: 0x300D
   * @retval float between 0 to 100
   */
-float SOLOMotorControllersKvaser::GetMotorResistance()
+float SOLOMotorControllersImpl::GetMotorResistance()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetMotorResistance(error);
+	return  SOLOMotorControllersImpl::GetMotorResistance(error);
 }
 
 /**
@@ -2909,7 +2887,7 @@ float SOLOMotorControllersKvaser::GetMotorResistance()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 0.2
   */
-float SOLOMotorControllersKvaser::GetMotorInductance(int& error)
+float SOLOMotorControllersImpl::GetMotorInductance(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2927,10 +2905,10 @@ float SOLOMotorControllersKvaser::GetMotorInductance(int& error)
 				.The method refers to the Object Dictionary: 0x300E
   * @retval float between 0 to 0.2
   */
-float SOLOMotorControllersKvaser::GetMotorInductance()
+float SOLOMotorControllersImpl::GetMotorInductance()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetMotorInductance(error);
+	return  SOLOMotorControllersImpl::GetMotorInductance(error);
 }
 
 /**
@@ -2940,7 +2918,7 @@ float SOLOMotorControllersKvaser::GetMotorInductance()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between -30000 to 30000 RPM
   */
-long SOLOMotorControllersKvaser::GetSpeedFeedback(int& error)
+long SOLOMotorControllersImpl::GetSpeedFeedback(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2958,10 +2936,10 @@ long SOLOMotorControllersKvaser::GetSpeedFeedback(int& error)
 				.The method refers to the Object Dictionary: 0x3036
   * @retval long between -30000 to 30000 RPM
   */
-long SOLOMotorControllersKvaser::GetSpeedFeedback()
+long SOLOMotorControllersImpl::GetSpeedFeedback()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetSpeedFeedback(error);
+	return  SOLOMotorControllersImpl::GetSpeedFeedback(error);
 }
 
 /**
@@ -2970,7 +2948,7 @@ long SOLOMotorControllersKvaser::GetSpeedFeedback()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between 0 to 3
   */
-long SOLOMotorControllersKvaser::GetMotorType(int& error)
+long SOLOMotorControllersImpl::GetMotorType(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -2987,10 +2965,10 @@ long SOLOMotorControllersKvaser::GetMotorType(int& error)
 				.The method refers to the Object Dictionary: 0x3015
   * @retval long between 0 to 3
   */
-long SOLOMotorControllersKvaser::GetMotorType()
+long SOLOMotorControllersImpl::GetMotorType()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetMotorType(error);
+	return  SOLOMotorControllersImpl::GetMotorType(error);
 }
 
 /**
@@ -3000,7 +2978,7 @@ long SOLOMotorControllersKvaser::GetMotorType()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between 0 to 2
   */
-long SOLOMotorControllersKvaser::GetFeedbackControlMode(int& error)
+long SOLOMotorControllersImpl::GetFeedbackControlMode(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3018,10 +2996,10 @@ long SOLOMotorControllersKvaser::GetFeedbackControlMode(int& error)
 				.The method refers to the Object Dictionary: 0x3013
   * @retval long between 0 to 2
   */
-long SOLOMotorControllersKvaser::GetFeedbackControlMode()
+long SOLOMotorControllersImpl::GetFeedbackControlMode()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetFeedbackControlMode(error);
+	return  SOLOMotorControllersImpl::GetFeedbackControlMode(error);
 }
 
 /**
@@ -3030,7 +3008,7 @@ long SOLOMotorControllersKvaser::GetFeedbackControlMode()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between 0 or 1
   */
-long SOLOMotorControllersKvaser::GetCommandMode(int& error)
+long SOLOMotorControllersImpl::GetCommandMode(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3047,10 +3025,10 @@ long SOLOMotorControllersKvaser::GetCommandMode(int& error)
 				.The method refers to the Object Dictionary: 0x3002
   * @retval long between 0 or 1
   */
-long SOLOMotorControllersKvaser::GetCommandMode()
+long SOLOMotorControllersImpl::GetCommandMode()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetCommandMode(error);
+	return  SOLOMotorControllersImpl::GetCommandMode(error);
 }
 
 /**
@@ -3060,7 +3038,7 @@ long SOLOMotorControllersKvaser::GetCommandMode()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between 0 to 2
   */
-long SOLOMotorControllersKvaser::GetControlMode(int& error)
+long SOLOMotorControllersImpl::GetControlMode(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3078,10 +3056,10 @@ long SOLOMotorControllersKvaser::GetControlMode(int& error)
 				.The method refers to the Object Dictionary: 0x3013
   * @retval long between 0 to 2
   */
-long SOLOMotorControllersKvaser::GetControlMode()
+long SOLOMotorControllersImpl::GetControlMode()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetControlMode(error);
+	return  SOLOMotorControllersImpl::GetControlMode(error);
 }
 
 /**
@@ -3090,7 +3068,7 @@ long SOLOMotorControllersKvaser::GetControlMode()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between 0 to 30000
   */
-long SOLOMotorControllersKvaser::GetSpeedLimit(int& error)
+long SOLOMotorControllersImpl::GetSpeedLimit(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3107,10 +3085,10 @@ long SOLOMotorControllersKvaser::GetSpeedLimit(int& error)
 				.The method refers to the Object Dictionary: 0x3011
   * @retval long between 0 to 30000
   */
-long SOLOMotorControllersKvaser::GetSpeedLimit()
+long SOLOMotorControllersImpl::GetSpeedLimit()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetSpeedLimit(error);
+	return  SOLOMotorControllersImpl::GetSpeedLimit(error);
 }
 
 /**
@@ -3120,7 +3098,7 @@ long SOLOMotorControllersKvaser::GetSpeedLimit()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 16000
   */
-float SOLOMotorControllersKvaser::GetPositionControllerKp(int& error)
+float SOLOMotorControllersImpl::GetPositionControllerKp(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3138,10 +3116,10 @@ float SOLOMotorControllersKvaser::GetPositionControllerKp(int& error)
 				.The method refers to the Object Dictionary: 0x301C
   * @retval float between 0 to 16000
   */
-float SOLOMotorControllersKvaser::GetPositionControllerKp()
+float SOLOMotorControllersImpl::GetPositionControllerKp()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPositionControllerKp(error);
+	return  SOLOMotorControllersImpl::GetPositionControllerKp(error);
 }
 
 /**
@@ -3151,7 +3129,7 @@ float SOLOMotorControllersKvaser::GetPositionControllerKp()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 16000
   */
-float SOLOMotorControllersKvaser::GetPositionControllerKi(int& error)
+float SOLOMotorControllersImpl::GetPositionControllerKi(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3169,10 +3147,10 @@ float SOLOMotorControllersKvaser::GetPositionControllerKi(int& error)
 				.The method refers to the Object Dictionary: 0x301D
   * @retval float between 0 to 16000
   */
-float SOLOMotorControllersKvaser::GetPositionControllerKi()
+float SOLOMotorControllersImpl::GetPositionControllerKi()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPositionControllerKi(error);
+	return  SOLOMotorControllersImpl::GetPositionControllerKi(error);
 }
 
 /**
@@ -3182,7 +3160,7 @@ float SOLOMotorControllersKvaser::GetPositionControllerKi()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between -2,147,483,647 to 2,147,483,647
   */
-long SOLOMotorControllersKvaser::GetPositionCountsFeedback(int& error)
+long SOLOMotorControllersImpl::GetPositionCountsFeedback(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3200,10 +3178,10 @@ long SOLOMotorControllersKvaser::GetPositionCountsFeedback(int& error)
 				.The method refers to the Object Dictionary: 0x3037
   * @retval long between -2,147,483,647 to 2,147,483,647
   */
-long SOLOMotorControllersKvaser::GetPositionCountsFeedback()
+long SOLOMotorControllersImpl::GetPositionCountsFeedback()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPositionCountsFeedback(error);
+	return  SOLOMotorControllersImpl::GetPositionCountsFeedback(error);
 }
 
 /**
@@ -3213,7 +3191,7 @@ long SOLOMotorControllersKvaser::GetPositionCountsFeedback()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long 
   */
-long SOLOMotorControllersKvaser::GetErrorRegister(int& error)
+long SOLOMotorControllersImpl::GetErrorRegister(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3231,10 +3209,10 @@ long SOLOMotorControllersKvaser::GetErrorRegister(int& error)
 				.The method refers to the Object Dictionary: 0x3020
   * @retval long 
   */
-long SOLOMotorControllersKvaser::GetErrorRegister()
+long SOLOMotorControllersImpl::GetErrorRegister()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetErrorRegister(error);
+	return  SOLOMotorControllersImpl::GetErrorRegister(error);
 }
 
 /**
@@ -3243,7 +3221,7 @@ long SOLOMotorControllersKvaser::GetErrorRegister()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long
   */
-long SOLOMotorControllersKvaser::GetDeviceFirmwareVersion(int& error)
+long SOLOMotorControllersImpl::GetDeviceFirmwareVersion(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3260,10 +3238,10 @@ long SOLOMotorControllersKvaser::GetDeviceFirmwareVersion(int& error)
 				.The method refers to the Object Dictionary: 0x303A
   * @retval long
   */
-long SOLOMotorControllersKvaser::GetDeviceFirmwareVersion()
+long SOLOMotorControllersImpl::GetDeviceFirmwareVersion()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetDeviceFirmwareVersion(error);
+	return  SOLOMotorControllersImpl::GetDeviceFirmwareVersion(error);
 }
 
 /**
@@ -3272,7 +3250,7 @@ long SOLOMotorControllersKvaser::GetDeviceFirmwareVersion()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long
   */
-long SOLOMotorControllersKvaser::GetDeviceHardwareVersion(int& error)
+long SOLOMotorControllersImpl::GetDeviceHardwareVersion(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3289,10 +3267,10 @@ long SOLOMotorControllersKvaser::GetDeviceHardwareVersion(int& error)
 				.The method refers to the Object Dictionary: 0x303B
   * @retval long
   */
-long SOLOMotorControllersKvaser::GetDeviceHardwareVersion()
+long SOLOMotorControllersImpl::GetDeviceHardwareVersion()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetDeviceHardwareVersion(error);
+	return  SOLOMotorControllersImpl::GetDeviceHardwareVersion(error);
 }
 
 /**
@@ -3302,7 +3280,7 @@ long SOLOMotorControllersKvaser::GetDeviceHardwareVersion()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 32
   */
-float SOLOMotorControllersKvaser::GetTorqueReferenceIq(int& error)
+float SOLOMotorControllersImpl::GetTorqueReferenceIq(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3320,10 +3298,10 @@ float SOLOMotorControllersKvaser::GetTorqueReferenceIq(int& error)
 				.The method refers to the Object Dictionary: 0x3004
   * @retval float between 0 to 32
   */
-float SOLOMotorControllersKvaser::GetTorqueReferenceIq()
+float SOLOMotorControllersImpl::GetTorqueReferenceIq()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetTorqueReferenceIq(error);
+	return  SOLOMotorControllersImpl::GetTorqueReferenceIq(error);
 }
 
 /**
@@ -3333,7 +3311,7 @@ float SOLOMotorControllersKvaser::GetTorqueReferenceIq()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between 0 to 30000
   */
-long SOLOMotorControllersKvaser::GetSpeedReference(int& error)
+long SOLOMotorControllersImpl::GetSpeedReference(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3351,10 +3329,10 @@ long SOLOMotorControllersKvaser::GetSpeedReference(int& error)
 				.The method refers to the Object Dictionary: 0x3005
   * @retval long between 0 to 30000
   */
-long SOLOMotorControllersKvaser::GetSpeedReference()
+long SOLOMotorControllersImpl::GetSpeedReference()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetSpeedReference(error);
+	return  SOLOMotorControllersImpl::GetSpeedReference(error);
 }
 
 /**
@@ -3365,7 +3343,7 @@ long SOLOMotorControllersKvaser::GetSpeedReference()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 32
   */
-float SOLOMotorControllersKvaser::GetMagnetizingCurrentIdReference(int& error)
+float SOLOMotorControllersImpl::GetMagnetizingCurrentIdReference(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3384,10 +3362,10 @@ float SOLOMotorControllersKvaser::GetMagnetizingCurrentIdReference(int& error)
 				.The method refers to the Object Dictionary: 0x301A
   * @retval float between 0 to 32
   */
-float SOLOMotorControllersKvaser::GetMagnetizingCurrentIdReference()
+float SOLOMotorControllersImpl::GetMagnetizingCurrentIdReference()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetMagnetizingCurrentIdReference(error);
+	return  SOLOMotorControllersImpl::GetMagnetizingCurrentIdReference(error);
 }
 
 /**
@@ -3397,7 +3375,7 @@ float SOLOMotorControllersKvaser::GetMagnetizingCurrentIdReference()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between -2,147,483,647 to 2,147,483,647 Quad-Pulses
   */
-long SOLOMotorControllersKvaser::GetPositionReference(int& error)
+long SOLOMotorControllersImpl::GetPositionReference(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3415,10 +3393,10 @@ long SOLOMotorControllersKvaser::GetPositionReference(int& error)
 				.The method refers to the Object Dictionary: 0x301B
   * @retval long between -2,147,483,647 to 2,147,483,647 Quad-Pulses
   */
-long SOLOMotorControllersKvaser::GetPositionReference()
+long SOLOMotorControllersImpl::GetPositionReference()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPositionReference(error);
+	return  SOLOMotorControllersImpl::GetPositionReference(error);
 }
 
 /**
@@ -3428,7 +3406,7 @@ long SOLOMotorControllersKvaser::GetPositionReference()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 100 %
   */
-float SOLOMotorControllersKvaser::GetPowerReference(int& error)
+float SOLOMotorControllersImpl::GetPowerReference(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3446,10 +3424,10 @@ float SOLOMotorControllersKvaser::GetPowerReference(int& error)
 				.The method refers to the Object Dictionary: 0x3006
   * @retval float between 0 to 100 %
   */
-float SOLOMotorControllersKvaser::GetPowerReference()
+float SOLOMotorControllersImpl::GetPowerReference()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPowerReference(error);
+	return  SOLOMotorControllersImpl::GetPowerReference(error);
 }
 
 /**
@@ -3458,7 +3436,7 @@ float SOLOMotorControllersKvaser::GetPowerReference()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long 0 Counter ClockWise / 1 ClockWise
   */
-long SOLOMotorControllersKvaser::GetMotorDirection(int& error)
+long SOLOMotorControllersImpl::GetMotorDirection(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3475,10 +3453,10 @@ long SOLOMotorControllersKvaser::GetMotorDirection(int& error)
 				.The method refers to the Object Dictionary: 0x300C
   * @retval long 0 Counter ClockWise / 1 ClockWise
   */
-long SOLOMotorControllersKvaser::GetMotorDirection()
+long SOLOMotorControllersImpl::GetMotorDirection()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetMotorDirection(error);
+	return  SOLOMotorControllersImpl::GetMotorDirection(error);
 }
 
 /**
@@ -3487,7 +3465,7 @@ long SOLOMotorControllersKvaser::GetMotorDirection()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0.01 to 1000
   */
-float SOLOMotorControllersKvaser::GetObserverGainBldcPmsm(int& error)
+float SOLOMotorControllersImpl::GetObserverGainBldcPmsm(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3504,10 +3482,10 @@ float SOLOMotorControllersKvaser::GetObserverGainBldcPmsm(int& error)
 				.The method refers to the Object Dictionary: 0x3021
   * @retval float between 0.01 to 1000
   */
-float SOLOMotorControllersKvaser::GetObserverGainBldcPmsm()
+float SOLOMotorControllersImpl::GetObserverGainBldcPmsm()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetObserverGainBldcPmsm(error);
+	return  SOLOMotorControllersImpl::GetObserverGainBldcPmsm(error);
 }
 
 /**
@@ -3516,7 +3494,7 @@ float SOLOMotorControllersKvaser::GetObserverGainBldcPmsm()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0.01 to 1000
   */
-float SOLOMotorControllersKvaser::GetObserverGainBldcPmsmUltrafast(int& error)
+float SOLOMotorControllersImpl::GetObserverGainBldcPmsmUltrafast(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3533,10 +3511,10 @@ float SOLOMotorControllersKvaser::GetObserverGainBldcPmsmUltrafast(int& error)
 				.The method refers to the Object Dictionary: 0x3022
   * @retval float between 0.01 to 1000
   */
-float SOLOMotorControllersKvaser::GetObserverGainBldcPmsmUltrafast()
+float SOLOMotorControllersImpl::GetObserverGainBldcPmsmUltrafast()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetObserverGainBldcPmsmUltrafast(error);
+	return  SOLOMotorControllersImpl::GetObserverGainBldcPmsmUltrafast(error);
 }
 
 /**
@@ -3545,7 +3523,7 @@ float SOLOMotorControllersKvaser::GetObserverGainBldcPmsmUltrafast()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0.01 to 1000
   */
-float SOLOMotorControllersKvaser::GetObserverGainDc(int& error)
+float SOLOMotorControllersImpl::GetObserverGainDc(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3562,10 +3540,10 @@ float SOLOMotorControllersKvaser::GetObserverGainDc(int& error)
 				.The method refers to the Object Dictionary: 0x3023
   * @retval float between 0.01 to 1000
   */
-float SOLOMotorControllersKvaser::GetObserverGainDc()
+float SOLOMotorControllersImpl::GetObserverGainDc()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetObserverGainDc(error);
+	return  SOLOMotorControllersImpl::GetObserverGainDc(error);
 }
 
 /**
@@ -3575,7 +3553,7 @@ float SOLOMotorControllersKvaser::GetObserverGainDc()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0.01 to 16000
   */
-float SOLOMotorControllersKvaser::GetFilterGainBldcPmsm(int& error)
+float SOLOMotorControllersImpl::GetFilterGainBldcPmsm(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3593,10 +3571,10 @@ float SOLOMotorControllersKvaser::GetFilterGainBldcPmsm(int& error)
 				.The method refers to the Object Dictionary: 0x3024
   * @retval float between 0.01 to 16000
   */
-float SOLOMotorControllersKvaser::GetFilterGainBldcPmsm()
+float SOLOMotorControllersImpl::GetFilterGainBldcPmsm()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetFilterGainBldcPmsm(error);
+	return  SOLOMotorControllersImpl::GetFilterGainBldcPmsm(error);
 }
 
 /**
@@ -3606,7 +3584,7 @@ float SOLOMotorControllersKvaser::GetFilterGainBldcPmsm()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0.01 to 16000
   */
-float SOLOMotorControllersKvaser::GetFilterGainBldcPmsmUltrafast(int& error)
+float SOLOMotorControllersImpl::GetFilterGainBldcPmsmUltrafast(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3624,10 +3602,10 @@ float SOLOMotorControllersKvaser::GetFilterGainBldcPmsmUltrafast(int& error)
 				.The method refers to the Object Dictionary: 0x3025
   * @retval float between 0.01 to 16000
   */
-float SOLOMotorControllersKvaser::GetFilterGainBldcPmsmUltrafast()
+float SOLOMotorControllersImpl::GetFilterGainBldcPmsmUltrafast()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetFilterGainBldcPmsmUltrafast(error);
+	return  SOLOMotorControllersImpl::GetFilterGainBldcPmsmUltrafast(error);
 }
 
 /**
@@ -3636,7 +3614,7 @@ float SOLOMotorControllersKvaser::GetFilterGainBldcPmsmUltrafast()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between -2 to 2
   */
-float SOLOMotorControllersKvaser::Get3PhaseMotorAngle(int& error)
+float SOLOMotorControllersImpl::Get3PhaseMotorAngle(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3653,10 +3631,10 @@ float SOLOMotorControllersKvaser::Get3PhaseMotorAngle(int& error)
 				.The method refers to the Object Dictionary: 0x3038
   * @retval float between -2 to 2
   */
-float SOLOMotorControllersKvaser::Get3PhaseMotorAngle()
+float SOLOMotorControllersImpl::Get3PhaseMotorAngle()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::Get3PhaseMotorAngle(error);
+	return  SOLOMotorControllersImpl::Get3PhaseMotorAngle(error);
 }
 
 /**
@@ -3665,7 +3643,7 @@ float SOLOMotorControllersKvaser::Get3PhaseMotorAngle()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 1.0
   */
-float SOLOMotorControllersKvaser::GetEncoderHallCcwOffset(int& error)
+float SOLOMotorControllersImpl::GetEncoderHallCcwOffset(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3682,10 +3660,10 @@ float SOLOMotorControllersKvaser::GetEncoderHallCcwOffset(int& error)
 				.The method refers to the Object Dictionary: 0x3028
   * @retval float between 0 to 1.0
   */
-float SOLOMotorControllersKvaser::GetEncoderHallCcwOffset()
+float SOLOMotorControllersImpl::GetEncoderHallCcwOffset()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetEncoderHallCcwOffset(error);
+	return  SOLOMotorControllersImpl::GetEncoderHallCcwOffset(error);
 }
 
 /**
@@ -3694,7 +3672,7 @@ float SOLOMotorControllersKvaser::GetEncoderHallCcwOffset()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 1.0
   */
-float SOLOMotorControllersKvaser::GetEncoderHallCwOffset(int& error)
+float SOLOMotorControllersImpl::GetEncoderHallCwOffset(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3711,10 +3689,10 @@ float SOLOMotorControllersKvaser::GetEncoderHallCwOffset(int& error)
 				.The method refers to the Object Dictionary: 0x3029
   * @retval float between 0 to 1.0
   */
-float SOLOMotorControllersKvaser::GetEncoderHallCwOffset()
+float SOLOMotorControllersImpl::GetEncoderHallCwOffset()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetEncoderHallCwOffset(error);
+	return  SOLOMotorControllersImpl::GetEncoderHallCwOffset(error);
 }
 
 /**
@@ -3723,7 +3701,7 @@ float SOLOMotorControllersKvaser::GetEncoderHallCwOffset()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between 0 or 1
   */
-long SOLOMotorControllersKvaser::GetUartBaudrate(int& error)
+long SOLOMotorControllersImpl::GetUartBaudrate(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3740,10 +3718,10 @@ long SOLOMotorControllersKvaser::GetUartBaudrate(int& error)
 				.The method refers to the Object Dictionary: 0x3026
   * @retval long between 0 or 1
   */
-long SOLOMotorControllersKvaser::GetUartBaudrate()
+long SOLOMotorControllersImpl::GetUartBaudrate()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetUartBaudrate(error);
+	return  SOLOMotorControllersImpl::GetUartBaudrate(error);
 }
 
 /**
@@ -3754,7 +3732,7 @@ long SOLOMotorControllersKvaser::GetUartBaudrate()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 1600 Rev/S^2
   */
-float SOLOMotorControllersKvaser::GetSpeedAccelerationValue(int& error)
+float SOLOMotorControllersImpl::GetSpeedAccelerationValue(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3773,10 +3751,10 @@ float SOLOMotorControllersKvaser::GetSpeedAccelerationValue(int& error)
 				.The method refers to the Object Dictionary: 0x302A
   * @retval float between 0 to 1600 Rev/S^2
   */
-float SOLOMotorControllersKvaser::GetSpeedAccelerationValue()
+float SOLOMotorControllersImpl::GetSpeedAccelerationValue()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetSpeedAccelerationValue(error);
+	return  SOLOMotorControllersImpl::GetSpeedAccelerationValue(error);
 }
 
 /**
@@ -3787,7 +3765,7 @@ float SOLOMotorControllersKvaser::GetSpeedAccelerationValue()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 1600 Rev/S^2
   */
-float SOLOMotorControllersKvaser::GetSpeedDecelerationValue(int& error)
+float SOLOMotorControllersImpl::GetSpeedDecelerationValue(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3806,10 +3784,10 @@ float SOLOMotorControllersKvaser::GetSpeedDecelerationValue(int& error)
 				.The method refers to the Object Dictionary: 0x302B
   * @retval float between 0 to 1600 Rev/S^2
   */
-float SOLOMotorControllersKvaser::GetSpeedDecelerationValue()
+float SOLOMotorControllersImpl::GetSpeedDecelerationValue()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetSpeedDecelerationValue(error);
+	return  SOLOMotorControllersImpl::GetSpeedDecelerationValue(error);
 }
 
 /**
@@ -3818,7 +3796,7 @@ float SOLOMotorControllersKvaser::GetSpeedDecelerationValue()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long
   */
-long SOLOMotorControllersKvaser::GetAnalogueSpeedResolutionDivisionCoefficient(int &error)
+long SOLOMotorControllersImpl::GetAnalogueSpeedResolutionDivisionCoefficient(int &error)
 {
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
@@ -3834,10 +3812,10 @@ long SOLOMotorControllersKvaser::GetAnalogueSpeedResolutionDivisionCoefficient(i
 				.The method refers to the Object Dictionary: 0x303E
   * @retval long
   */
-long SOLOMotorControllersKvaser::GetAnalogueSpeedResolutionDivisionCoefficient()
+long SOLOMotorControllersImpl::GetAnalogueSpeedResolutionDivisionCoefficient()
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::GetAnalogueSpeedResolutionDivisionCoefficient(error);
+    return SOLOMotorControllersImpl::GetAnalogueSpeedResolutionDivisionCoefficient(error);
 }
 
 /**
@@ -3847,7 +3825,7 @@ long SOLOMotorControllersKvaser::GetAnalogueSpeedResolutionDivisionCoefficient()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between 0 to 2,147,483,647
   */
-long SOLOMotorControllersKvaser::GetEncoderIndexCounts(int& error)
+long SOLOMotorControllersImpl::GetEncoderIndexCounts(int& error)
 {
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
@@ -3866,20 +3844,20 @@ long SOLOMotorControllersKvaser::GetEncoderIndexCounts(int& error)
 				.The method refers to the Object Dictionary: 0x303D
   * @retval long between 0 to 2,147,483,647
   */
-long SOLOMotorControllersKvaser::GetEncoderIndexCounts()
+long SOLOMotorControllersImpl::GetEncoderIndexCounts()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetEncoderIndexCounts(error);
+	return  SOLOMotorControllersImpl::GetEncoderIndexCounts(error);
 }
 
 /**
   * @brief  This command test if the communication is working   
   * @retval bool 0 not working / 1 for working
   */
-bool SOLOMotorControllersKvaser::CommunicationIsWorking(int& error)
+bool SOLOMotorControllersImpl::CommunicationIsWorking(int& error)
 {
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	float temperature = SOLOMotorControllersKvaser::GetBoardTemperature(error);
+	float temperature = SOLOMotorControllersImpl::GetBoardTemperature(error);
 	if (error == SOLOMotorControllers::Error::noErrorDetected) {
 		return true;
 	}
@@ -3890,10 +3868,10 @@ bool SOLOMotorControllersKvaser::CommunicationIsWorking(int& error)
   * @brief  This command test if the communication is working   
   * @retval bool 0 not working / 1 for working
   */
-bool SOLOMotorControllersKvaser::CommunicationIsWorking()
+bool SOLOMotorControllersImpl::CommunicationIsWorking()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return SOLOMotorControllersKvaser::CommunicationIsWorking(error);
+	return SOLOMotorControllersImpl::CommunicationIsWorking(error);
 }
 
 /**
@@ -3902,7 +3880,7 @@ bool SOLOMotorControllersKvaser::CommunicationIsWorking()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long
   */
-long SOLOMotorControllersKvaser::GetMotionProfileMode(int &error)
+long SOLOMotorControllersImpl::GetMotionProfileMode(int &error)
 {
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
@@ -3918,10 +3896,10 @@ long SOLOMotorControllersKvaser::GetMotionProfileMode(int &error)
 				.The method refers to the Object Dictionary: 0x303F
   * @retval long
   */
-long SOLOMotorControllersKvaser::GetMotionProfileMode()
+long SOLOMotorControllersImpl::GetMotionProfileMode()
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::GetMotionProfileMode(error);
+    return SOLOMotorControllersImpl::GetMotionProfileMode(error);
 }
 
 /**
@@ -3930,7 +3908,7 @@ long SOLOMotorControllersKvaser::GetMotionProfileMode()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float
   */
-float SOLOMotorControllersKvaser::GetMotionProfileVariable1(int &error)
+float SOLOMotorControllersImpl::GetMotionProfileVariable1(int &error)
 {
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
@@ -3946,10 +3924,10 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable1(int &error)
 				.The method refers to the Object Dictionary: 0x3040
   * @retval float
   */
-float SOLOMotorControllersKvaser::GetMotionProfileVariable1()
+float SOLOMotorControllersImpl::GetMotionProfileVariable1()
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::GetMotionProfileVariable1(error);
+    return SOLOMotorControllersImpl::GetMotionProfileVariable1(error);
 }
 
 /**
@@ -3958,7 +3936,7 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable1()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float
   */
-float SOLOMotorControllersKvaser::GetMotionProfileVariable2(int &error)
+float SOLOMotorControllersImpl::GetMotionProfileVariable2(int &error)
 {
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
@@ -3974,10 +3952,10 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable2(int &error)
 				.The method refers to the Object Dictionary: 0x3041
   * @retval float
   */
-float SOLOMotorControllersKvaser::GetMotionProfileVariable2()
+float SOLOMotorControllersImpl::GetMotionProfileVariable2()
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::GetMotionProfileVariable2(error);
+    return SOLOMotorControllersImpl::GetMotionProfileVariable2(error);
 }
 
 /**
@@ -3986,7 +3964,7 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable2()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float
   */
-float SOLOMotorControllersKvaser::GetMotionProfileVariable3(int &error)
+float SOLOMotorControllersImpl::GetMotionProfileVariable3(int &error)
 {
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
@@ -4002,10 +3980,10 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable3(int &error)
 				.The method refers to the Object Dictionary: 0x3042
   * @retval float
   */
-float SOLOMotorControllersKvaser::GetMotionProfileVariable3()
+float SOLOMotorControllersImpl::GetMotionProfileVariable3()
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::GetMotionProfileVariable3(error);
+    return SOLOMotorControllersImpl::GetMotionProfileVariable3(error);
 }
 
 /**
@@ -4014,7 +3992,7 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable3()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float
   */
-float SOLOMotorControllersKvaser::GetMotionProfileVariable4(int &error)
+float SOLOMotorControllersImpl::GetMotionProfileVariable4(int &error)
 {
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
@@ -4030,10 +4008,10 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable4(int &error)
 				.The method refers to the Object Dictionary: 0x3043
   * @retval float
   */
-float SOLOMotorControllersKvaser::GetMotionProfileVariable4()
+float SOLOMotorControllersImpl::GetMotionProfileVariable4()
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::GetMotionProfileVariable4(error);
+    return SOLOMotorControllersImpl::GetMotionProfileVariable4(error);
 }
 
 /**
@@ -4042,7 +4020,7 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable4()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float
   */
-float SOLOMotorControllersKvaser::GetMotionProfileVariable5(int &error)
+float SOLOMotorControllersImpl::GetMotionProfileVariable5(int &error)
 {
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
@@ -4058,18 +4036,18 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable5(int &error)
 				.The method refers to the Object Dictionary: 0x3044
   * @retval float
   */
-float SOLOMotorControllersKvaser::GetMotionProfileVariable5()
+float SOLOMotorControllersImpl::GetMotionProfileVariable5()
 {
     int error = SOLOMotorControllers::Error::noProcessedCommand;
-    return SOLOMotorControllersKvaser::GetMotionProfileVariable5(error);
+    return SOLOMotorControllersImpl::GetMotionProfileVariable5(error);
 }
 
-void SOLOMotorControllersKvaser::GeneralCanbusRead(uint16_t *ID , uint8_t *DLC, uint8_t *Data)
+void SOLOMotorControllersImpl::GeneralCanbusRead(uint16_t *ID , uint8_t *DLC, uint8_t *Data)
 {
 	comIf->CANOpenGenericReceive(ID , DLC, Data);
 }
 
-void SOLOMotorControllersKvaser::GeneralCanbusWrite(uint16_t ID, uint8_t *DLC, uint8_t *Data, int &error)
+void SOLOMotorControllersImpl::GeneralCanbusWrite(uint16_t ID, uint8_t *DLC, uint8_t *Data, int &error)
 {
 	comIf->CANOpenGenericTransmit(ID , DLC, Data, error);
 }
@@ -4081,7 +4059,7 @@ void SOLOMotorControllersKvaser::GeneralCanbusWrite(uint16_t ID, uint8_t *DLC, u
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long between -2,147,483,647 to 2,147,483,647 Quad-Pulses
   */
-long SOLOMotorControllersKvaser::GetPdoPositionCountsFeedback(int& error)
+long SOLOMotorControllersImpl::GetPdoPositionCountsFeedback(int& error)
 {
 	return GetPdoParameterValueLong(PdoParameterName::positionCountsFeedback, error);
 }
@@ -4092,10 +4070,10 @@ long SOLOMotorControllersKvaser::GetPdoPositionCountsFeedback(int& error)
   *				.The method refers to the Object Dictionary: 0x1814
   * @retval long between -2,147,483,647 to 2,147,483,647 Quad-Pulses
   */
-long SOLOMotorControllersKvaser::GetPdoPositionCountsFeedback()
+long SOLOMotorControllersImpl::GetPdoPositionCountsFeedback()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPdoPositionCountsFeedback(error);
+	return  SOLOMotorControllersImpl::GetPdoPositionCountsFeedback(error);
 }
 
 /**
@@ -4105,7 +4083,7 @@ long SOLOMotorControllersKvaser::GetPdoPositionCountsFeedback()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long value that rappresent the speed feeback in RPM (positive and negative value) 
   */
-long SOLOMotorControllersKvaser::GetPdoSpeedFeedback (int &error){
+long SOLOMotorControllersImpl::GetPdoSpeedFeedback (int &error){
 	return GetPdoParameterValueLong(PdoParameterName::speedFeedback, error);
 }
 /**
@@ -4114,7 +4092,7 @@ long SOLOMotorControllersKvaser::GetPdoSpeedFeedback (int &error){
   *				.The method refers to the Object Dictionary: 0x1815
   * @retval long value that rappresent the speed feeback in RPM (positive and negative value)
   */
-long SOLOMotorControllersKvaser::GetPdoSpeedFeedback (){
+long SOLOMotorControllersImpl::GetPdoSpeedFeedback (){
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
 	return GetPdoParameterValueLong(PdoParameterName::speedFeedback, error);
 }
@@ -4126,7 +4104,7 @@ long SOLOMotorControllersKvaser::GetPdoSpeedFeedback (){
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 32
   */
-float SOLOMotorControllersKvaser::GetPdoQuadratureCurrentIqFeedback(int& error)
+float SOLOMotorControllersImpl::GetPdoQuadratureCurrentIqFeedback(int& error)
 {
 	return GetPdoParameterValueFloat(PdoParameterName::quadratureCurrentIqFeedback, error);
 }
@@ -4137,10 +4115,10 @@ float SOLOMotorControllersKvaser::GetPdoQuadratureCurrentIqFeedback(int& error)
   *				.The method refers to the Object Dictionary: 0x1816
   * @retval float between 0 to 32
   */
-float SOLOMotorControllersKvaser::GetPdoQuadratureCurrentIqFeedback()
+float SOLOMotorControllersImpl::GetPdoQuadratureCurrentIqFeedback()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPdoQuadratureCurrentIqFeedback(error);
+	return  SOLOMotorControllersImpl::GetPdoQuadratureCurrentIqFeedback(error);
 }
 
 /**
@@ -4150,7 +4128,7 @@ float SOLOMotorControllersKvaser::GetPdoQuadratureCurrentIqFeedback()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between 0 to 32
   */
-float SOLOMotorControllersKvaser::GetPdoMagnetizingCurrentIdFeedback(int& error)
+float SOLOMotorControllersImpl::GetPdoMagnetizingCurrentIdFeedback(int& error)
 {
 	return GetPdoParameterValueFloat(PdoParameterName::magnetizingCurrentIdFeedback, error);
 }
@@ -4161,10 +4139,10 @@ float SOLOMotorControllersKvaser::GetPdoMagnetizingCurrentIdFeedback(int& error)
   *				.The method refers to the Object Dictionary: 0x1817
   * @retval float between 0 to 32
   */
-float SOLOMotorControllersKvaser::GetPdoMagnetizingCurrentIdFeedback()
+float SOLOMotorControllersImpl::GetPdoMagnetizingCurrentIdFeedback()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPdoMagnetizingCurrentIdFeedback(error);
+	return  SOLOMotorControllersImpl::GetPdoMagnetizingCurrentIdFeedback(error);
 }
 
 /**
@@ -4174,7 +4152,7 @@ float SOLOMotorControllersKvaser::GetPdoMagnetizingCurrentIdFeedback()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval long 
   */
-long SOLOMotorControllersKvaser::GetPdoErrorRegister(int& error)
+long SOLOMotorControllersImpl::GetPdoErrorRegister(int& error)
 {
 	return GetPdoParameterValueLong(PdoParameterName::errorRegister, error);
 }
@@ -4185,10 +4163,10 @@ long SOLOMotorControllersKvaser::GetPdoErrorRegister(int& error)
   *				.The method refers to the Object Dictionary: 0x1818
   * @retval long 
   */
-long SOLOMotorControllersKvaser::GetPdoErrorRegister()
+long SOLOMotorControllersImpl::GetPdoErrorRegister()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPdoErrorRegister(error);
+	return  SOLOMotorControllersImpl::GetPdoErrorRegister(error);
 }
 
 /**
@@ -4197,7 +4175,7 @@ long SOLOMotorControllersKvaser::GetPdoErrorRegister()
   * @param[out]  error   pointer to an integer that specify result of function  
   * @retval float between -30 to 150 Celsius
   */
-float SOLOMotorControllersKvaser::GetPdoBoardTemperature(int& error)
+float SOLOMotorControllersImpl::GetPdoBoardTemperature(int& error)
 {
 	return GetPdoParameterValueFloat(PdoParameterName::boardTemperature, error);
 }
@@ -4207,8 +4185,9 @@ float SOLOMotorControllersKvaser::GetPdoBoardTemperature(int& error)
   *				.The method refers to the Object Dictionary: 0x1819
   * @retval float between -30 to 150 Celsius
   */
-float SOLOMotorControllersKvaser::GetPdoBoardTemperature()
+float SOLOMotorControllersImpl::GetPdoBoardTemperature()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return  SOLOMotorControllersKvaser::GetPdoBoardTemperature(error);
+	return GetPdoBoardTemperature(error);
 }
+

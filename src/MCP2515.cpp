@@ -20,7 +20,7 @@
 #endif
 #include "canlib.h"
 #include "MCP2515.hpp"
-#include "SOLOMotorControllersCanopen.h"
+#include "SOLOMotorControllers.h"
 
 MCP2515::MCP2515(uint16_t canBaudrate, uint8_t _chipSelectPin, long _countTimeout){
     chipSelectPin = _chipSelectPin;
@@ -28,19 +28,19 @@ MCP2515::MCP2515(uint16_t canBaudrate, uint8_t _chipSelectPin, long _countTimeou
 
     switch (canBaudrate)
 	{
-	case SOLOMotorControllers::CanbusBaudrate::rate1000:
+	case CommunicationInterface::CanbusBaudrate::rate1000:
 		canBaudrate = canBITRATE_1M;
 		break;
-	case SOLOMotorControllers::CanbusBaudrate::rate500:
+	case CommunicationInterface::CanbusBaudrate::rate500:
 		canBaudrate = canBITRATE_500K;
 		break;
-	case SOLOMotorControllers::CanbusBaudrate::rate250:
+	case CommunicationInterface::CanbusBaudrate::rate250:
 		canBaudrate = canBITRATE_250K;
 		break;
-	case SOLOMotorControllers::CanbusBaudrate::rate125:
+	case CommunicationInterface::CanbusBaudrate::rate125:
 		canBaudrate = canBITRATE_125K;
 		break;
-	case SOLOMotorControllers::CanbusBaudrate::rate100:
+	case CommunicationInterface::CanbusBaudrate::rate100:
 		canBaudrate = canBITRATE_100K;
 		break;
 	default:

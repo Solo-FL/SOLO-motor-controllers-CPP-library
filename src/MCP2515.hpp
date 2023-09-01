@@ -507,8 +507,10 @@ public:
         return true;
     };
 
-    bool Connect() { return true; };
-    void Disconnect() {};
+    bool Connect() override { return true; };
+    bool Connect(UINT8 deviceAddress, 
+                 CanbusBaudrate baudrate, long millisecondsTimeout) override { return true; }
+    void Disconnect() override {};
 
     void getErrorMode(int& errorMode) override { MCP2515_ReadErrorMode(errorMode); }
     uint8_t getReceiveErrorCounter() override { return MCP2515_Read_ReceiveErrorCounter(); };

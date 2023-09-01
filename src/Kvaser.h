@@ -59,6 +59,36 @@ public:
             }
     }
 
+    bool Connect(UINT8 deviceAddress, 
+             CanbusBaudrate baudrate, long millisecondsTimeout) override
+    {
+        (void) deviceAddress;
+        (void)  millisecondsTimeout;
+        switch (baudrate)
+            {
+            case CanbusBaudrate::rate1000:
+                mCanBaudrate = canBITRATE_1M;
+                break;
+            case CanbusBaudrate::rate500:
+                mCanBaudrate = canBITRATE_500K;
+                break;
+            case CanbusBaudrate::rate250:
+                mCanBaudrate = canBITRATE_250K;
+                break;
+            case CanbusBaudrate::rate125:
+                mCanBaudrate = canBITRATE_125K;
+                break;
+            case CanbusBaudrate::rate100:
+                mCanBaudrate = canBITRATE_100K;
+                break;
+            default:
+                mCanBaudrate = canBITRATE_1M;
+                break;
+            }
+        //timeout = millisecondsTimeout; // FIXME: not used!
+
+        return Connect();
+    }
     void Disconnect() override
     {
         canClose(hnd);

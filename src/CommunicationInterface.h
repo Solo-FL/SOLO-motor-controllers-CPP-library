@@ -10,6 +10,18 @@
 class CommunicationInterface {
 
 public:
+        /**
+     * @brief  Canbus Baudrate enumeration definition
+     */
+    enum CanbusBaudrate
+        {
+            rate1000 = 0,							/*!< Baudrate 1000 kbits/s */
+            rate500 = 1,							/*!< Baudrate 500 kbits/s */
+            rate250 = 2,							/*!< Baudrate 250 kbits/s */
+            rate125 = 3,							/*!< Baudrate 125 kbits/s */
+            rate100 = 4								/*!< Baudrate 100 kbits/s */
+        };
+
     virtual ~CommunicationInterface() = default;
     
     virtual bool CANOpenTransmit(uint8_t destination, uint16_t object, uint8_t subIndex, uint8_t * informatrionToSend, int &error) = 0;
@@ -26,6 +38,8 @@ public:
 	virtual bool PDOReceive(int source,  uint8_t* informationReceived, int& error) = 0;
 
     virtual bool Connect() = 0;
+    virtual bool Connect(UINT8 deviceAddress, 
+                         CanbusBaudrate baudrate, long millisecondsTimeout) = 0;
     virtual void Disconnect() = 0;
 
     virtual void getErrorMode(int& errorMode) = 0;
@@ -34,17 +48,5 @@ public:
 };
 
 
-class SerialCommunication {
-
-public:
-    virtual ~SerialCommunication() = default;
-};
-
-
-class MC2515Communication {
-
-public:
-    virtual ~MC2515Communication() = default;
-};
 
 

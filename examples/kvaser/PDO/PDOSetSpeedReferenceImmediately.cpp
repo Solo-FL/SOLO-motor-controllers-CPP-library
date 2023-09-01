@@ -19,13 +19,13 @@ using std::cout;
 using std::endl;
 #include <conio.h>
 
-#include "SOLOMotorControllersKvaser.h"
+#include "SOLOMotorControllersImpl.h"
 
-SOLOMotorControllersKvaser *solo;
+SOLOMotorControllersImpl *solo;
 int error;
 
 int main(void){
-	solo = new SOLOMotorControllersKvaser(0, SOLOMotorControllers::CanbusBaudrate::rate1000);
+	solo = new SOLOMotorControllersImpl(0, SOLOMotorControllers::CanbusBaudrate::rate1000);
 
 	// 1 time needed CONFIGURATION:
 	cout << "PdoParameterConfig" << std::endl;

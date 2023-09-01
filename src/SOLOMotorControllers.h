@@ -20,6 +20,8 @@
 #include <tchar.h>
 #include <stdio.h>
 
+#include "CommunicationInterface.h"
+
 class SOLOMotorControllers {
 
 public:
@@ -102,18 +104,6 @@ public:
         {
             rate937500 = 0,							/*!< baud rate 937500 */
             rate115200 = 1							/*!< baud rate 115200 */
-        };
-
-    /**
-     * @brief  Canbus Baudrate enumeration definition
-     */
-    enum CanbusBaudrate
-        {
-            rate1000 = 0,							/*!< Baudrate 1000 kbits/s */
-            rate500 = 1,							/*!< Baudrate 500 kbits/s */
-            rate250 = 2,							/*!< Baudrate 250 kbits/s */
-            rate125 = 3,							/*!< Baudrate 125 kbits/s */
-            rate100 = 4								/*!< Baudrate 100 kbits/s */
         };
 
     /**
@@ -320,9 +310,9 @@ public:
 
     virtual bool SetSpeedDecelerationValue(float speedDecelerationValue) = 0;
 
-    virtual bool SetCanbusBaudrate(CanbusBaudrate canbusBoudrate, int& error) = 0;
+    virtual bool SetCanbusBaudrate(CommunicationInterface::CanbusBaudrate canbusBoudrate, int& error) = 0;
 
-    virtual bool SetCanbusBaudrate(CanbusBaudrate canbusBoudrate) = 0;
+    virtual bool SetCanbusBaudrate(CommunicationInterface::CanbusBaudrate canbusBoudrate) = 0;
 		
     virtual bool SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient, int &error) = 0;
 		

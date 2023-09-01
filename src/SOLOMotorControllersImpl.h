@@ -1,6 +1,6 @@
 /**
  *******************************************************************************
- * @file    SOLOMotorControllersKvaser.h
+ * @file    SOLOMotorControllersImpl.h
  * @authors SOLO Motor Controllers
  * @brief   This file contains all the base functions prototypes for the Solo Drivers
  *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
@@ -20,12 +20,8 @@
 #include "SOLOMotorControllers.h"
 #include "SOLOMotorControllersUtils.h"
 
-#include "canlib.h"
+//#include "canlib.h"
 #include "CommunicationInterface.h"
-#include <map>
-
-#ifndef SOLOMOTORCONTROLLERSCANOPEN_H       //Avoid loading SOLOMotorControllersCanopen.h more than once
-#define SOLOMOTORCONTROLLERSCANOPEN_H
 
 //SOLO Object Index
 /** @addtogroup NMT_Control_Objects NMT Control Objects
@@ -50,7 +46,9 @@
 #define Object_PowerReference                          0x3006
 #define Object_MotorParametersIdentification           0x3007
 #define Object_EmergencyStop                           0x3008
+// for compatibility have 0x3009 twice
 #define Object_OutputPwmFrequency                      0x3009
+#define Object_OutputPwmFrequencyKhz                   0x3009
 #define Object_SpeedControllerKp                       0x300A
 #define Object_SpeedControllerKi                       0x300B
 #define Object_MotorDirection                          0x300C
@@ -155,7 +153,7 @@ typedef struct
 /**
  * @brief a class for handle canopen communication
  */
-class SOLOMotorControllersKvaser : public SOLOMotorControllers
+class SOLOMotorControllersImpl : public SOLOMotorControllers
 {
 
 private:
@@ -168,12 +166,12 @@ private:
 
 public:
     int pdoParameterCobIdByPdoParameterName[PdoParameterNameCount];
-    SOLOMotorControllersKvaser(CommunicationInterface* ci,
+    SOLOMotorControllersImpl(CommunicationInterface* ci,
             UINT8 deviceAddress = 0,
-            SOLOMotorControllers::CanbusBaudrate baudrate = SOLOMotorControllers::CanbusBaudrate::rate1000,
+            CommunicationInterface::CanbusBaudrate baudrate = CommunicationInterface::CanbusBaudrate::rate1000,
             long millisecondsTimeout = 200, bool autoConnect = true);
 
-    ~SOLOMotorControllersKvaser();
+    ~SOLOMotorControllersImpl();
 
 private:
     float   ConvertToFloat(unsigned char data[]);
@@ -184,7 +182,7 @@ private:
 
 public:
     bool Connect(UINT8 deviceAddress, 
-        SOLOMotorControllers::CanbusBaudrate baudrate = SOLOMotorControllers::CanbusBaudrate::rate1000,
+        CommunicationInterface::CanbusBaudrate baudrate = CommunicationInterface::CanbusBaudrate::rate1000,
         long millisecondsTimeout = 200);
 
     bool Connect() override { return comIf->Connect(); };
@@ -349,11 +347,11 @@ public:
     bool SetSpeedAccelerationValue(float speedAccelerationValue) override;
     bool SetSpeedDecelerationValue(float speedDecelerationValue, int& error) override;
     bool SetSpeedDecelerationValue(float speedDecelerationValue) override;
-    bool SetCanbusBaudrate(CanbusBaudrate canbusBaudrate, int& error) override;
-    bool SetCanbusBaudrate(CanbusBaudrate canbusBaudrate) override;
-    bool SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient, int &error) override;
+    bool SetCanbusBaudrate(CommunicationInterface::CanbusBaudrate canbusBaudrate, int& error) override;
+    bool SetCanbusBaudrate(CommunicationInterface::CanbusBaudrate canbusBaudrate) override;
+    bool SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient, int& error) override;
     bool SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient) override;
-    bool SetMotionProfileMode( MotionProfileMode motionProfileMode, int &error) override;
+    bool SetMotionProfileMode( MotionProfileMode motionProfileMode, int& error) override;
     bool SetMotionProfileMode( MotionProfileMode motionProfileMode) override;
     bool SetMotionProfileVariable1(float MotionProfileVariable1, int &error) override;
     bool SetMotionProfileVariable1(float MotionProfileVariable1) override;
@@ -513,4 +511,3 @@ public:
   * @}
   */
 
-#endif

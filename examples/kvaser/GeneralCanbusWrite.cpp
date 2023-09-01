@@ -19,11 +19,15 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 #include <string>
 using namespace std;
 #include "canlib.h"
+#ifdef ARDUINO
+#include "MCP2515.hpp"
+#else
 #include "Kvaser.h"
-#include "SOLOMotorControllersKvaser.h"
+#endif
+#include "SOLOMotorControllersImpl.h"
 
 // instanciate a SOLO object as Canopen IMPORTANT
-SOLOMotorControllersKvaser *solo; 
+SOLOMotorControllersImpl *solo; 
 
 //Init writing variable
 uint16_t ID_Write = 605;
@@ -36,11 +40,15 @@ int cnt = 0;
 
 int main(void)
 {
-	CommunicationInterface* ci = new Kvaser(SOLOMotorControllers::CanbusBaudrate::rate1000);
+#ifdef ARDUINO
+	CommunicationInterface* ci = new MCP2515(CommunicationInterface::CanbusBaudrate::rate1000);
+#else
+	CommunicationInterface* ci = new Kvaser(CommunicationInterface::CanbusBaudrate::rate1000);
+#endif
 
     //Initialize the SOLO object
-    //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
-    solo = new SOLOMotorControllersKvaser(ci);
+    //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersImpl(0);
+    solo = new SOLOMotorControllersImpl(ci);
 
 	//TRY CONNECT LOOP
 	while(solo->CommunicationIsWorking() == false ){

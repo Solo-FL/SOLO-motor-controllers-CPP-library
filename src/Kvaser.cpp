@@ -30,19 +30,19 @@ Kvaser::Kvaser(long canBaudrate, bool autoConnect)
 {
     switch (canBaudrate)
 	{
-	case SOLOMotorControllers::CanbusBaudrate::rate1000:
+	case CommunicationInterface::CanbusBaudrate::rate1000:
 		canBaudrate = canBITRATE_1M;
 		break;
-	case SOLOMotorControllers::CanbusBaudrate::rate500:
+	case CommunicationInterface::CanbusBaudrate::rate500:
 		canBaudrate = canBITRATE_500K;
 		break;
-	case SOLOMotorControllers::CanbusBaudrate::rate250:
+	case CommunicationInterface::CanbusBaudrate::rate250:
 		canBaudrate = canBITRATE_250K;
 		break;
-	case SOLOMotorControllers::CanbusBaudrate::rate125:
+	case CommunicationInterface::CanbusBaudrate::rate125:
 		canBaudrate = canBITRATE_125K;
 		break;
-	case SOLOMotorControllers::CanbusBaudrate::rate100:
+	case CommunicationInterface::CanbusBaudrate::rate100:
 		canBaudrate = canBITRATE_100K;
 		break;
 	default:

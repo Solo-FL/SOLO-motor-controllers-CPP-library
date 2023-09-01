@@ -15,8 +15,12 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 #include <iostream>
 
 #include <conio.h>
+#ifdef ARDUINO
+#include "MCP2515.hpp"
+#else
 #include "Kvaser.h"
-#include "SOLOMotorControllersKvaser.h" 
+#endif
+#include "SOLOMotorControllersImpl.h" 
 
 //For this Test, make sure you have calibrated your Motor and Hall sensors before
 //to know more please read: https://www.solomotorcontrollers.com/hall-sensors-to-solo-for-controlling-speed-torque-brushless-motor/
@@ -48,11 +52,15 @@ long actualMotorPosition = 0;
 void soloConfigInit() {
   //In this example, make sure you put SOLO into Closed-Loop Mode
   
-	CommunicationInterface* ci = new Kvaser(SOLOMotorControllers::CanbusBaudrate::rate1000);
+#ifdef ARDUINO
+	CommunicationInterface* ci = new MCP2515(CommunicationInterface::CanbusBaudrate::rate1000);
+#else
+	CommunicationInterface* ci = new Kvaser(CommunicationInterface::CanbusBaudrate::rate1000);
+#endif
 
   //Initialize the SOLO object
-  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
-  solo = new SOLOMotorControllersKvaser(ci);
+  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersImpl(0);
+  solo = new SOLOMotorControllersImpl(ci);
 
   //TRY CONNECT LOOP
   while(solo->CommunicationIsWorking() == false ){

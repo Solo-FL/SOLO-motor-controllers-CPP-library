@@ -18,8 +18,12 @@ To learn more please visit:  https://www.SOLOMotorControllers.com/
 #include <iostream>
 
 #include <conio.h>
+#ifdef ARDUINO
+#include "MCP2515.hpp"
+#else
 #include "Kvaser.h"
-#include "SOLOMotorControllersKvaser.h" 
+#endif
+#include "SOLOMotorControllersImpl.h" 
 
 SOLOMotorControllers *solo; 
 int error;
@@ -27,11 +31,15 @@ long commandMode;
 bool setIsSuccesfull;
 
 int main(void) {
-	CommunicationInterface* ci = new Kvaser(SOLOMotorControllers::CanbusBaudrate::rate1000);
-
+#ifdef ARDUINO
+	CommunicationInterface* ci = new MCP2515(CommunicationInterface::CanbusBaudrate::rate1000);
+#else
+	CommunicationInterface* ci = new Kvaser(CommunicationInterface::CanbusBaudrate::rate1000);
+#endif
+    
     //Initialize the SOLO object
-    //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
-    solo = new SOLOMotorControllersKvaser(ci);
+    //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersImpl(0);
+    solo = new SOLOMotorControllersImpl(ci);
   
   //Infinite Loop
   while(true){

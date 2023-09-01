@@ -22,11 +22,15 @@ public:
 
     virtual bool SendPdoSync(int& error) = 0;
 	virtual bool SendPdoRtr(int destination, int& error) = 0;
-	virtual bool PDOTransmit(int destination, uint8_t* informatrionToSend, int& error) = 0;
+	virtual bool PDOTransmit(int destination, uint8_t* informationToSend, int& error) = 0;
 	virtual bool PDOReceive(int source,  uint8_t* informationReceived, int& error) = 0;
 
     virtual bool Connect() = 0;
     virtual void Disconnect() = 0;
+
+    virtual void getErrorMode(int& errorMode) = 0;
+    virtual uint8_t getReceiveErrorCounter() = 0;
+    virtual uint8_t getTransmitErrorCounter() = 0;
 };
 
 

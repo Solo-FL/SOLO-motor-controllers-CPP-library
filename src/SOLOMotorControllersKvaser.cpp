@@ -28,7 +28,7 @@ SOLOMotorControllersKvaser::SOLOMotorControllersKvaser(CommunicationInterface* c
         long millisecondsTimeout, bool autoConnect)
 	:Address(deviceAddress)
 	, timeout(millisecondsTimeout)
-    , kvaser(ci)
+    , comIf(ci)
 {
 	if (Address == 0) //Address 0 is reserved for the host 
 	{
@@ -40,7 +40,7 @@ SOLOMotorControllersKvaser::SOLOMotorControllersKvaser(CommunicationInterface* c
 
 SOLOMotorControllersKvaser::~SOLOMotorControllersKvaser()
 {
-	kvaser->Disconnect();
+	comIf->Disconnect();
 }
 
 bool SOLOMotorControllersKvaser::Connect(UINT8 deviceAddress, 
@@ -70,7 +70,7 @@ bool SOLOMotorControllersKvaser::Connect(UINT8 deviceAddress,
 	}
 	timeout = millisecondsTimeout;
 
-	return kvaser->Connect();
+	return comIf->Connect();
 }
 
 bool SOLOMotorControllersKvaser::SetGuardTime(long guardtime, int &error)
@@ -82,7 +82,7 @@ bool SOLOMotorControllersKvaser::SetGuardTime(long guardtime, int &error)
         return false;
     }
     soloUtils->ConvertToData(guardtime, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_GuardTime, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_GuardTime, 0x00, informatrionToSend, error);
 }
 
 bool SOLOMotorControllersKvaser::SetGuardTime(long guardtime)
@@ -100,7 +100,7 @@ bool SOLOMotorControllersKvaser::SetLifeTimeFactor(long lifeTimeFactor, int &err
         return false;
     }
     soloUtils->ConvertToData(lifeTimeFactor, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_LifeTimeFactor, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_LifeTimeFactor, 0x00, informatrionToSend, error);
 }
 
 bool SOLOMotorControllersKvaser::SetLifeTimeFactor(long lifeTimeFactor)
@@ -117,7 +117,7 @@ bool SOLOMotorControllersKvaser::SetProducerHeartbeatTime(long producerHeartbeat
         return false;
     }
     soloUtils->ConvertToData(producerHeartbeatTime, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_ProducerHeartbeatTime, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_ProducerHeartbeatTime, 0x00, informatrionToSend, error);
 }
 
 bool SOLOMotorControllersKvaser::SetProducerHeartbeatTime(long producerHeartbeatTime)
@@ -193,7 +193,7 @@ bool SOLOMotorControllersKvaser::SetPdoParameterConfig(PdoParameterConfig config
 	informatrionToSend[1] = 0;
 	informatrionToSend[2] = config.parameterCobId >> 8;
 	informatrionToSend[3] = config.parameterCobId % 256;
-	boolean isSuccess = kvaser->CANOpenTransmit(Address, pdoParameterObjectByPdoParameterName[config.parameterName], 0x01, informatrionToSend, error);
+	boolean isSuccess = comIf->CANOpenTransmit(Address, pdoParameterObjectByPdoParameterName[config.parameterName], 0x01, informatrionToSend, error);
 	//std::cout << "SetPdoParameterConfiguration [1] return: "<< (int)isSuccess <<" error: "<< error<< " \n";
 	if(isSuccess)
 	{
@@ -208,7 +208,7 @@ bool SOLOMotorControllersKvaser::SetPdoParameterConfig(PdoParameterConfig config
 			informatrionToSend[3] = 0xFF;
 		}
 		
-		isSuccess = kvaser->CANOpenTransmit(Address, pdoParameterObjectByPdoParameterName[config.parameterName], 0x02, informatrionToSend, error);
+		isSuccess = comIf->CANOpenTransmit(Address, pdoParameterObjectByPdoParameterName[config.parameterName], 0x02, informatrionToSend, error);
 		//std::cout << "SetPdoParameterConfiguration [2] return: "<< (int)isSuccess <<" error: "<< error<< " \n";
 		
 		return isSuccess;
@@ -229,14 +229,14 @@ PdoParameterConfig SOLOMotorControllersKvaser::GetPdoParameterConfig(PdoParamete
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, parameterName, 0x1, informationToSend, informationReceived, error))
+	if (comIf->CANOpenReceive(Address, parameterName, 0x1, informationToSend, informationReceived, error))
 	{
 		config.parameterName = parameterName;
 		config.parameterCobId = (informationReceived[2] << 8) + informationReceived[3];
 		config.isPdoParameterEnable = informationReceived[0] & 0x80;
 		config.isRrtParameterEnable = informationReceived[0] & 0x40;
 
-		if (kvaser->CANOpenReceive(Address, parameterName, 0x2, informationToSend, informationReceived, error))
+		if (comIf->CANOpenReceive(Address, parameterName, 0x2, informationToSend, informationReceived, error))
 		{
 			config.syncParameterCount = informationReceived[3];
 			return config;
@@ -262,7 +262,7 @@ PdoParameterConfig SOLOMotorControllersKvaser::GetPdoParameterConfig(PdoParamete
   */
 bool SOLOMotorControllersKvaser::SendPdoSync(int &error)
 {
-	return kvaser->SendPdoSync(error);
+	return comIf->SendPdoSync(error);
 }
 
 /**
@@ -272,7 +272,7 @@ bool SOLOMotorControllersKvaser::SendPdoSync(int &error)
 bool SOLOMotorControllersKvaser::SendPdoSync()
 {
 	int error = SOLOMotorControllers::Error::noProcessedCommand;
-	return kvaser->SendPdoSync(error);
+	return comIf->SendPdoSync(error);
 }
 
 /**
@@ -293,7 +293,7 @@ bool SOLOMotorControllersKvaser::SendPdoRtr(PdoParameterName parameterName, int 
 		return false;
 	}
 
-	return kvaser->SendPdoRtr(adr, error);
+	return comIf->SendPdoRtr(adr, error);
 }
 
 /**
@@ -397,7 +397,7 @@ bool SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName parameter
 		return false;
 	}
 
-	return kvaser->PDOTransmit(adr, informatrionToSend, error);
+	return comIf->PDOTransmit(adr, informatrionToSend, error);
 }
 
 /**
@@ -432,7 +432,7 @@ bool SOLOMotorControllersKvaser::SetPdoParameterValue(PdoParameterName parameter
 		return false;
 	}
 
-	return kvaser->PDOTransmit(adr, informatrionToSend, error);
+	return comIf->PDOTransmit(adr, informatrionToSend, error);
 }
 
 /**
@@ -464,7 +464,7 @@ long SOLOMotorControllersKvaser::GetPdoParameterValueLong(PdoParameterName param
 		return false;
 	}
 
-	if (kvaser->PDOReceive(adr,informationReceived, error)) {
+	if (comIf->PDOReceive(adr,informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -487,7 +487,7 @@ float SOLOMotorControllersKvaser::GetPdoParameterValueFloat(PdoParameterName par
 		return false;
 	}
 
-	if (kvaser->PDOReceive(adr,informationReceived, error)) {
+	if (comIf->PDOReceive(adr,informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1;
@@ -509,7 +509,7 @@ bool SOLOMotorControllersKvaser::SetDeviceAddress(unsigned char deviceAddress, i
 		return false;
 	}
 	soloUtils->ConvertToData((long)deviceAddress, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_SetDeviceAddress, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_SetDeviceAddress, 0x00, informatrionToSend, error);
 
 }
 
@@ -538,7 +538,7 @@ bool SOLOMotorControllersKvaser::SetCommandMode(SOLOMotorControllers::CommandMod
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 	soloUtils->ConvertToData((long)mode, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_CommandMode, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_CommandMode, 0x00, informatrionToSend, error);
 
 }
 
@@ -571,7 +571,7 @@ bool SOLOMotorControllersKvaser::SetCurrentLimit(float currentLimit, int& error)
 		return false;
 	}
 	soloUtils->ConvertToData(currentLimit, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_CurrentLimit, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_CurrentLimit, 0x00, informatrionToSend, error);
 
 }
 
@@ -603,7 +603,7 @@ bool SOLOMotorControllersKvaser::SetTorqueReferenceIq(float torqueReferenceIq, i
 		return false;
 	}
 	soloUtils->ConvertToData(torqueReferenceIq, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_TorqueReferenceIq, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_TorqueReferenceIq, 0x00, informatrionToSend, error);
 
 }
 
@@ -635,7 +635,7 @@ bool SOLOMotorControllersKvaser::SetSpeedReference(long speedReference, int& err
 		return false;
 	}
 	soloUtils->ConvertToData(speedReference, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_SpeedReference, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_SpeedReference, 0x00, informatrionToSend, error);
 
 }
 
@@ -668,7 +668,7 @@ bool SOLOMotorControllersKvaser::SetPowerReference(float powerReference, int& er
 		return false;
 	}
 	soloUtils->ConvertToData(powerReference, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_PowerReference, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_PowerReference, 0x00, informatrionToSend, error);
 
 }
 
@@ -698,7 +698,7 @@ bool SOLOMotorControllersKvaser::MotorParametersIdentification(SOLOMotorControll
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 	soloUtils->ConvertToData((long)identification, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_MotorParametersIdentification, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_MotorParametersIdentification, 0x00, informatrionToSend, error);
 
 }
 
@@ -726,7 +726,7 @@ bool SOLOMotorControllersKvaser::EmergencyStop(int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	return kvaser->CANOpenTransmit(Address, Object_EmergencyStop, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_EmergencyStop, 0x00, informatrionToSend, error);
 
 }
 
@@ -758,7 +758,7 @@ bool SOLOMotorControllersKvaser::SetOutputPwmFrequencyKhz(long outputPwmFrequenc
 		return false;
 	}
 	soloUtils->ConvertToData(outputPwmFrequencyKhz, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_OutputPwmFrequency, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_OutputPwmFrequency, 0x00, informatrionToSend, error);
 
 }
 
@@ -791,7 +791,7 @@ bool SOLOMotorControllersKvaser::SetSpeedControllerKp(float speedControllerKp, i
 		return false;
 	}
 	soloUtils->ConvertToData(speedControllerKp, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_SpeedControllerKp, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_SpeedControllerKp, 0x00, informatrionToSend, error);
 
 }
 
@@ -825,7 +825,7 @@ bool SOLOMotorControllersKvaser::SetSpeedControllerKi(float speedControllerKi, i
 		return false;
 	}
 	soloUtils->ConvertToData(speedControllerKi, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_SpeedControllerKi, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_SpeedControllerKi, 0x00, informatrionToSend, error);
 
 }
 
@@ -855,7 +855,7 @@ bool SOLOMotorControllersKvaser::SetMotorDirection(SOLOMotorControllers::Directi
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 	soloUtils->ConvertToData((long)motorDirection, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_MotorDirection, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_MotorDirection, 0x00, informatrionToSend, error);
 
 }
 
@@ -889,7 +889,7 @@ bool SOLOMotorControllersKvaser::SetMotorResistance(float motorResistance, int& 
 		return false;
 	}
 	soloUtils->ConvertToData(motorResistance, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_MotorResistance, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_MotorResistance, 0x00, informatrionToSend, error);
 
 }
 
@@ -923,7 +923,7 @@ bool SOLOMotorControllersKvaser::SetMotorInductance(float motorInductance, int& 
 		return false;
 	}
 	soloUtils->ConvertToData(motorInductance, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_MotorInductance, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_MotorInductance, 0x00, informatrionToSend, error);
 
 }
 
@@ -957,7 +957,7 @@ bool SOLOMotorControllersKvaser::SetMotorPolesCounts(long motorPolesCounts, int&
 	}
 
 	soloUtils->ConvertToData(motorPolesCounts, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_MotorPolesCounts, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_MotorPolesCounts, 0x00, informatrionToSend, error);
 
 }
 
@@ -990,7 +990,7 @@ bool SOLOMotorControllersKvaser::SetIncrementalEncoderLines(long incrementalEnco
 		return false;
 	}
 	soloUtils->ConvertToData(incrementalEncoderLines, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_IncrementalEncoderLines, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_IncrementalEncoderLines, 0x00, informatrionToSend, error);
 
 }
 
@@ -1024,7 +1024,7 @@ bool SOLOMotorControllersKvaser::SetSpeedLimit(long speedLimit, int& error)
 		return false;
 	}
 	soloUtils->ConvertToData(speedLimit, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_SpeedLimit, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_SpeedLimit, 0x00, informatrionToSend, error);
 
 }
 
@@ -1053,7 +1053,7 @@ bool SOLOMotorControllersKvaser::SetFeedbackControlMode(SOLOMotorControllers::Fe
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 	soloUtils->ConvertToData((long)mode, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_FeedbackControlMode, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_FeedbackControlMode, 0x00, informatrionToSend, error);
 
 }
 
@@ -1079,7 +1079,7 @@ bool SOLOMotorControllersKvaser::ResetFactory(int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x01 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	return kvaser->CANOpenTransmit(Address, Object_ResetFactory, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_ResetFactory, 0x00, informatrionToSend, error);
 
 }
 
@@ -1115,7 +1115,7 @@ bool SOLOMotorControllersKvaser::SetMotorType(SOLOMotorControllers::MotorType mo
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 	soloUtils->ConvertToData((long)motorType, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_MotorType, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_MotorType, 0x00, informatrionToSend, error);
 
 }
 
@@ -1145,7 +1145,7 @@ bool SOLOMotorControllersKvaser::SetControlMode(SOLOMotorControllers::ControlMod
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 	soloUtils->ConvertToData((long)controlMode, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_ControlMode, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_ControlMode, 0x00, informatrionToSend, error);
 
 }
 
@@ -1179,7 +1179,7 @@ bool SOLOMotorControllersKvaser::SetCurrentControllerKp(float currentControllerK
 		return false;
 	}
 	soloUtils->ConvertToData(currentControllerKp, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_CurrentControllerKp, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_CurrentControllerKp, 0x00, informatrionToSend, error);
 
 }
 
@@ -1211,7 +1211,7 @@ bool SOLOMotorControllersKvaser::SetCurrentControllerKi(float currentControllerK
 		return false;
 	}
 	soloUtils->ConvertToData(currentControllerKi, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_CurrentControllerKi, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_CurrentControllerKi, 0x00, informatrionToSend, error);
 
 }
 
@@ -1254,7 +1254,7 @@ bool SOLOMotorControllersKvaser::SetMagnetizingCurrentIdReference(float magnetiz
 		return false;
 	}
 	soloUtils->ConvertToData(magnetizingCurrentIdReference, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_MagnetizingCurrentIdReference, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_MagnetizingCurrentIdReference, 0x00, informatrionToSend, error);
 
 }
 
@@ -1291,7 +1291,7 @@ bool SOLOMotorControllersKvaser::SetPositionReference(long positionReference, in
 		return false;
 	}
 	soloUtils->ConvertToData(positionReference, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_PositionReference, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_PositionReference, 0x00, informatrionToSend, error);
 
 }
 
@@ -1325,7 +1325,7 @@ bool SOLOMotorControllersKvaser::SetPositionControllerKp(float positionControlle
 		return false;
 	}
 	soloUtils->ConvertToData(positionControllerKp, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_PositionControllerKp, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_PositionControllerKp, 0x00, informatrionToSend, error);
 
 }
 
@@ -1357,7 +1357,7 @@ bool SOLOMotorControllersKvaser::SetPositionControllerKi(float positionControlle
 		return false;
 	}
 	soloUtils->ConvertToData(positionControllerKi, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_PositionControllerKi, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_PositionControllerKi, 0x00, informatrionToSend, error);
 
 }
 
@@ -1383,7 +1383,7 @@ bool SOLOMotorControllersKvaser::ResetPositionToZero(int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x01 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	return kvaser->CANOpenTransmit(Address, Object_ResetPositionToZero, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_ResetPositionToZero, 0x00, informatrionToSend, error);
 
 }
 
@@ -1409,7 +1409,7 @@ bool SOLOMotorControllersKvaser::OverwriteErrorRegister(int& error)
 {
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	return kvaser->CANOpenTransmit(Address, Object_OverwriteErrorRegister, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_OverwriteErrorRegister, 0x00, informatrionToSend, error);
 
 }
 
@@ -1443,7 +1443,7 @@ bool SOLOMotorControllersKvaser::SetObserverGainBldcPmsm(float observerGain, int
 		return false;
 	}
 	soloUtils->ConvertToData(observerGain, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_ObserverGainBldcPmsm, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_ObserverGainBldcPmsm, 0x00, informatrionToSend, error);
 
 }
 
@@ -1479,7 +1479,7 @@ bool SOLOMotorControllersKvaser::SetObserverGainBldcPmsmUltrafast(float observer
 		return false;
 	}
 	soloUtils->ConvertToData(observerGain, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_ObserverGainBldcPmsmUltrafast, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_ObserverGainBldcPmsmUltrafast, 0x00, informatrionToSend, error);
 
 }
 
@@ -1515,7 +1515,7 @@ bool SOLOMotorControllersKvaser::SetObserverGainDc(float observerGain, int& erro
 		return false;
 	}
 	soloUtils->ConvertToData(observerGain, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_ObserverGainDc, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_ObserverGainDc, 0x00, informatrionToSend, error);
 
 }
 
@@ -1550,7 +1550,7 @@ bool SOLOMotorControllersKvaser::SetFilterGainBldcPmsm(float filterGain, int& er
 		return false;
 	}
 	soloUtils->ConvertToData(filterGain, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_FilterGainBldcPmsm, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_FilterGainBldcPmsm, 0x00, informatrionToSend, error);
 
 }
 
@@ -1584,7 +1584,7 @@ bool SOLOMotorControllersKvaser::SetFilterGainBldcPmsmUltrafast(float filterGain
 		return false;
 	}
 	soloUtils->ConvertToData(filterGain, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_FilterGainBldcPmsmUltrafast, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_FilterGainBldcPmsmUltrafast, 0x00, informatrionToSend, error);
 
 }
 
@@ -1613,7 +1613,7 @@ bool SOLOMotorControllersKvaser::SetUartBaudrate(SOLOMotorControllers::UartBaudr
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 	soloUtils->ConvertToData((long)baudrate, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_UartBaudrate, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_UartBaudrate, 0x00, informatrionToSend, error);
 
 }
 
@@ -1641,7 +1641,7 @@ bool SOLOMotorControllersKvaser::SensorCalibration(SOLOMotorControllers::Positio
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 	soloUtils->ConvertToData((long)calibrationAction, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_SensorCalibration, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_SensorCalibration, 0x00, informatrionToSend, error);
 
 }
 
@@ -1674,7 +1674,7 @@ bool SOLOMotorControllersKvaser::SetEncoderHallCcwOffset(float encoderHallOffset
 		return false;
 	}
 	soloUtils->ConvertToData(encoderHallOffset, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_EncoderHallCcwOffset, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_EncoderHallCcwOffset, 0x00, informatrionToSend, error);
 
 }
 
@@ -1708,7 +1708,7 @@ bool SOLOMotorControllersKvaser::SetEncoderHallCwOffset(float encoderHallOffset,
 		return false;
 	}
 	soloUtils->ConvertToData(encoderHallOffset, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_EncoderHallCwOffset, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_EncoderHallCwOffset, 0x00, informatrionToSend, error);
 
 }
 
@@ -1742,7 +1742,7 @@ bool SOLOMotorControllersKvaser::SetSpeedAccelerationValue(float speedAccelerati
 		return false;
 	}
 	soloUtils->ConvertToData(speedAccelerationValue, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_SpeedAccelerationValue, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_SpeedAccelerationValue, 0x00, informatrionToSend, error);
 
 }
 
@@ -1776,7 +1776,7 @@ bool SOLOMotorControllersKvaser::SetSpeedDecelerationValue(float speedDecelerati
 		return false;
 	}
 	soloUtils->ConvertToData(speedDecelerationValue, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_SpeedDecelerationValue, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_SpeedDecelerationValue, 0x00, informatrionToSend, error);
 
 }
 
@@ -1805,7 +1805,7 @@ bool SOLOMotorControllersKvaser::SetCanbusBaudrate(CanbusBaudrate canbusBaudrate
 	uint8_t informatrionToSend[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 	soloUtils->ConvertToData((long)canbusBaudrate, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_CanbusBaudrate, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_CanbusBaudrate, 0x00, informatrionToSend, error);
 
 }
 
@@ -1838,7 +1838,7 @@ bool SOLOMotorControllersKvaser::SetAnalogueSpeedResolutionDivisionCoefficient(l
 		return false;
 	}
     soloUtils->ConvertToData((long) divisionCoefficient, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_ASRDC, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_ASRDC, 0x00, informatrionToSend, error);
 }
 
 /**
@@ -1867,7 +1867,7 @@ bool SOLOMotorControllersKvaser::SetMotionProfileMode( MotionProfileMode motionP
     uint8_t informatrionToSend[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
     soloUtils->ConvertToData((long) motionProfileMode, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_MotionProfileMode, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_MotionProfileMode, 0x00, informatrionToSend, error);
 }
 
 /**
@@ -1899,7 +1899,7 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable1(float MotionProfileVa
 		return false;
 	}
     soloUtils->ConvertToData((float) MotionProfileVariable1, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_MotionProfileVariable1, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_MotionProfileVariable1, 0x00, informatrionToSend, error);
 }
 
 /**
@@ -1930,7 +1930,7 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable2(float MotionProfileVa
 		return false;
 	}
     soloUtils->ConvertToData((float) MotionProfileVariable2, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_MotionProfileVariable2, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_MotionProfileVariable2, 0x00, informatrionToSend, error);
 }
 
 /**
@@ -1961,7 +1961,7 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable3(float MotionProfileVa
 		return false;
 	}
     soloUtils->ConvertToData((float) MotionProfileVariable3, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_MotionProfileVariable3, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_MotionProfileVariable3, 0x00, informatrionToSend, error);
 }
 
 /**
@@ -1992,7 +1992,7 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable4(float MotionProfileVa
 		return false;
 	}
     soloUtils->ConvertToData((float) MotionProfileVariable4, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_MotionProfileVariable4, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_MotionProfileVariable4, 0x00, informatrionToSend, error);
 }
 
 /**
@@ -2023,7 +2023,7 @@ bool SOLOMotorControllersKvaser::SetMotionProfileVariable5(float MotionProfileVa
 		return false;
 	}
     soloUtils->ConvertToData((float) MotionProfileVariable5, informatrionToSend);
-	return kvaser->CANOpenTransmit(Address, Object_MotionProfileVariable5, 0x00, informatrionToSend, error);
+	return comIf->CANOpenTransmit(Address, Object_MotionProfileVariable5, 0x00, informatrionToSend, error);
 }
 
 /**
@@ -2233,7 +2233,7 @@ long SOLOMotorControllersKvaser::GetReadErrorRegister(int& error)
 	uint8_t  informationToSend[4] = { 0x00,0x00,0x00,0x00 };
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (kvaser->CANOpenReceive(Address, Object_ReadErrorRegister, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_ReadErrorRegister, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -2249,7 +2249,7 @@ long SOLOMotorControllersKvaser::GetGuardTime(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_GuardTime, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_GuardTime, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -2265,7 +2265,7 @@ long SOLOMotorControllersKvaser::GetLifeTimeFactor(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_LifeTimeFactor, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_LifeTimeFactor, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -2281,7 +2281,7 @@ long SOLOMotorControllersKvaser::GetProducerHeartbeatTime(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_ProducerHeartbeatTime, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_ProducerHeartbeatTime, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -2304,7 +2304,7 @@ long SOLOMotorControllersKvaser::GetDeviceAddress(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_SetDeviceAddress, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_SetDeviceAddress, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -2334,7 +2334,7 @@ float SOLOMotorControllersKvaser::GetPhaseAVoltage(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_PhaseAVoltage, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_PhaseAVoltage, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2365,7 +2365,7 @@ float SOLOMotorControllersKvaser::GetPhaseBVoltage(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_PhaseBVoltage, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_PhaseBVoltage, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2396,7 +2396,7 @@ float SOLOMotorControllersKvaser::GetPhaseACurrent(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_PhaseACurrent, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_PhaseACurrent, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2427,7 +2427,7 @@ float SOLOMotorControllersKvaser::GetPhaseBCurrent(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_PhaseBCurrent, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_PhaseBCurrent, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2457,7 +2457,7 @@ float SOLOMotorControllersKvaser::GetBusVoltage(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_BusVoltage, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_BusVoltage, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2488,7 +2488,7 @@ float SOLOMotorControllersKvaser::GetDcMotorCurrentIm(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_DcMotorCurrentIm, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_DcMotorCurrentIm, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2519,7 +2519,7 @@ float SOLOMotorControllersKvaser::GetDcMotorVoltageVm(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_DcMotorVoltageVm, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_DcMotorVoltageVm, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2550,7 +2550,7 @@ float SOLOMotorControllersKvaser::GetSpeedControllerKp(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_SpeedControllerKp, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_SpeedControllerKp, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2581,7 +2581,7 @@ float SOLOMotorControllersKvaser::GetSpeedControllerKi(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_SpeedControllerKi, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_SpeedControllerKi, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2611,7 +2611,7 @@ long SOLOMotorControllersKvaser::GetOutputPwmFrequencyKhz(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_OutputPwmFrequency, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_OutputPwmFrequency, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived) / 1000L); //PWM reading is in Hz
 	}
 	return -1;
@@ -2641,7 +2641,7 @@ float SOLOMotorControllersKvaser::GetCurrentLimit(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_CurrentLimit, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_CurrentLimit, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2672,7 +2672,7 @@ float SOLOMotorControllersKvaser::GetQuadratureCurrentIqFeedback(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_QuadratureCurrentIqFeedback, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_QuadratureCurrentIqFeedback, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2703,7 +2703,7 @@ float SOLOMotorControllersKvaser::GetMagnetizingCurrentIdFeedback(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_MagnetizingCurrentIdFeedback, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_MagnetizingCurrentIdFeedback, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2733,7 +2733,7 @@ long SOLOMotorControllersKvaser::GetMotorPolesCounts(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_MotorPolesCounts, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_MotorPolesCounts, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -2762,7 +2762,7 @@ long SOLOMotorControllersKvaser::GetIncrementalEncoderLines(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_IncrementalEncoderLines, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_IncrementalEncoderLines, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -2792,7 +2792,7 @@ float SOLOMotorControllersKvaser::GetCurrentControllerKp(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_CurrentControllerKp, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_CurrentControllerKp, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2823,7 +2823,7 @@ float SOLOMotorControllersKvaser::GetCurrentControllerKi(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_CurrentControllerKi, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_CurrentControllerKi, 0x22, informationToSend, informationReceived, error)) {
 		float readValue = soloUtils->ConvertToFloat(informationReceived);
 		return readValue*0.00005;
 	}
@@ -2854,7 +2854,7 @@ float SOLOMotorControllersKvaser::GetBoardTemperature(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_BoardTemperature, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_BoardTemperature, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -2884,7 +2884,7 @@ float SOLOMotorControllersKvaser::GetMotorResistance(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_MotorResistance, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_MotorResistance, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived)*8);
 	}
 	return -1.0;
@@ -2915,7 +2915,7 @@ float SOLOMotorControllersKvaser::GetMotorInductance(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_MotorInductance, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_MotorInductance, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived)/8);
 	}
 	return -1.0;
@@ -2946,7 +2946,7 @@ long SOLOMotorControllersKvaser::GetSpeedFeedback(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_SpeedFeedback, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_SpeedFeedback, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -2976,7 +2976,7 @@ long SOLOMotorControllersKvaser::GetMotorType(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_MotorType, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_MotorType, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3006,7 +3006,7 @@ long SOLOMotorControllersKvaser::GetFeedbackControlMode(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_FeedbackControlMode, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_FeedbackControlMode, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3036,7 +3036,7 @@ long SOLOMotorControllersKvaser::GetCommandMode(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_CommandMode, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_CommandMode, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3066,7 +3066,7 @@ long SOLOMotorControllersKvaser::GetControlMode(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_ControlMode, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_ControlMode, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3096,7 +3096,7 @@ long SOLOMotorControllersKvaser::GetSpeedLimit(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_SpeedLimit, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_SpeedLimit, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3126,7 +3126,7 @@ float SOLOMotorControllersKvaser::GetPositionControllerKp(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_PositionControllerKp, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_PositionControllerKp, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3157,7 +3157,7 @@ float SOLOMotorControllersKvaser::GetPositionControllerKi(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_PositionControllerKi, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_PositionControllerKi, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3188,7 +3188,7 @@ long SOLOMotorControllersKvaser::GetPositionCountsFeedback(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_PositionCountsFeedback, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_PositionCountsFeedback, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3219,7 +3219,7 @@ long SOLOMotorControllersKvaser::GetErrorRegister(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_OverwriteErrorRegister, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_OverwriteErrorRegister, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3249,7 +3249,7 @@ long SOLOMotorControllersKvaser::GetDeviceFirmwareVersion(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_DeviceFirmwareVersion, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_DeviceFirmwareVersion, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3278,7 +3278,7 @@ long SOLOMotorControllersKvaser::GetDeviceHardwareVersion(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_DeviceHardwareVersion, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_DeviceHardwareVersion, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3308,7 +3308,7 @@ float SOLOMotorControllersKvaser::GetTorqueReferenceIq(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_TorqueReferenceIq, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_TorqueReferenceIq, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3339,7 +3339,7 @@ long SOLOMotorControllersKvaser::GetSpeedReference(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_SpeedReference, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_SpeedReference, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3371,7 +3371,7 @@ float SOLOMotorControllersKvaser::GetMagnetizingCurrentIdReference(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_MagnetizingCurrentIdReference, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_MagnetizingCurrentIdReference, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3403,7 +3403,7 @@ long SOLOMotorControllersKvaser::GetPositionReference(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_PositionReference, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_PositionReference, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3434,7 +3434,7 @@ float SOLOMotorControllersKvaser::GetPowerReference(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_PowerReference, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_PowerReference, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3464,7 +3464,7 @@ long SOLOMotorControllersKvaser::GetMotorDirection(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_MotorDirection, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_MotorDirection, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3493,7 +3493,7 @@ float SOLOMotorControllersKvaser::GetObserverGainBldcPmsm(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_ObserverGainBldcPmsm, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_ObserverGainBldcPmsm, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3522,7 +3522,7 @@ float SOLOMotorControllersKvaser::GetObserverGainBldcPmsmUltrafast(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_ObserverGainBldcPmsmUltrafast, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_ObserverGainBldcPmsmUltrafast, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3551,7 +3551,7 @@ float SOLOMotorControllersKvaser::GetObserverGainDc(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_ObserverGainDc, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_ObserverGainDc, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3581,7 +3581,7 @@ float SOLOMotorControllersKvaser::GetFilterGainBldcPmsm(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_FilterGainBldcPmsm, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_FilterGainBldcPmsm, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3612,7 +3612,7 @@ float SOLOMotorControllersKvaser::GetFilterGainBldcPmsmUltrafast(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_FilterGainBldcPmsmUltrafast, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_FilterGainBldcPmsmUltrafast, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3642,7 +3642,7 @@ float SOLOMotorControllersKvaser::Get3PhaseMotorAngle(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_3PhaseMotorAngle, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_3PhaseMotorAngle, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3671,7 +3671,7 @@ float SOLOMotorControllersKvaser::GetEncoderHallCcwOffset(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_EncoderHallCcwOffset, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_EncoderHallCcwOffset, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3700,7 +3700,7 @@ float SOLOMotorControllersKvaser::GetEncoderHallCwOffset(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_EncoderHallCwOffset, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_EncoderHallCwOffset, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3729,7 +3729,7 @@ long SOLOMotorControllersKvaser::GetUartBaudrate(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_UartBaudrate, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_UartBaudrate, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3760,7 +3760,7 @@ float SOLOMotorControllersKvaser::GetSpeedAccelerationValue(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_SpeedAccelerationValue, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_SpeedAccelerationValue, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3793,7 +3793,7 @@ float SOLOMotorControllersKvaser::GetSpeedDecelerationValue(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_SpeedDecelerationValue, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_SpeedDecelerationValue, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
 	return -1.0;
@@ -3823,7 +3823,7 @@ long SOLOMotorControllersKvaser::GetAnalogueSpeedResolutionDivisionCoefficient(i
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (kvaser->CANOpenReceive(Address, Object_ASRDC, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_ASRDC, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
     return -1 ;
@@ -3853,7 +3853,7 @@ long SOLOMotorControllersKvaser::GetEncoderIndexCounts(int& error)
 	uint8_t  informationReceived[4] = { 0x00,0x00,0x00,0x00 };
 	error = SOLOMotorControllers::Error::noProcessedCommand;
 
-	if (kvaser->CANOpenReceive(Address, Object_EncoderIndexCounts, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_EncoderIndexCounts, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
 	return -1;
@@ -3907,7 +3907,7 @@ long SOLOMotorControllersKvaser::GetMotionProfileMode(int &error)
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (kvaser->CANOpenReceive(Address, Object_MotionProfileMode, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_MotionProfileMode, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToLong(informationReceived));
 	}
     return -1 ;
@@ -3935,7 +3935,7 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable1(int &error)
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (kvaser->CANOpenReceive(Address, Object_MotionProfileVariable1, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_MotionProfileVariable1, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
     return -1 ;
@@ -3963,7 +3963,7 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable2(int &error)
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (kvaser->CANOpenReceive(Address, Object_MotionProfileVariable2, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_MotionProfileVariable2, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
     return -1 ;
@@ -3991,7 +3991,7 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable3(int &error)
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (kvaser->CANOpenReceive(Address, Object_MotionProfileVariable3, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_MotionProfileVariable3, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
     return -1 ;
@@ -4019,7 +4019,7 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable4(int &error)
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (kvaser->CANOpenReceive(Address, Object_MotionProfileVariable4, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_MotionProfileVariable4, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
     return -1 ;
@@ -4047,7 +4047,7 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable5(int &error)
     uint8_t  informationToSend  [4] = {0x00,0x00,0x00,0x00};
     uint8_t  informationReceived[4] = {0x00,0x00,0x00,0x00};
     error = SOLOMotorControllers::Error::noProcessedCommand;
-	if (kvaser->CANOpenReceive(Address, Object_MotionProfileVariable5, 0x22, informationToSend, informationReceived, error)) {
+	if (comIf->CANOpenReceive(Address, Object_MotionProfileVariable5, 0x22, informationToSend, informationReceived, error)) {
 		return (soloUtils->ConvertToFloat(informationReceived));
 	}
     return -1 ; 
@@ -4066,12 +4066,12 @@ float SOLOMotorControllersKvaser::GetMotionProfileVariable5()
 
 void SOLOMotorControllersKvaser::GeneralCanbusRead(uint16_t *ID , uint8_t *DLC, uint8_t *Data)
 {
-	kvaser->CANOpenGenericReceive(ID , DLC, Data);
+	comIf->CANOpenGenericReceive(ID , DLC, Data);
 }
 
 void SOLOMotorControllersKvaser::GeneralCanbusWrite(uint16_t ID, uint8_t *DLC, uint8_t *Data, int &error)
 {
-	kvaser->CANOpenGenericTransmit(ID , DLC, Data, error);
+	comIf->CANOpenGenericTransmit(ID , DLC, Data, error);
 }
 
 /**

@@ -21,7 +21,6 @@
 #include "SOLOMotorControllersUtils.h"
 
 #include "canlib.h"
-//#include "Kvaser.h"
 #include "CommunicationInterface.h"
 #include <map>
 
@@ -160,51 +159,50 @@ class SOLOMotorControllersKvaser : public SOLOMotorControllers
 {
 
 private:
-	uint8_t Address;
-	//canHandle hnd;		
-	CommunicationInterface* kvaser;
-	SOLOMotorControllersUtils *soloUtils;
-	long timeout;
-	long canBaudrate;
-	int pdoParameterObjectByPdoParameterName[PdoParameterNameCount];
+    uint8_t Address;
+    CommunicationInterface* comIf;
+    SOLOMotorControllersUtils* soloUtils;
+    long timeout;
+    long canBaudrate;
+    int pdoParameterObjectByPdoParameterName[PdoParameterNameCount];
 
 public:
-	int pdoParameterCobIdByPdoParameterName[PdoParameterNameCount];
-	SOLOMotorControllersKvaser(CommunicationInterface* ci,
+    int pdoParameterCobIdByPdoParameterName[PdoParameterNameCount];
+    SOLOMotorControllersKvaser(CommunicationInterface* ci,
             UINT8 deviceAddress = 0,
             SOLOMotorControllers::CanbusBaudrate baudrate = SOLOMotorControllers::CanbusBaudrate::rate1000,
-	 		long millisecondsTimeout = 200, bool autoConnect = true);
+            long millisecondsTimeout = 200, bool autoConnect = true);
 
-	~SOLOMotorControllersKvaser();
+    ~SOLOMotorControllersKvaser();
 
 private:
-	float 	ConvertToFloat(unsigned char data[]);
-	long  	ConvertToLong(unsigned char data[]);
-	void  	ConvertToData(float f, unsigned char data[]);
-	void  	ConvertToData(long l, unsigned char data[]);
-	void  	ExtractData(unsigned char _Data[], unsigned char _ExtractedData[]);
+    float   ConvertToFloat(unsigned char data[]);
+    long    ConvertToLong(unsigned char data[]);
+    void    ConvertToData(float f, unsigned char data[]);
+    void    ConvertToData(long l, unsigned char data[]);
+    void    ExtractData(unsigned char _Data[], unsigned char _ExtractedData[]);
 
 public:
-	bool Connect(UINT8 deviceAddress, 
-		SOLOMotorControllers::CanbusBaudrate baudrate = SOLOMotorControllers::CanbusBaudrate::rate1000,
-		long millisecondsTimeout = 200);
+    bool Connect(UINT8 deviceAddress, 
+        SOLOMotorControllers::CanbusBaudrate baudrate = SOLOMotorControllers::CanbusBaudrate::rate1000,
+        long millisecondsTimeout = 200);
 
-	bool Connect() override { return kvaser->Connect(); };
-	void Disconnect() override { return kvaser->Disconnect(); };
+    bool Connect() override { return comIf->Connect(); };
+    void Disconnect() override { return comIf->Disconnect(); };
 
-	//void Disconnect();
-	
+    //void Disconnect();
+    
 /** @addtogroup CANOpen_Write_Functions_Specific Specific CANOpen Write Functions
   * @{
   */
-	//----------Write  SOLOMotorControllersCanopen----------
-	bool SetGuardTime(long guardtime, int& error);
-	bool SetGuardTime(long guardtime);
-	bool SetLifeTimeFactor(long lifeTimeFactor, int& error);
-	bool SetLifeTimeFactor(long lifeTimeFactor);
-	bool SetProducerHeartbeatTime(long producerHeartbeatTime, int& error);
-	bool SetProducerHeartbeatTime(long producerHeartbeatTime);
-	bool SetPdoParameterConfig(PdoParameterConfig config, int &error);
+    //----------Write  SOLOMotorControllersCanopen----------
+    bool SetGuardTime(long guardtime, int& error);
+    bool SetGuardTime(long guardtime);
+    bool SetLifeTimeFactor(long lifeTimeFactor, int& error);
+    bool SetLifeTimeFactor(long lifeTimeFactor);
+    bool SetProducerHeartbeatTime(long producerHeartbeatTime, int& error);
+    bool SetProducerHeartbeatTime(long producerHeartbeatTime);
+    bool SetPdoParameterConfig(PdoParameterConfig config, int &error);
 
 /**
   * @}
@@ -213,51 +211,51 @@ public:
 /** @addtogroup CANOpen_PDO_Functions CANOpen Functions for Work with PDO Objects
   * @{
   */
-	bool 	SetPdoParameterCobbIdInputValidation(PdoParameterName parameterName, int parameterCobbId, int &error);
-	bool 	SetSyncParameterCountInputValidation(uint8_t parameterCount, int &error);
-	long 	GetPdoParameterValueLong(PdoParameterName parameterName, int &error);
-	float 	GetPdoParameterValueFloat(PdoParameterName parameterName, int &error);
-	bool 	PdoRtrValidParameter(PdoParameterName parameterName, int &error);
-	void 	InitPdoConfig();
-	long 	GetPdoParameterCobId(PdoParameterName parameterName, int &error);
-	bool 	SetPdoParameterValue(PdoParameterName parameterName, long value, int &error);
-	bool 	SetPdoParameterValue(PdoParameterName parameterName, long value);
-	bool 	SetPdoParameterValue(PdoParameterName parameterName, float value, int &error);
-	bool 	SetPdoParameterValue(PdoParameterName parameterName, float value);
-	
-	bool SendPdoSync(int &error);
-	bool SendPdoSync();
-	bool SendPdoRtr(PdoParameterName parameterName, int &error);
-	bool SendPdoRtr(PdoParameterName parameterName);
-	
+    bool    SetPdoParameterCobbIdInputValidation(PdoParameterName parameterName, int parameterCobbId, int &error);
+    bool    SetSyncParameterCountInputValidation(uint8_t parameterCount, int &error);
+    long    GetPdoParameterValueLong(PdoParameterName parameterName, int &error);
+    float   GetPdoParameterValueFloat(PdoParameterName parameterName, int &error);
+    bool    PdoRtrValidParameter(PdoParameterName parameterName, int &error);
+    void    InitPdoConfig();
+    long    GetPdoParameterCobId(PdoParameterName parameterName, int &error);
+    bool    SetPdoParameterValue(PdoParameterName parameterName, long value, int &error);
+    bool    SetPdoParameterValue(PdoParameterName parameterName, long value);
+    bool    SetPdoParameterValue(PdoParameterName parameterName, float value, int &error);
+    bool    SetPdoParameterValue(PdoParameterName parameterName, float value);
+    
+    bool SendPdoSync(int &error);
+    bool SendPdoSync();
+    bool SendPdoRtr(PdoParameterName parameterName, int &error);
+    bool SendPdoRtr(PdoParameterName parameterName);
+    
 
-	bool SetPdoPositionReference(long positionReference, int& error);
-	bool SetPdoPositionReference(long positionReference);
-	bool SetPdoSpeedReference(long speedReference, int &error);
-	bool SetPdoSpeedReference(long speedReference);
-	bool SetPdoTorqueReferenceIq(float torqueReferenceIq, int& error);
-	bool SetPdoTorqueReferenceIq(float torqueReferenceIq);
-	bool SetPdoMagnetizingCurrentIdReference(float magnetizingCurrentIdReference, int& error);
-	bool SetPdoMagnetizingCurrentIdReference(float magnetizingCurrentIdReference);
-	bool SetPdoControlMode(SOLOMotorControllers::ControlMode controlMode, int& error);
-	bool SetPdoControlMode(SOLOMotorControllers::ControlMode controlMode);
-	bool SetPdoMotorDirection(SOLOMotorControllers::Direction motorDirection, int& error);
-	bool SetPdoMotorDirection(SOLOMotorControllers::Direction motorDirection);
+    bool SetPdoPositionReference(long positionReference, int& error);
+    bool SetPdoPositionReference(long positionReference);
+    bool SetPdoSpeedReference(long speedReference, int &error);
+    bool SetPdoSpeedReference(long speedReference);
+    bool SetPdoTorqueReferenceIq(float torqueReferenceIq, int& error);
+    bool SetPdoTorqueReferenceIq(float torqueReferenceIq);
+    bool SetPdoMagnetizingCurrentIdReference(float magnetizingCurrentIdReference, int& error);
+    bool SetPdoMagnetizingCurrentIdReference(float magnetizingCurrentIdReference);
+    bool SetPdoControlMode(SOLOMotorControllers::ControlMode controlMode, int& error);
+    bool SetPdoControlMode(SOLOMotorControllers::ControlMode controlMode);
+    bool SetPdoMotorDirection(SOLOMotorControllers::Direction motorDirection, int& error);
+    bool SetPdoMotorDirection(SOLOMotorControllers::Direction motorDirection);
 
-	long 	GetPdoPositionCountsFeedback(int& error);
-	long 	GetPdoPositionCountsFeedback();
-	long	GetPdoSpeedFeedback (int &error);
-	long 	GetPdoSpeedFeedback ();
-	float 	GetPdoQuadratureCurrentIqFeedback(int& error);
-	float 	GetPdoQuadratureCurrentIqFeedback();
-	float 	GetPdoMagnetizingCurrentIdFeedback(int& error);
-	float 	GetPdoMagnetizingCurrentIdFeedback();
-	long 	GetPdoErrorRegister(int& error);
-	long 	GetPdoErrorRegister();
-	float 	GetPdoBoardTemperature(int& error);
-	float 	GetPdoBoardTemperature();
-	PdoParameterConfig 	GetPdoParameterConfig(PdoParameterName parameterName, int &error);
-	bool 	UpdatePdoParameterCobIdByPdoParameterName();
+    long    GetPdoPositionCountsFeedback(int& error);
+    long    GetPdoPositionCountsFeedback();
+    long    GetPdoSpeedFeedback (int &error);
+    long    GetPdoSpeedFeedback ();
+    float   GetPdoQuadratureCurrentIqFeedback(int& error);
+    float   GetPdoQuadratureCurrentIqFeedback();
+    float   GetPdoMagnetizingCurrentIdFeedback(int& error);
+    float   GetPdoMagnetizingCurrentIdFeedback();
+    long    GetPdoErrorRegister(int& error);
+    long    GetPdoErrorRegister();
+    float   GetPdoBoardTemperature(int& error);
+    float   GetPdoBoardTemperature();
+    PdoParameterConfig  GetPdoParameterConfig(PdoParameterName parameterName, int &error);
+    bool    UpdatePdoParameterCobIdByPdoParameterName();
 
 /**
   * @}
@@ -266,94 +264,94 @@ public:
 /** @addtogroup CANOpen_Write_Functions Standard CANOpen Write Functions
   * @{
   */
-	//----------Write  SOLOMotorControllers----------   
-	bool SetDeviceAddress(unsigned char deviceAddress, int& error) override;
-	bool SetDeviceAddress(unsigned char deviceAddress) override;
-	bool SetCommandMode(SOLOMotorControllers::CommandMode mode, int& error) override;
-	bool SetCommandMode(SOLOMotorControllers::CommandMode mode) override;
-	bool SetCurrentLimit(float currentLimit, int& error) override;
-	bool SetCurrentLimit(float currentLimit) override;
-	bool SetTorqueReferenceIq(float torqueReferenceIq, int& error) override;
-	bool SetTorqueReferenceIq(float torqueReferenceIq) override;
-	bool SetSpeedReference(long speedReference, int& error) override;
-	bool SetSpeedReference(long speedReference) override;
-	bool SetPowerReference(float powerReference, int& error) override;
-	bool SetPowerReference(float powerReference) override;
-	bool MotorParametersIdentification(SOLOMotorControllers::Action identification, int& error) override;
-	bool MotorParametersIdentification(SOLOMotorControllers::Action identification) override;
-	bool EmergencyStop(int& error) override;
-	bool EmergencyStop() override;
-	bool SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz, int& error) override;
-	bool SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz) override;
-	bool SetSpeedControllerKp(float speedControllerKp, int& error) override;
-	bool SetSpeedControllerKp(float speedControllerKp) override;
-	bool SetSpeedControllerKi(float speedControllerKi, int& error) override;
-	bool SetSpeedControllerKi(float speedControllerKi) override;
-	bool SetMotorDirection(SOLOMotorControllers::Direction motorDirection, int& error) override;
-	bool SetMotorDirection(SOLOMotorControllers::Direction motorDirection) override;
-	bool SetMotorResistance(float motorResistance, int& error) override;
-	bool SetMotorResistance(float motorResistance) override;
-	bool SetMotorInductance(float motorInductance, int& error) override;
-	bool SetMotorInductance(float motorInductance) override;
-	bool SetMotorPolesCounts(long motorPolesCounts, int& error) override;
-	bool SetMotorPolesCounts(long motorPolesCounts) override;
-	bool SetIncrementalEncoderLines(long incrementalEncoderLines, int& error) override;
-	bool SetIncrementalEncoderLines(long incrementalEncoderLines) override;
-	bool SetSpeedLimit(long speedLimit, int& error) override;
-	bool SetSpeedLimit(long speedLimit) override;
-	bool SetFeedbackControlMode(SOLOMotorControllers::FeedbackControlMode mode, int& error) override;
-	bool SetFeedbackControlMode(SOLOMotorControllers::FeedbackControlMode mode) override;
-	bool ResetFactory(int& error) override;
-	bool ResetFactory() override;
-	bool ResetDeviceAddress(int& error) override;
-	bool ResetDeviceAddress() override;
-	bool SetMotorType(SOLOMotorControllers::MotorType motorType, int& error) override;
-	bool SetMotorType(SOLOMotorControllers::MotorType motorType) override;
-	bool SetControlMode(SOLOMotorControllers::ControlMode controlMode, int& error) override;
-	bool SetControlMode(SOLOMotorControllers::ControlMode controlMode) override;
-	bool SetCurrentControllerKp(float currentControllerKp, int& error) override;
-	bool SetCurrentControllerKp(float currentControllerKp) override;
-	bool SetCurrentControllerKi(float currentControllerKi, int& error) override;
-	bool SetCurrentControllerKi(float currentControllerKi) override;
-	bool SetMonitoringMode(bool mode, int& error) override;
-	bool SetMonitoringMode(bool mode) override;
-	bool SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference, int& error) override;
-	bool SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference) override;
-	bool SetPositionReference(long positionReference, int& error) override;
-	bool SetPositionReference(long positionReference) override;
-	bool SetPositionControllerKp(float positionControllerKp, int& error) override;
-	bool SetPositionControllerKp(float positionControllerKp) override;
-	bool SetPositionControllerKi(float positionControllerKi, int& error) override;
-	bool SetPositionControllerKi(float positionControllerKi) override;
-	bool ResetPositionToZero(int& error) override; //Home
-	bool ResetPositionToZero() override;
-	bool OverwriteErrorRegister(int& error) override;
-	bool OverwriteErrorRegister() override;
-	bool SetObserverGainBldcPmsm(float observerGain, int& error) override;
-	bool SetObserverGainBldcPmsm(float observerGain) override;
-	bool SetObserverGainBldcPmsmUltrafast(float observerGain, int& error) override;
-	bool SetObserverGainBldcPmsmUltrafast(float observerGain) override;
-	bool SetObserverGainDc(float observerGain, int& error) override;
-	bool SetObserverGainDc(float observerGain) override;
-	bool SetFilterGainBldcPmsm(float filterGain, int& error) override;
-	bool SetFilterGainBldcPmsm(float filterGain) override;
-	bool SetFilterGainBldcPmsmUltrafast(float filterGain, int& error) override;
-	bool SetFilterGainBldcPmsmUltrafast(float filterGain) override;
-	bool SetUartBaudrate(SOLOMotorControllers::UartBaudrate baudrate, int& error) override;
-	bool SetUartBaudrate(SOLOMotorControllers::UartBaudrate baudrate) override;
-	bool SensorCalibration(SOLOMotorControllers::PositionSensorCalibrationAction calibrationAction, int& error) override;
-	bool SensorCalibration(SOLOMotorControllers::PositionSensorCalibrationAction calibrationAction) override;
-	bool SetEncoderHallCcwOffset(float encoderHallOffset, int& error) override;
-	bool SetEncoderHallCcwOffset(float encoderHallOffset) override;
-	bool SetEncoderHallCwOffset(float encoderHallOffset, int& error) override;
-	bool SetEncoderHallCwOffset(float encoderHallOffset) override;
-	bool SetSpeedAccelerationValue(float speedAccelerationValue, int& error) override;
-	bool SetSpeedAccelerationValue(float speedAccelerationValue) override;
-	bool SetSpeedDecelerationValue(float speedDecelerationValue, int& error) override;
-	bool SetSpeedDecelerationValue(float speedDecelerationValue) override;
-	bool SetCanbusBaudrate(CanbusBaudrate canbusBaudrate, int& error) override;
-	bool SetCanbusBaudrate(CanbusBaudrate canbusBaudrate) override;
-	bool SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient, int &error) override;
+    //----------Write  SOLOMotorControllers----------   
+    bool SetDeviceAddress(unsigned char deviceAddress, int& error) override;
+    bool SetDeviceAddress(unsigned char deviceAddress) override;
+    bool SetCommandMode(SOLOMotorControllers::CommandMode mode, int& error) override;
+    bool SetCommandMode(SOLOMotorControllers::CommandMode mode) override;
+    bool SetCurrentLimit(float currentLimit, int& error) override;
+    bool SetCurrentLimit(float currentLimit) override;
+    bool SetTorqueReferenceIq(float torqueReferenceIq, int& error) override;
+    bool SetTorqueReferenceIq(float torqueReferenceIq) override;
+    bool SetSpeedReference(long speedReference, int& error) override;
+    bool SetSpeedReference(long speedReference) override;
+    bool SetPowerReference(float powerReference, int& error) override;
+    bool SetPowerReference(float powerReference) override;
+    bool MotorParametersIdentification(SOLOMotorControllers::Action identification, int& error) override;
+    bool MotorParametersIdentification(SOLOMotorControllers::Action identification) override;
+    bool EmergencyStop(int& error) override;
+    bool EmergencyStop() override;
+    bool SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz, int& error) override;
+    bool SetOutputPwmFrequencyKhz(long outputPwmFrequencyKhz) override;
+    bool SetSpeedControllerKp(float speedControllerKp, int& error) override;
+    bool SetSpeedControllerKp(float speedControllerKp) override;
+    bool SetSpeedControllerKi(float speedControllerKi, int& error) override;
+    bool SetSpeedControllerKi(float speedControllerKi) override;
+    bool SetMotorDirection(SOLOMotorControllers::Direction motorDirection, int& error) override;
+    bool SetMotorDirection(SOLOMotorControllers::Direction motorDirection) override;
+    bool SetMotorResistance(float motorResistance, int& error) override;
+    bool SetMotorResistance(float motorResistance) override;
+    bool SetMotorInductance(float motorInductance, int& error) override;
+    bool SetMotorInductance(float motorInductance) override;
+    bool SetMotorPolesCounts(long motorPolesCounts, int& error) override;
+    bool SetMotorPolesCounts(long motorPolesCounts) override;
+    bool SetIncrementalEncoderLines(long incrementalEncoderLines, int& error) override;
+    bool SetIncrementalEncoderLines(long incrementalEncoderLines) override;
+    bool SetSpeedLimit(long speedLimit, int& error) override;
+    bool SetSpeedLimit(long speedLimit) override;
+    bool SetFeedbackControlMode(SOLOMotorControllers::FeedbackControlMode mode, int& error) override;
+    bool SetFeedbackControlMode(SOLOMotorControllers::FeedbackControlMode mode) override;
+    bool ResetFactory(int& error) override;
+    bool ResetFactory() override;
+    bool ResetDeviceAddress(int& error) override;
+    bool ResetDeviceAddress() override;
+    bool SetMotorType(SOLOMotorControllers::MotorType motorType, int& error) override;
+    bool SetMotorType(SOLOMotorControllers::MotorType motorType) override;
+    bool SetControlMode(SOLOMotorControllers::ControlMode controlMode, int& error) override;
+    bool SetControlMode(SOLOMotorControllers::ControlMode controlMode) override;
+    bool SetCurrentControllerKp(float currentControllerKp, int& error) override;
+    bool SetCurrentControllerKp(float currentControllerKp) override;
+    bool SetCurrentControllerKi(float currentControllerKi, int& error) override;
+    bool SetCurrentControllerKi(float currentControllerKi) override;
+    bool SetMonitoringMode(bool mode, int& error) override;
+    bool SetMonitoringMode(bool mode) override;
+    bool SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference, int& error) override;
+    bool SetMagnetizingCurrentIdReference(float magnetizingCurrentIdReference) override;
+    bool SetPositionReference(long positionReference, int& error) override;
+    bool SetPositionReference(long positionReference) override;
+    bool SetPositionControllerKp(float positionControllerKp, int& error) override;
+    bool SetPositionControllerKp(float positionControllerKp) override;
+    bool SetPositionControllerKi(float positionControllerKi, int& error) override;
+    bool SetPositionControllerKi(float positionControllerKi) override;
+    bool ResetPositionToZero(int& error) override; //Home
+    bool ResetPositionToZero() override;
+    bool OverwriteErrorRegister(int& error) override;
+    bool OverwriteErrorRegister() override;
+    bool SetObserverGainBldcPmsm(float observerGain, int& error) override;
+    bool SetObserverGainBldcPmsm(float observerGain) override;
+    bool SetObserverGainBldcPmsmUltrafast(float observerGain, int& error) override;
+    bool SetObserverGainBldcPmsmUltrafast(float observerGain) override;
+    bool SetObserverGainDc(float observerGain, int& error) override;
+    bool SetObserverGainDc(float observerGain) override;
+    bool SetFilterGainBldcPmsm(float filterGain, int& error) override;
+    bool SetFilterGainBldcPmsm(float filterGain) override;
+    bool SetFilterGainBldcPmsmUltrafast(float filterGain, int& error) override;
+    bool SetFilterGainBldcPmsmUltrafast(float filterGain) override;
+    bool SetUartBaudrate(SOLOMotorControllers::UartBaudrate baudrate, int& error) override;
+    bool SetUartBaudrate(SOLOMotorControllers::UartBaudrate baudrate) override;
+    bool SensorCalibration(SOLOMotorControllers::PositionSensorCalibrationAction calibrationAction, int& error) override;
+    bool SensorCalibration(SOLOMotorControllers::PositionSensorCalibrationAction calibrationAction) override;
+    bool SetEncoderHallCcwOffset(float encoderHallOffset, int& error) override;
+    bool SetEncoderHallCcwOffset(float encoderHallOffset) override;
+    bool SetEncoderHallCwOffset(float encoderHallOffset, int& error) override;
+    bool SetEncoderHallCwOffset(float encoderHallOffset) override;
+    bool SetSpeedAccelerationValue(float speedAccelerationValue, int& error) override;
+    bool SetSpeedAccelerationValue(float speedAccelerationValue) override;
+    bool SetSpeedDecelerationValue(float speedDecelerationValue, int& error) override;
+    bool SetSpeedDecelerationValue(float speedDecelerationValue) override;
+    bool SetCanbusBaudrate(CanbusBaudrate canbusBaudrate, int& error) override;
+    bool SetCanbusBaudrate(CanbusBaudrate canbusBaudrate) override;
+    bool SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient, int &error) override;
     bool SetAnalogueSpeedResolutionDivisionCoefficient(long divisionCoefficient) override;
     bool SetMotionProfileMode( MotionProfileMode motionProfileMode, int &error) override;
     bool SetMotionProfileMode( MotionProfileMode motionProfileMode) override;
@@ -374,12 +372,12 @@ public:
 /** @addtogroup CANOpen_Read_Functions Specific CANOpen Read Functions
   * @{
   */
-	long	GetGuardTime(int& error);
-	long	GetGuardTime();
-	long	GetLifeTimeFactor(int& error);
-	long	GetLifeTimeFactor();
-	long	GetProducerHeartbeatTime(int& error);
-	long	GetProducerHeartbeatTime();
+    long    GetGuardTime(int& error);
+    long    GetGuardTime();
+    long    GetLifeTimeFactor(int& error);
+    long    GetLifeTimeFactor();
+    long    GetProducerHeartbeatTime(int& error);
+    long    GetProducerHeartbeatTime();
 /**
   * @}
   */
@@ -387,129 +385,129 @@ public:
 /** @addtogroup CANOpen_Read_Functions Standard CANOpen Read Functions
   * @{
   */
-	//----------Read SOLOMotorControllers----------
-	long	GetReadErrorRegister(int& error);
-	long	GetReadErrorRegister();
-	long	GetDeviceAddress(int& error) override;
-	long	GetDeviceAddress() override;
-	float	GetPhaseAVoltage(int& error) override;
-	float	GetPhaseAVoltage() override;
-	float	GetPhaseBVoltage(int& error) override;
-	float	GetPhaseBVoltage() override;
-	float	GetPhaseACurrent(int& error) override;
-	float	GetPhaseACurrent() override;
-	float	GetPhaseBCurrent(int& error) override;
-	float	GetPhaseBCurrent() override;
-	float	GetBusVoltage(int& error) override; //Battery Voltage
-	float	GetBusVoltage() override;
-	float	GetDcMotorCurrentIm(int& error) override;
-	float	GetDcMotorCurrentIm() override;
-	float	GetDcMotorVoltageVm(int& error) override;
-	float	GetDcMotorVoltageVm() override;
-	float	GetSpeedControllerKp(int& error) override;
-	float	GetSpeedControllerKp() override;
-	float	GetSpeedControllerKi(int& error) override;
-	float	GetSpeedControllerKi() override;
-	long	GetOutputPwmFrequencyKhz(int& error) override;
-	long	GetOutputPwmFrequencyKhz() override;
-	float	GetCurrentLimit(int& error) override;
-	float	GetCurrentLimit() override;
-	float	GetQuadratureCurrentIqFeedback(int& error) override;
-	float	GetQuadratureCurrentIqFeedback() override;
-	float	GetMagnetizingCurrentIdFeedback(int& error) override; //Magnetizing
-	float	GetMagnetizingCurrentIdFeedback() override;
-	long	GetMotorPolesCounts(int& error) override;
-	long	GetMotorPolesCounts() override;
-	long	GetIncrementalEncoderLines(int& error) override;
-	long	GetIncrementalEncoderLines() override;
-	float	GetCurrentControllerKp(int& error) override;
-	float	GetCurrentControllerKp() override;
-	float	GetCurrentControllerKi(int& error) override;
-	float	GetCurrentControllerKi() override;
-	float	GetBoardTemperature(int& error) override;
-	float	GetBoardTemperature() override;
-	float	GetMotorResistance(int& error) override;
-	float	GetMotorResistance() override;
-	float	GetMotorInductance(int& error) override;
-	float	GetMotorInductance() override;
-	long	GetSpeedFeedback(int& error) override;
-	long 	GetSpeedFeedback() override;
-	long	GetMotorType(int& error) override;
-	long	GetMotorType() override;
-	long	GetFeedbackControlMode(int& error) override;
-	long	GetFeedbackControlMode() override;
-	long	GetCommandMode(int& error) override;
-	long	GetCommandMode() override;
-	long	GetControlMode(int& error) override;
-	long	GetControlMode() override;
-	long	GetSpeedLimit(int& error) override;
-	long	GetSpeedLimit() override;
-	float	GetPositionControllerKp(int& error) override;
-	float	GetPositionControllerKp() override;
-	float	GetPositionControllerKi(int& error) override;
-	float	GetPositionControllerKi() override;
-	long	GetPositionCountsFeedback(int& error) override;
-	long	GetPositionCountsFeedback() override;
-	long	GetErrorRegister(int& error) override;
-	long	GetErrorRegister() override;
-	long	GetDeviceFirmwareVersion(int& error) override;
-	long	GetDeviceFirmwareVersion() override;
-	long	GetDeviceHardwareVersion(int& error) override;
-	long	GetDeviceHardwareVersion() override;
-	float	GetTorqueReferenceIq(int& error) override;
-	float	GetTorqueReferenceIq() override;
-	long	GetSpeedReference(int& error) override;
-	long 	GetSpeedReference() override;
-	float 	GetMagnetizingCurrentIdReference(int& error) override;
-	float 	GetMagnetizingCurrentIdReference() override;
-	long  	GetPositionReference(int& error) override;
-	long  	GetPositionReference() override;
-	float 	GetPowerReference(int& error) override;
-	float 	GetPowerReference() override;
-	long  	GetMotorDirection(int& error) override;
-	long  	GetMotorDirection() override;
-	float 	GetObserverGainBldcPmsm(int& error) override;
-	float 	GetObserverGainBldcPmsm() override;
-	float 	GetObserverGainBldcPmsmUltrafast(int& error) override;
-	float 	GetObserverGainBldcPmsmUltrafast() override;
-	float 	GetObserverGainDc(int& error) override;
-	float 	GetObserverGainDc() override;
-	float 	GetFilterGainBldcPmsm(int& error) override;
-	float 	GetFilterGainBldcPmsm() override;
-	float 	GetFilterGainBldcPmsmUltrafast(int& error) override;
-	float 	GetFilterGainBldcPmsmUltrafast() override;
-	float 	Get3PhaseMotorAngle(int& error) override; // Read Estimated or Measured Rotor Angle
-	float 	Get3PhaseMotorAngle() override;
-	float 	GetEncoderHallCcwOffset(int& error) override;
-	float 	GetEncoderHallCcwOffset() override;
-	float 	GetEncoderHallCwOffset(int& error) override;
-	float 	GetEncoderHallCwOffset() override;
-	long  	GetUartBaudrate(int& error) override;
-	long  	GetUartBaudrate() override;
-	float 	GetSpeedAccelerationValue(int& error) override;
-	float 	GetSpeedAccelerationValue() override;
-	float	GetSpeedDecelerationValue(int& error) override;
-	float 	GetSpeedDecelerationValue() override;
-	long  	GetAnalogueSpeedResolutionDivisionCoefficient(int &error) override;
-    long  	GetAnalogueSpeedResolutionDivisionCoefficient() override;
-	bool  	CommunicationIsWorking(int& error) override;
-	bool  	CommunicationIsWorking() override;
-	long  	GetEncoderIndexCounts(int& error) override;
-	long  	GetEncoderIndexCounts() override;
-	long 	GetMotionProfileMode(int &error) override;
-    long 	GetMotionProfileMode() override;
-    float 	GetMotionProfileVariable1(int &error) override;
-    float 	GetMotionProfileVariable1() override;
-    float 	GetMotionProfileVariable2(int &error) override;
-    float 	GetMotionProfileVariable2() override;
-    float 	GetMotionProfileVariable3(int &error) override;
-    float 	GetMotionProfileVariable3() override;
-    float 	GetMotionProfileVariable4(int &error) override;
-    float 	GetMotionProfileVariable4() override;
-    float 	GetMotionProfileVariable5(int &error) override;
-    float 	GetMotionProfileVariable5() override;
-	void 	GeneralCanbusRead(uint16_t *ID , uint8_t *DLC, uint8_t *Data);
-	void 	GeneralCanbusWrite(uint16_t ID, uint8_t *DLC, uint8_t *Data, int &error);
+    //----------Read SOLOMotorControllers----------
+    long    GetReadErrorRegister(int& error);
+    long    GetReadErrorRegister();
+    long    GetDeviceAddress(int& error) override;
+    long    GetDeviceAddress() override;
+    float   GetPhaseAVoltage(int& error) override;
+    float   GetPhaseAVoltage() override;
+    float   GetPhaseBVoltage(int& error) override;
+    float   GetPhaseBVoltage() override;
+    float   GetPhaseACurrent(int& error) override;
+    float   GetPhaseACurrent() override;
+    float   GetPhaseBCurrent(int& error) override;
+    float   GetPhaseBCurrent() override;
+    float   GetBusVoltage(int& error) override; //Battery Voltage
+    float   GetBusVoltage() override;
+    float   GetDcMotorCurrentIm(int& error) override;
+    float   GetDcMotorCurrentIm() override;
+    float   GetDcMotorVoltageVm(int& error) override;
+    float   GetDcMotorVoltageVm() override;
+    float   GetSpeedControllerKp(int& error) override;
+    float   GetSpeedControllerKp() override;
+    float   GetSpeedControllerKi(int& error) override;
+    float   GetSpeedControllerKi() override;
+    long    GetOutputPwmFrequencyKhz(int& error) override;
+    long    GetOutputPwmFrequencyKhz() override;
+    float   GetCurrentLimit(int& error) override;
+    float   GetCurrentLimit() override;
+    float   GetQuadratureCurrentIqFeedback(int& error) override;
+    float   GetQuadratureCurrentIqFeedback() override;
+    float   GetMagnetizingCurrentIdFeedback(int& error) override; //Magnetizing
+    float   GetMagnetizingCurrentIdFeedback() override;
+    long    GetMotorPolesCounts(int& error) override;
+    long    GetMotorPolesCounts() override;
+    long    GetIncrementalEncoderLines(int& error) override;
+    long    GetIncrementalEncoderLines() override;
+    float   GetCurrentControllerKp(int& error) override;
+    float   GetCurrentControllerKp() override;
+    float   GetCurrentControllerKi(int& error) override;
+    float   GetCurrentControllerKi() override;
+    float   GetBoardTemperature(int& error) override;
+    float   GetBoardTemperature() override;
+    float   GetMotorResistance(int& error) override;
+    float   GetMotorResistance() override;
+    float   GetMotorInductance(int& error) override;
+    float   GetMotorInductance() override;
+    long    GetSpeedFeedback(int& error) override;
+    long    GetSpeedFeedback() override;
+    long    GetMotorType(int& error) override;
+    long    GetMotorType() override;
+    long    GetFeedbackControlMode(int& error) override;
+    long    GetFeedbackControlMode() override;
+    long    GetCommandMode(int& error) override;
+    long    GetCommandMode() override;
+    long    GetControlMode(int& error) override;
+    long    GetControlMode() override;
+    long    GetSpeedLimit(int& error) override;
+    long    GetSpeedLimit() override;
+    float   GetPositionControllerKp(int& error) override;
+    float   GetPositionControllerKp() override;
+    float   GetPositionControllerKi(int& error) override;
+    float   GetPositionControllerKi() override;
+    long    GetPositionCountsFeedback(int& error) override;
+    long    GetPositionCountsFeedback() override;
+    long    GetErrorRegister(int& error) override;
+    long    GetErrorRegister() override;
+    long    GetDeviceFirmwareVersion(int& error) override;
+    long    GetDeviceFirmwareVersion() override;
+    long    GetDeviceHardwareVersion(int& error) override;
+    long    GetDeviceHardwareVersion() override;
+    float   GetTorqueReferenceIq(int& error) override;
+    float   GetTorqueReferenceIq() override;
+    long    GetSpeedReference(int& error) override;
+    long    GetSpeedReference() override;
+    float   GetMagnetizingCurrentIdReference(int& error) override;
+    float   GetMagnetizingCurrentIdReference() override;
+    long    GetPositionReference(int& error) override;
+    long    GetPositionReference() override;
+    float   GetPowerReference(int& error) override;
+    float   GetPowerReference() override;
+    long    GetMotorDirection(int& error) override;
+    long    GetMotorDirection() override;
+    float   GetObserverGainBldcPmsm(int& error) override;
+    float   GetObserverGainBldcPmsm() override;
+    float   GetObserverGainBldcPmsmUltrafast(int& error) override;
+    float   GetObserverGainBldcPmsmUltrafast() override;
+    float   GetObserverGainDc(int& error) override;
+    float   GetObserverGainDc() override;
+    float   GetFilterGainBldcPmsm(int& error) override;
+    float   GetFilterGainBldcPmsm() override;
+    float   GetFilterGainBldcPmsmUltrafast(int& error) override;
+    float   GetFilterGainBldcPmsmUltrafast() override;
+    float   Get3PhaseMotorAngle(int& error) override; // Read Estimated or Measured Rotor Angle
+    float   Get3PhaseMotorAngle() override;
+    float   GetEncoderHallCcwOffset(int& error) override;
+    float   GetEncoderHallCcwOffset() override;
+    float   GetEncoderHallCwOffset(int& error) override;
+    float   GetEncoderHallCwOffset() override;
+    long    GetUartBaudrate(int& error) override;
+    long    GetUartBaudrate() override;
+    float   GetSpeedAccelerationValue(int& error) override;
+    float   GetSpeedAccelerationValue() override;
+    float   GetSpeedDecelerationValue(int& error) override;
+    float   GetSpeedDecelerationValue() override;
+    long    GetAnalogueSpeedResolutionDivisionCoefficient(int &error) override;
+    long    GetAnalogueSpeedResolutionDivisionCoefficient() override;
+    bool    CommunicationIsWorking(int& error) override;
+    bool    CommunicationIsWorking() override;
+    long    GetEncoderIndexCounts(int& error) override;
+    long    GetEncoderIndexCounts() override;
+    long    GetMotionProfileMode(int &error) override;
+    long    GetMotionProfileMode() override;
+    float   GetMotionProfileVariable1(int &error) override;
+    float   GetMotionProfileVariable1() override;
+    float   GetMotionProfileVariable2(int &error) override;
+    float   GetMotionProfileVariable2() override;
+    float   GetMotionProfileVariable3(int &error) override;
+    float   GetMotionProfileVariable3() override;
+    float   GetMotionProfileVariable4(int &error) override;
+    float   GetMotionProfileVariable4() override;
+    float   GetMotionProfileVariable5(int &error) override;
+    float   GetMotionProfileVariable5() override;
+    void    GeneralCanbusRead(uint16_t *ID , uint8_t *DLC, uint8_t *Data);
+    void    GeneralCanbusWrite(uint16_t ID, uint8_t *DLC, uint8_t *Data, int &error);
 };
 /**
   * @}

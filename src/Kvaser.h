@@ -64,6 +64,10 @@ public:
         canClose(hnd);
     }
 
+    void getErrorMode(int& errorMode) override { errorMode = 0; }
+    uint8_t getReceiveErrorCounter() override { return 0; };
+    uint8_t getTransmitErrorCounter() override { return 0; };
+
 private:
     canHandle hnd;		
 	long mCanBaudrate;

@@ -450,6 +450,7 @@ public:
         BusOff
     } ;
 
+private:
     //Methods
     void    StartSPI() ;
     void    EndSPI() ;
@@ -482,8 +483,7 @@ public:
 
     // Implementation of CommunicationInterface
 
-    //bool    CANOpenTransmit(uint8_t _address , uint16_t _object, uint8_t * _informatrionToSend, int &error);
-    //bool    CANOpenReceive (uint8_t _address , uint16_t _object, uint8_t * _informatrionToSend,uint8_t * _informationReceived, int &error);
+public:
 
     bool CANOpenTransmit(uint8_t destination, uint16_t object, uint8_t subIndex, uint8_t* informatrionToSend, int &error) override;
     bool CANOpenReceive (uint8_t source, uint16_t object, uint8_t subIndex, uint8_t* informatrionToSend, uint8_t *informationReceived, int &error) override;
@@ -491,7 +491,7 @@ public:
     bool CANOpenGenericTransmit(uint16_t destination, uint8_t *object, uint8_t *informationToSend, int& error) { (void) destination; (void) object; (void) informationToSend; (void) error;
         return true;
     };
-    // FIXME: error needed?
+    // FIXME: should error be added as last parameter
     bool CANOpenGenericReceive(uint16_t *source, uint8_t *object, uint8_t *informationReceived) { (void) source; (void) object; (void) informationReceived;
         return true;
     };

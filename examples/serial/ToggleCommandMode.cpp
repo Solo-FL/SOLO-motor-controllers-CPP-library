@@ -20,7 +20,7 @@ using std::cout;
 using std::endl;
 
 #include <conio.h>
-#include "SOLOMotorControllersKvaser.h" 
+#include "SOLOMotorControllersSerial.h"
 
 SOLOMotorControllers *solo; 
 int error;
@@ -28,7 +28,7 @@ long commandMode;
 bool setIsSuccesfull;
 
 int main(void) {
-  solo = new SOLOMotorControllersKvaser();
+  solo = new SOLOMotorControllersSerial((char*)"COM3");
   
   //Infinite Loop
   while(true){

@@ -16,13 +16,13 @@ using std::cout;
 using std::endl;
 
 #include <conio.h>
-#include "SOLOMotorControllersKvaser.h"
+#include "SOLOMotorControllersSerial.h"
 
 int main(void)
 {
     float readingValue;
     int error;
-    SOLOMotorControllers *solo = new SOLOMotorControllersKvaser();
+    SOLOMotorControllers *solo = new SOLOMotorControllersSerial((char*)"COM3");
 
     //TRY CONNECT LOOP
     while(solo->CommunicationIsWorking() == false ){

@@ -17,7 +17,7 @@ using std::cout;
 using std::endl;
 
 #include <conio.h>
-#include "SOLOMotorControllersKvaser.h" 
+#include "SOLOMotorControllersSerial.h"
 
 //instanciate a SOLO object:
 SOLOMotorControllers *solo;  
@@ -52,8 +52,8 @@ void soloConfigInit() {
   // pressing the Piano Switch NO# 5 DOWN. in SOLO UNO
   
   //Initialize the SOLO object
-  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
-  solo = new SOLOMotorControllersKvaser();
+  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersSerial((char*)"COM3",0);
+  solo = new SOLOMotorControllersSerial((char*)"COM3");
 
   //TRY CONNECT LOOP
   while(solo->CommunicationIsWorking() == false ){

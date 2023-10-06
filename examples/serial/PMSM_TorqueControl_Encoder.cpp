@@ -17,7 +17,7 @@ using std::cout;
 using std::endl;
 
 #include <conio.h>
-#include "SOLOMotorControllersKvaser.h" 
+#include "SOLOMotorControllersSerial.h"
 
 //For this Test, make sure you have calibrated your Motor and Hall sensors before
 //to know more please read: https://www.solomotorcontrollers.com/how-to-connect-calibrate-incremental-encoder-with-solo/
@@ -53,8 +53,8 @@ void soloConfigInit() {
   //In this example, make sure you put SOLO into Closed-Loop Mode
   
   //Initialize the SOLO object
-  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
-  solo = new SOLOMotorControllersKvaser();
+  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersSerial((char*)"COM3",0);
+  solo = new SOLOMotorControllersSerial((char*)"COM3");
 
   //TRY CONNECT LOOP
   while(solo->CommunicationIsWorking() == false ){

@@ -18,7 +18,7 @@ using std::cout;
 using std::endl;
 
 #include <conio.h>
-#include "SOLOMotorControllersKvaser.h" 
+#include "SOLOMotorControllersSerial.h"
 
 // instanciate a SOLO object
 SOLOMotorControllers *solo; 
@@ -29,7 +29,7 @@ int error;
 int main(void) {
   //Initialize the SOLO object
   //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersKvaser(0);
-  solo = new SOLOMotorControllersKvaser();
+  solo = new SOLOMotorControllersSerial((char*)"COM3");
   
   //Infinite Loop
   while (true)

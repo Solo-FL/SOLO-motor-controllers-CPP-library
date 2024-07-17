@@ -22,17 +22,25 @@ Start up Info
 =======
 
 Open the Project:
+
 1. double click on SOLO-motor-controllers-CPP-library.sln to start Visual Studio 2022 as a Visual studio project
 
 Run an Example:
+
 1. In the Visual Studio go to the Solution Explorer Menu
+
 2. right click on the example you want to execute
+
 3. select "include In Project"
+
 4. press the run icon
 
 Note: in case you want to run a different file you need to remove the file from the project:
+
 1. In the Visual Studio go to the Solution Explorer Menu
-2. right click on the example you want to esclude
+
+2. right click on the example you want to exclude
+
 3. select "Exclude From Project"
 
 

@@ -177,7 +177,7 @@ public:
 	int pdoParameterCobIdByPdoParameterName[PdoParameterNameCount];
 	SOLOMotorControllersCanopenKvaser(UINT8 deviceAddress = 0, 
 			SOLOMotorControllers::CanbusBaudrate baudrate = SOLOMotorControllers::CanbusBaudrate::rate1000,
-	 		long millisecondsTimeout = 200, bool autoConnect = true);
+	 		long millisecondsTimeout = 10, bool autoConnect = true);
 
 	~SOLOMotorControllersCanopenKvaser();
 	static int lastError;
@@ -185,7 +185,7 @@ public:
 public:
 	bool Connect(UINT8 deviceAddress, 
 		SOLOMotorControllers::CanbusBaudrate baudrate = SOLOMotorControllers::CanbusBaudrate::rate1000,
-		long millisecondsTimeout = 200);
+		long millisecondsTimeout = 10);
 
 	bool Connect();
 

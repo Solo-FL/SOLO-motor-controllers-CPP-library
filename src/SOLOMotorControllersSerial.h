@@ -191,7 +191,7 @@ extern "C"
 
 		SOLOMotorControllersSerial(char* COMPortName, UINT8 deviceAddress = 0,
  				SOLOMotorControllers::UartBaudrate baudrate = SOLOMotorControllersSerial::UartBaudrate::rate115200,
- 				long millisecondsTimeout = 5, int packetFailureTrialAttempts = 2, bool autoConnect = true);
+ 				long millisecondsTimeout = 1, int packetFailureTrialAttempts = 1, bool autoConnect = true);
 
 		~SOLOMotorControllersSerial();
 
@@ -207,7 +207,7 @@ extern "C"
 
 		bool Connect(char* COMPortName, UINT8 deviceAddress = 0,
  				SOLOMotorControllers::UartBaudrate baudrate = SOLOMotorControllersSerial::UartBaudrate::rate115200,
- 				long millisecondsTimeout = 50, int packetFailureTrialAttempts = 3);
+ 				long millisecondsTimeout = 1, int packetFailureTrialAttempts = 1);
 
 		bool Connect();
 

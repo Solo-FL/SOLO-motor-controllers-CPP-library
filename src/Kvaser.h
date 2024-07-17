@@ -1,16 +1,16 @@
 /**
  *******************************************************************************
- * @file    SOLOMotorControllersUtils.h
+ * @file    Kvaser.h
  * @authors SOLO Motor Controllers
  * @brief   This file contains all the base functions prototypes for the Solo Drivers
  *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
  * 
- * @date    Date: 2023
- * @version 1.2.0
+ * @date    Date: 2024
+ * @version 1.3.0
  * *******************************************************************************    
  * @attention
- * Copyright: (c) 2021-2023, SOLO motor controllers project
- * GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+ * Copyright: (c) 2021-2024, SOLO motor controllers project
+ * MIT License (see LICENSE file for more details)
  ******************************************************************************* 
  */
 

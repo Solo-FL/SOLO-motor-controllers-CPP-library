@@ -5,12 +5,12 @@
  * @brief   This file contains all the base functions prototypes for the Solo Drivers
  *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
  * 
- * @date    Date: 2023
- * @version 1.2.0
+ * @date    Date: 2024
+ * @version 1.3.0
  * *******************************************************************************    
  * @attention
- * Copyright: (c) 2021-2023, SOLO motor controllers project
- * GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+ * Copyright: (c) 2021-2024, SOLO motor controllers project
+ * MIT License (see LICENSE file for more details)
  ******************************************************************************* 
  */
 
@@ -193,7 +193,7 @@ bool SOLOMotorControllersUtils::SetSpeedControllerKiInputValidation(float speedC
 }
 bool SOLOMotorControllersUtils::SetMotorResistanceInputValidation(float motorResistance, int& error)
 {
-	if (motorResistance < 0.001 || motorResistance > 50)
+	if (motorResistance < 0.0001 || motorResistance > 25.0)
 	{
 		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
@@ -202,7 +202,7 @@ bool SOLOMotorControllersUtils::SetMotorResistanceInputValidation(float motorRes
 }
 bool SOLOMotorControllersUtils::SetMotorInductanceInputValidation(float motorInductance, int& error)
 {
-	if (motorInductance < 0.00001 || motorInductance > 0.2)
+	if (motorInductance < 0.0000001 || motorInductance > 0.5)
 	{
 		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
@@ -290,18 +290,18 @@ bool SOLOMotorControllersUtils::SetPositionControllerKiInputValidation(float pos
 	}
 	return true;
 }
-bool SOLOMotorControllersUtils::SetObserverGainBldcPmsmInputValidation(float observerGain, int& error)
+bool SOLOMotorControllersUtils::SetZsftInjectionAmplitudeValidation(float amplitude, int& error)
 {
-	if (observerGain < 0.01 || observerGain > 1000)
+	if (amplitude < 0.0 || amplitude > 0.55)
 	{
 		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 	return true;
 }
-bool SOLOMotorControllersUtils::SetObserverGainBldcPmsmUltrafastInputValidation(float observerGain, int& error)
+bool SOLOMotorControllersUtils::SetZsftPolarityAmplitudeValidation(float amplitude, int& error)
 {
-	if (observerGain < 0.01 || observerGain > 1000)
+	if (amplitude < 0.0 || amplitude > 0.55)
 	{
 		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
@@ -317,18 +317,18 @@ bool SOLOMotorControllersUtils::SetObserverGainDcInputValidation(float observerG
 	}
 	return true;
 }
-bool SOLOMotorControllersUtils::SetFilterGainBldcPmsmInputValidation(float filterGain, int& error)
+bool SOLOMotorControllersUtils::SetZsftInjectionFrequencyInputValidation(long frequency, int& error)
 {
-	if (filterGain < 0.01 || filterGain > 16000)
+	if (frequency < 0 || frequency > 10)
 	{
 		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
 	}
 	return true;
 }
-bool SOLOMotorControllersUtils::SetFilterGainBldcPmsmUltrafastInputValidation(float filterGain, int& error)
+bool SOLOMotorControllersUtils::SetSensorlessTransitionSpeedInputValidation(long speed, int& error)
 {
-	if (filterGain < 0.01 || filterGain > 16000)
+	if (speed < 1 || speed > 5000)
 	{
 		error = SOLOMotorControllers::Error::outOfRengeSetting;
 		return false;
@@ -421,6 +421,24 @@ bool SOLOMotorControllersUtils::SetMotionProfileVariable4InputValidation(float M
 bool SOLOMotorControllersUtils::SetMotionProfileVariable5InputValidation(float MotionProfileVariable5, int &error)
 {
     if (MotionProfileVariable5 < 0 || MotionProfileVariable5 > 16000)
+    {
+        error = SOLOMotorControllers::Error::outOfRengeSetting;
+        return false;
+    }
+    return true;
+}
+bool SOLOMotorControllersUtils::SetRegenerationCurrentLimitValidation(float current, int &error)
+{
+    if (current < 0 || current > 32)	//todo this value must change
+    {
+        error = SOLOMotorControllers::Error::outOfRengeSetting;
+        return false;
+    }
+    return true;
+}
+bool SOLOMotorControllersUtils::SetPositionSensorDigitalFilterLevelValidation(long level, int &error)
+{
+    if (level < 0 || level > 32)	//todo this value must change
     {
         error = SOLOMotorControllers::Error::outOfRengeSetting;
         return false;

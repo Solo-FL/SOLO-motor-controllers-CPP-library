@@ -5,12 +5,12 @@
  * @brief   This file contains all the base functions prototypes for the Solo Drivers
  *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
  * 
- * @date    Date: 2023
- * @version 1.2.0
+ * @date    Date: 2024
+ * @version 1.3.0
  * *******************************************************************************    
  * @attention
- * Copyright: (c) 2021-2023, SOLO motor controllers project
- * GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+ * Copyright: (c) 2021-2024, SOLO motor controllers project
+ * MIT License (see LICENSE file for more details)
  ******************************************************************************* 
  */
 #ifndef SOLO_MOTOR_CONTROLLERS_UTILS_H
@@ -49,11 +49,11 @@ public:
 	bool SetPositionReferenceInputValidation(long positionReference, int& error);
 	bool SetPositionControllerKpInputValidation(float positionControllerKp, int& error);
 	bool SetPositionControllerKiInputValidation(float positionControllerKi, int& error);
-	bool SetObserverGainBldcPmsmInputValidation(float observerGain, int& error);
-	bool SetObserverGainBldcPmsmUltrafastInputValidation(float observerGain, int& error);
-	bool SetObserverGainDcInputValidation(float observerGain, int& error);
-	bool SetFilterGainBldcPmsmInputValidation(float filterGain, int& error);
-	bool SetFilterGainBldcPmsmUltrafastInputValidation(float filterGain, int& error);
+	bool SetZsftInjectionAmplitudeValidation(float amplitude, int& error);
+	bool SetZsftPolarityAmplitudeValidation(float amplitude, int& error);
+	bool SetObserverGainDcInputValidation(float amplitude, int& error);
+	bool SetZsftInjectionFrequencyInputValidation(long frequency, int& error);
+	bool SetSensorlessTransitionSpeedInputValidation(long speed, int& error);
 	bool SetEncoderHallCcwOffsetInputValidation(float encoderHallOffset, int& error);
 	bool SetEncoderHallCwOffsetInputValidation(float encoderHallOffset, int& error);
 	bool SetSpeedAccelerationValueInputValidation(float speedAccelerationValue, int& error);
@@ -64,5 +64,7 @@ public:
     bool SetMotionProfileVariable3InputValidation(float MotionProfileVariable3, int &error);
     bool SetMotionProfileVariable4InputValidation(float MotionProfileVariable4, int &error);
     bool SetMotionProfileVariable5InputValidation(float MotionProfileVariable5, int &error);
+	bool SetRegenerationCurrentLimitValidation(float current, int &error);
+	bool SetPositionSensorDigitalFilterLevelValidation(long level, int &error);
 };
 #endif 

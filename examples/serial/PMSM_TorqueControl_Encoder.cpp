@@ -1,15 +1,17 @@
-// Copyright: (c) 2021-2022, SOLO motor controllers project
-// GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-
-/*
-*    Title: SOLO Motor Controllers CPP Library
-*    Author: SOLOMotorControllers
-*    Date: 2023
-*    Code version: 1.2.0
-*    Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
-This Library is made by SOLOMotorControllers.com
-To learn more please visit:  https://www.SOLOMotorControllers.com/
-*/
+/**
+ *******************************************************************************
+ * @file    PMSM_TorqueControl_Encoder.cpp
+ * @authors SOLO Motor Controllers
+ * @brief   PMSM motor Torque Control with Encoder
+ * 
+ * @date    Date: 2024
+ * @version 1.3.0
+ * *******************************************************************************    
+ * @attention
+ * Copyright: (c) 2021-2024, SOLO motor controllers project
+ * MIT License (see LICENSE file for more details)
+ ******************************************************************************* 
+ */
 
 // The Motor used for Testings: teknic m-2310P-LN-04K
 #include <iostream>

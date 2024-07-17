@@ -20,7 +20,7 @@ using std::cout;
 using std::endl;
 
 #include <conio.h>
-#include "SOLOMotorControllersSerial.h"
+#include "SOLOMotorControllersCanopenKvaser.h" 
 
 //For this Test, make sure you have calibrated your Encoder before
 //to know more please read: https://www.solomotorcontrollers.com/how-to-connect-calibrate-incremental-encoder-with-solo/
@@ -72,8 +72,8 @@ void soloConfigInit() {
   // pressing the Piano Switch NO# 5 DOWN. in SOLO UNO
   
   //Initialize the SOLO object
-  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersSerial((char*)"COM3",0);
-  solo = new SOLOMotorControllersSerial((char*)"COM3");
+  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersCanopenKvaser(0);
+  solo = new SOLOMotorControllersCanopenKvaser();
 
   //TRY CONNECT LOOP
   while(solo->CommunicationIsWorking() == false ){

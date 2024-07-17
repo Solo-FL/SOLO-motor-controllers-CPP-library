@@ -1,8 +1,8 @@
 /**
  *******************************************************************************
- * @file    BLDCDroneRcCar_Sensorless_300000RPM.cpp
+ * @file    BLDC_SpeedControl_HALL.cpp
  * @authors SOLO Motor Controllers
- * @brief   BLDC Drone-RcCar motor with Sensorless at 300000RPM
+ * @brief   BLDC motor Speed Control with HALL sensor
  * 
  * @date    Date: 2024
  * @version 1.3.0
@@ -13,51 +13,54 @@
  ******************************************************************************* 
  */
 
-//Arduino Article about the same topic: https://www.solomotorcontrollers.com/drive-fast-drone-rc-car-brushless-motors-arduino-solo-sensorless
+// The Motor used for Testings: DB56C036030-A
 #include <iostream>
 using std::cout;
 using std::endl;
 
 #include <conio.h>
-#include "SOLOMotorControllersSerial.h"
+#include "SOLOMotorControllersCanopenKvaser.h" 
+
+//For this Test, make sure you have calibrated your Motor and Hall sensors before
+//to know more please read: https://www.solomotorcontrollers.com/hall-sensors-to-solo-for-controlling-speed-torque-brushless-motor/
 
 //instanciate a SOLO object:
-SOLOMotorControllers *solo;  
+SOLOMotorControllers *solo; 
 
 //Desired Switching or PWM Frequency at Output
-long pwmFrequency = 79; 
+long pwmFrequency = 20; 
 
 //Motor's Number of Poles
-long numberOfPoles = 2; 
-
-//Speed controller Kp
-float speedControllerKp = 0.03; 
-
-//Speed controller Ki
-float speedControllerKi = 0.001; 
+long numberOfPoles = 8; 
 
 // Current Limit of the Motor
-float currentLimit = 32.0; 
+float currentLimit = 10.0; 
 
-// Battery of Bus Voltage
+//Speed controller Kp
+float speedControllerKp = 0.15; 
+
+//Speed controller Ki
+float speedControllerKi = 0.005; 
+
+// Battery or Bus Voltage
 float busVoltage = 0; 
 
-// Desired Speed Reference 
-long desiredMotorSpeed = 0; 
+// Motor Torque feedback
+float actualMotorTorque = 0; 
 
 // Motor speed feedback
 long actualMotorSpeed = 0; 
 
+// Motor position feedback
+long actualMotorPosition = 0; 
 
 void soloConfigInit() {
-  //In this example, make sure you put SOLO into Closed-Loop by
-  // pressing the Piano Switch NO# 5 DOWN. in SOLO UNO
-
-    std::cout << "BLDCDroneRcCar_Sensorless_300000RPM Serial Test" << std::endl;
+    std::cout << "BLDC_SpeedControl_HALL Kvaser Test" << std::endl;
+  //In this example, make sure you put SOLO into Closed-Loop Mode
   
   //Initialize the SOLO object
-  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersSerial((char*)"COM3",0);
-  solo = new SOLOMotorControllersSerial((char*)"COM3");
+  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersCanopenKvaser(0);
+  solo = new SOLOMotorControllersCanopenKvaser();
 
   //TRY CONNECT LOOP
   while(solo->CommunicationIsWorking() == false ){
@@ -66,14 +69,14 @@ void soloConfigInit() {
     solo->Connect();
   }
   std::cout << "Solo connected!" << std::endl;
-      
+  
   // Initial Configuration of the device and the Motor
   solo->SetOutputPwmFrequencyKhz(pwmFrequency);
   solo->SetCurrentLimit(currentLimit);
   solo->SetMotorPolesCounts(numberOfPoles);
   solo->SetCommandMode(SOLOMotorControllers::CommandMode::digital);
-  solo->SetMotorType(SOLOMotorControllers::MotorType::bldcPmsmUltrafast);
-  solo->SetFeedbackControlMode(SOLOMotorControllers::FeedbackControlMode::sensorLessHso);
+  solo->SetMotorType(SOLOMotorControllers::MotorType::bldcPmsm);
+  solo->SetFeedbackControlMode(SOLOMotorControllers::FeedbackControlMode::hallSensors);
   solo->SetSpeedControllerKp(speedControllerKp);
   solo->SetSpeedControllerKi(speedControllerKi);
   solo->SetControlMode(SOLOMotorControllers::ControlMode::speedMode);
@@ -89,42 +92,38 @@ void soloConfigInit() {
   Sleep(2000); 
 }
 
-
 int main(void) {
   soloConfigInit();
 
   //Infinite Loop
   while(true){
-    //set the Direction on C.W. 
-    solo->SetMotorDirection(SOLOMotorControllers::Direction::clockwise); 
-
-    //set a new reference for speed [RPM]
-    desiredMotorSpeed = 10000;
-    solo->SetSpeedReference(desiredMotorSpeed);
-
-    // wait till motor reaches to the reference 
-    Sleep(5000); 
-
-    actualMotorSpeed = solo->GetSpeedFeedback();
-    std::cout << "Motor Speed: "<< actualMotorSpeed << std::endl;
-    
     //set the Direction on C.C.W. 
-    solo->SetMotorDirection(SOLOMotorControllers::Direction::counterclockwise); 
-
-    //set a new reference for speed [RPM]
-    desiredMotorSpeed = 30000;
-    solo->SetSpeedReference(desiredMotorSpeed);
-
+    solo->SetMotorDirection(SOLOMotorControllers::Direction::counterclockwise);
+    //set an arbitrary Positive speed reference[RPM]
+    solo->SetSpeedReference(1500);
     // wait till motor reaches to the reference 
-    Sleep(5000);
-
+    Sleep(300);
     actualMotorSpeed = solo->GetSpeedFeedback();
-    std::cout << "Motor Speed: "<< actualMotorSpeed << std::endl;
-    
-    //stop the motor
-    desiredMotorSpeed = 0;
-    solo->SetSpeedReference(desiredMotorSpeed);
-    Sleep(2000);
+    std::cout << "Measured Speed[RPM]: "<< actualMotorSpeed << std::endl;
+
+    actualMotorTorque = solo->GetQuadratureCurrentIqFeedback();
+    std::cout << "Number of Pulses passed: "<< actualMotorPosition << std::endl;
+
+    Sleep(3000);
+
+    //set the Direction on C.W. 
+    solo->SetMotorDirection(SOLOMotorControllers::Direction::clockwise);
+    //set an arbitrary Positive speed reference[RPM]
+    solo->SetSpeedReference(900);
+    // wait till motor reaches to the reference 
+    Sleep(300);
+    actualMotorSpeed = solo->GetSpeedFeedback();
+    std::cout << "Measured Speed[RPM]: "<< actualMotorSpeed << std::endl;
+
+    actualMotorTorque = solo->GetQuadratureCurrentIqFeedback();
+    std::cout << "Number of Pulses passed: "<< actualMotorPosition << std::endl;
+
+    Sleep(3000);
   }
   return 0;
 }

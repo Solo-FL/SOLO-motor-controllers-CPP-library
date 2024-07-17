@@ -18,13 +18,13 @@ using std::cout;
 using std::endl;
 
 #include <conio.h>
-#include "SOLOMotorControllersSerial.h"
+#include "SOLOMotorControllersCanopenKvaser.h"
 
 int main(void)
 {
     float readingValue;
     int error;
-    SOLOMotorControllers *solo = new SOLOMotorControllersSerial((char*)"COM3");
+    SOLOMotorControllers *solo = new SOLOMotorControllersCanopenKvaser();
 
     //TRY CONNECT LOOP
     while(solo->CommunicationIsWorking() == false ){
@@ -47,9 +47,4 @@ int main(void)
             std::cout << "Failed to set solo, Error: " <<  error << std::endl;
         }
     }
-    solo->Disconnect();
-
-    cout << "Press Enter to Exit";
-    _getch();
-    return 0;
 }

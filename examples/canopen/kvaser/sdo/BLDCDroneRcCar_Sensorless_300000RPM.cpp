@@ -2,7 +2,7 @@
  *******************************************************************************
  * @file    BLDCDroneRcCar_Sensorless_300000RPM.cpp
  * @authors SOLO Motor Controllers
- * @brief   BLDC Drone-RcCar motor with Sensorless at 300000RPM
+ * @brief   BLDC Drone-RcCar motor  with Sensorless at 300000RPM
  * 
  * @date    Date: 2024
  * @version 1.3.0
@@ -19,7 +19,7 @@ using std::cout;
 using std::endl;
 
 #include <conio.h>
-#include "SOLOMotorControllersSerial.h"
+#include "SOLOMotorControllersCanopenKvaser.h" 
 
 //instanciate a SOLO object:
 SOLOMotorControllers *solo;  
@@ -52,12 +52,10 @@ long actualMotorSpeed = 0;
 void soloConfigInit() {
   //In this example, make sure you put SOLO into Closed-Loop by
   // pressing the Piano Switch NO# 5 DOWN. in SOLO UNO
-
-    std::cout << "BLDCDroneRcCar_Sensorless_300000RPM Serial Test" << std::endl;
   
   //Initialize the SOLO object
-  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersSerial((char*)"COM3",0);
-  solo = new SOLOMotorControllersSerial((char*)"COM3");
+  //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersCanopenKvaser(0);
+  solo = new SOLOMotorControllersCanopenKvaser();
 
   //TRY CONNECT LOOP
   while(solo->CommunicationIsWorking() == false ){

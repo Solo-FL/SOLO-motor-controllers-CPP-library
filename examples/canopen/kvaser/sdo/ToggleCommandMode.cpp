@@ -2,7 +2,7 @@
  *******************************************************************************
  * @file    ToggleCommandMode.cpp
  * @authors SOLO Motor Controllers
- * @brief   Toggle CommandMode
+ * @brief   Toggle Command Mode
  * 
  * @date    Date: 2024
  * @version 1.3.0
@@ -21,7 +21,7 @@ using std::cout;
 using std::endl;
 
 #include <conio.h>
-#include "SOLOMotorControllersSerial.h"
+#include "SOLOMotorControllersCanopenKvaser.h" 
 
 SOLOMotorControllers *solo; 
 int error;
@@ -29,7 +29,7 @@ long commandMode;
 bool setIsSuccesfull;
 
 int main(void) {
-  solo = new SOLOMotorControllersSerial((char*)"COM3");
+  solo = new SOLOMotorControllersCanopenKvaser();
   
   //Infinite Loop
   while(true){

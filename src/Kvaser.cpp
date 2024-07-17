@@ -1,16 +1,16 @@
 /**
  *******************************************************************************
- * @file    SOLOMotorControllersUtils.h
+ * @file    Kvaser.cpp
  * @authors SOLO Motor Controllers
  * @brief   This file contains all the base functions prototypes for the Solo Drivers
  *          Availability: https://github.com/Solo-FL/SOLO-motor-controllers-CPP-library
  * 
- * @date    Date: 2023
- * @version 1.2.0
+ * @date    Date: 2024
+ * @version 1.3.0
  * *******************************************************************************    
  * @attention
- * Copyright: (c) 2021-2023, SOLO motor controllers project
- * GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+ * Copyright: (c) 2021-2024, SOLO motor controllers project
+ * MIT License (see LICENSE file for more details)
  ******************************************************************************* 
  */
 
@@ -167,14 +167,14 @@ bool Kvaser::CANOpenTransmit(int hnd, uint8_t _address, uint16_t _object,uint8_t
 	{
 		if ((rcvMsg[4] == 0x06) && (rcvMsg[5] == 0x02) && (rcvMsg[6] == 0x00) && (rcvMsg[7] == 0x00))
 		{
-			error = SOLOMotorControllers::Error::Abort_Object;
-			//std::cout << "CANOpenTransmit - Abort_Object \n";
+			error = SOLOMotorControllers::Error::abortObject;
+			//std::cout << "CANOpenTransmit - abortObject \n";
 			return false;
 		}
 		else if ((rcvMsg[4] == 0x06) && (rcvMsg[5] == 0x09) && (rcvMsg[6] == 0x00) && (rcvMsg[7] == 0x30))
 		{
-			error = SOLOMotorControllers::Error::Abort_Value;
-			//std::cout << "CANOpenTransmit - Abort_Value \n";
+			error = SOLOMotorControllers::Error::abortValue;
+			//std::cout << "CANOpenTransmit - abortValue \n";
 			return false;
 		}
 	} //End Abort Checking 
@@ -217,7 +217,7 @@ bool Kvaser::CANOpenGenericTransmit(int hnd, uint16_t _ID , uint8_t *_DLC, uint8
 bool Kvaser::CANOpenReceive(int hnd, uint8_t _address, uint16_t _object,uint8_t _subIndex, uint8_t* _informatrionToSend, uint8_t* _informationReceived, int& error)
 {
 	canStatus stat;
-	long ID_Read;
+	long ID_Read = 0;
 	uint8_t  DLC_Read;
 	unsigned int dlc, flags;
 	uint8_t  rcvMsg[8] = { 0,0,0,0,0,0,0,0 };
@@ -274,12 +274,12 @@ bool Kvaser::CANOpenReceive(int hnd, uint8_t _address, uint16_t _object,uint8_t 
 	{
 		if ((rcvMsg[4] == 0x06) && (rcvMsg[5] == 0x02) && (rcvMsg[6] == 0x00) && (rcvMsg[7] == 0x00))
 		{
-			error = SOLOMotorControllers::Error::Abort_Object;
+			error = SOLOMotorControllers::Error::abortObject;
 			return false;
 		}
 		else if ((rcvMsg[4] == 0x06) && (rcvMsg[5] == 0x09) && (rcvMsg[6] == 0x00) && (rcvMsg[7] == 0x30))
 		{
-			error = SOLOMotorControllers::Error::Abort_Value;
+			error = SOLOMotorControllers::Error::abortValue;
 			return false;
 		}
 	} //End Abort Checking

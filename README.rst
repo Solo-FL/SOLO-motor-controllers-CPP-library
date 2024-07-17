@@ -14,7 +14,8 @@ Kvaser works on top of  `Kvaser Drivers for Windows V5.39  <https://www.kvaser.c
 Branch Info
 =======
 
-MAIN BRANCH: The Library is compiled using GCC, supporting Visual Studio Code (`C/C++ for Visual Studio Code extension  <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools>`_)
+MAIN BRANCH: The Library is tested with Visual Studio 2022 
+(or can be compiled using GCC supporting Visual Studio Code (`C/C++ for Visual Studio Code extension  <https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools>`_))
 
 
 Authors
@@ -34,9 +35,9 @@ src/ = Source File folder
 
 examples/ = Examples File folder
 
-  serial/ = Examples over SOLOMotorControllersSerial 
+  serial/ = Examples over Serial 
 
-  kvaser/ = Examples over SOLOMotorControllersKvaser
+  Canopen/ = Examples over CANopen
    
 inc/ = File used by Kvaser implementation
 
@@ -44,16 +45,7 @@ lib/ = .Lib used by Kvaser implementation
 
 vscode example/ = reference over VScode set-up (reference for Build/Debug using VScode)
 
-buildAll.bat = spript for complie all the cpp file in examples and tests (in the main folder, write in the terminal: .\buildAll  )
-
 License
 =======
 
-GNU General Public License v3.0 or later
-
-See `COPYING <COPYING>`_ to see the full text.
-
-.. |License| image:: https://img.shields.io/badge/license-GPL%20v3.0-brightgreen.svg
-   :target: COPYING
-   :alt: Repository License
-
+MIT License

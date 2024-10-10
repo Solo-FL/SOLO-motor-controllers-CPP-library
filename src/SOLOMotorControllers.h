@@ -16,8 +16,31 @@
 
 #pragma once
 
+#ifdef _WIN32
 #include <Windows.h>
 #include <tchar.h>
+#else
+#include <unistd.h>
+#include <cstring>
+#include <cstdint>
+#include <cstdbool> 
+typedef void* HANDLE;
+typedef uint32_t DWORD;
+typedef uint8_t UINT8;
+typedef uint32_t UINT32;
+typedef bool BOOL;
+
+#define GENERIC_READ O_RDONLY
+#define GENERIC_WRITE O_WRONLY
+#define OPEN_EXISTING 0 // POSIX open() uses 0 for existing files
+#define NOPARITY 0
+#define RTS_CONTROL_DISABLE 0
+
+#define FALSE false
+#define TRUE true
+
+#endif
+
 #include <stdio.h>
 
 #ifdef __cplusplus

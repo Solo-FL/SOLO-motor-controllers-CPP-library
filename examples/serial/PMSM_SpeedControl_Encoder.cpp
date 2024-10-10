@@ -18,7 +18,13 @@
 using std::cout;
 using std::endl;
 
+#ifdef _WIN32
 #include <conio.h>
+#else
+#include <unistd.h>
+#define Sleep(x) usleep(x*1000)
+#endif
+
 #include "SOLOMotorControllersSerial.h"
 
 //For this Test, make sure you have calibrated your Motor and Incremental Encoders before
@@ -57,12 +63,12 @@ long actualMotorSpeed = 0;
 // Motor position feedback
 long actualMotorPosition = 0; 
 
-void soloConfigInit() {
+void soloConfigInit(char *portName) {
   //In this example, make sure you put SOLO into Closed-Loop Mode
   
   //Initialize the SOLO object
   //Equivalent, avoiding the default parameter of SOLO Device Address:  solo = new SOLOMotorControllersSerial((char*)"COM3",0);
-  solo = new SOLOMotorControllersSerial((char*)"COM3");
+  solo = new SOLOMotorControllersSerial(portName, 0, SOLOMotorControllers::UartBaudrate::rate115200, 100, 10, true);
 
   //TRY CONNECT LOOP
   while(solo->CommunicationIsWorking() == false ){
@@ -95,8 +101,17 @@ void soloConfigInit() {
   Sleep(2000); 
 }
 
-int main(void) {
-  soloConfigInit();
+int main(int argc, char *argv[]) {
+  if(argc != 2) {
+#ifdef _WIN32
+    std::cout << "Usage: " << argv[0] << " <COMPort e.g. COM3>" << std::endl;
+#else
+    std::cout << "Usage: " << argv[0] << " <device name e.g. ttyS0>" << std::endl;
+#endif
+    return 1;
+  }
+
+  soloConfigInit(argv[1]);
 
   //Infinite Loop
   while(true){

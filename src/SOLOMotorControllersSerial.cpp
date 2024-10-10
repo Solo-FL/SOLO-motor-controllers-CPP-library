@@ -15,10 +15,10 @@
  */
 
 #include "SOLOMotorControllersSerial.h"
-
+#include <string>
 //DEBUG
 // #include "stdio.h"
-// #include <iostream>
+#include <iostream>
 // using std::cout;
 // using std::endl;
 // using std::hex; 
@@ -46,6 +46,7 @@ SOLOMotorControllersSerial::~SOLOMotorControllersSerial()
 	Disconnect();
 }
 
+
 bool SOLOMotorControllersSerial::Connect(char* COMPortName, UINT8 deviceAddress,
  		SOLOMotorControllers::UartBaudrate baudrate,
  		long millisecondsTimeout, int packetFailureTrialAttempts)
@@ -58,6 +59,7 @@ bool SOLOMotorControllersSerial::Connect(char* COMPortName, UINT8 deviceAddress,
 	return SOLOMotorControllersSerial::Connect();
 }
 
+#ifdef _WIN32
 bool SOLOMotorControllersSerial::Connect()
 {
 	if(isConnected){
@@ -160,6 +162,125 @@ void SOLOMotorControllersSerial::Disconnect()
     	//std::cout << std::boolalpha << "Disconnect: "  << Status << std::endl;
 	}
 }
+#else
+
+#include <fcntl.h>
+#include <termios.h>
+#include <sys/ioctl.h>
+#include <linux/serial.h>
+#include <unistd.h>
+#include <errno.h>
+#include <cstring>
+
+int set_custom_baud_rate(int fd, int speed) {
+	#include <asm/termios.h>
+    struct termios2 tio;
+    if (ioctl(fd, TCGETS2, &tio)) {
+        std::cerr << "Error getting termios2: " << strerror(errno) << std::endl;
+        return -1;
+    }
+    tio.c_cflag &= ~CBAUD;
+    tio.c_cflag |= BOTHER;
+    tio.c_ispeed = speed;
+    tio.c_ospeed = speed;
+    if (ioctl(fd, TCSETS2, &tio)) {
+        std::cerr << "Error setting termios2: " << strerror(errno) << std::endl;
+        return -1;
+    }
+    return 0;
+}
+
+
+bool SOLOMotorControllersSerial::Connect()
+{
+    if (isConnected) {
+        // std::cout << "Connect - Already connected " << std::endl;
+        return true;
+    }
+
+    std::string comPortName = "/dev/" + std::string(portName); // ComPortName = "/dev/" + portName
+    //std::cout << "Connect - connection start ComPortName:" << comPortName << std::endl;
+
+    // Opening the serial port
+    hSerial = open(comPortName.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
+    usleep(100000); // Sleep for 100ms
+
+    if (hSerial < 0) {
+        std::cout << "Connect - hSerial: error opening serial port - " << strerror(errno) << std::endl;
+        return false;
+    }
+
+    // Setting Parameters
+    struct termios tty;
+    memset(&tty, 0, sizeof tty);
+
+    if (tcgetattr(hSerial, &tty) != 0) {
+        std::cout << "Connect - tcgetattr: error getting state - " << strerror(errno) << std::endl;
+        return false;
+    }
+
+    switch (uartBaudrate) {
+        case 0:
+			//std::cout << "Connect - rate937500" << std::endl;
+			if(set_custom_baud_rate(hSerial, 937500) != 0){
+				std::cout << "Connect - set_custom_baud_rate: error setting custom baud rate - " << strerror(errno) << std::endl;
+				return false;
+			}
+            break;
+        case 1:
+			//std::cout << "Connect - rate115200" << std::endl;
+            cfsetospeed(&tty, B115200);
+            cfsetispeed(&tty, B115200);
+            break;
+        default:
+			//std::cout << "Connect - rate115200 (default)" << std::endl;
+            cfsetospeed(&tty, B115200);
+            cfsetispeed(&tty, B115200);
+            break;
+    }
+
+    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8; // 8-bit chars
+    tty.c_iflag &= ~IGNBRK;                     // disable break processing
+    tty.c_lflag = 0;                            // no signaling chars, no echo,
+                                                // no canonical processing
+    tty.c_oflag = 0;                            // no remapping, no delays
+    tty.c_cc[VMIN] = 0;                         // read doesn't block
+    tty.c_cc[VTIME] = timeout / 100;            // timeout in deciseconds
+
+    tty.c_iflag &= ~(IXON | IXOFF | IXANY);     // shut off xon/xoff ctrl
+
+    tty.c_cflag |= (CLOCAL | CREAD);            // ignore modem controls,
+                                                // enable reading
+    tty.c_cflag &= ~(PARENB | PARODD);          // shut off parity
+    tty.c_cflag |= 0;
+    tty.c_cflag &= ~CSTOPB;
+    tty.c_cflag &= ~CRTSCTS;
+
+    if (tcsetattr(hSerial, TCSANOW, &tty) != 0) {
+        std::cout << "Connect - tcsetattr: error setting serial port state - " << strerror(errno) << std::endl;
+        return false;
+    }
+
+    // std::cout << "Connect - connection success" << std::endl;
+    isConnected = true;
+    usleep(100000); // Sleep for 100ms
+    return true;
+}
+
+void SOLOMotorControllersSerial::Disconnect()
+{
+    if (isConnected == true)
+    {
+        isConnected = false;
+        usleep(500000); // Sleep for 500ms
+        close(hSerial);
+        usleep(500000); // Sleep for 500ms
+        // std::cout << std::boolalpha << "Disconnect: " << (Status == 0) << std::endl;
+    }
+}
+
+
+#endif
 
 bool SOLOMotorControllersSerial::Test()
 {
@@ -181,7 +302,7 @@ bool SOLOMotorControllersSerial::ExeCMD(unsigned char* cmd, int& error)
 
 	bool isPacketFailureTrialAttemptsOverflow = true;
 	//FailureTrialAttempts block
-	for (int attempts = 0; attempts < trialCount; attempts++){ 
+	for (UINT32 attempts = 0; attempts < trialCount; attempts++){ 
     if (!isConnected) {
       SOLOMotorControllersSerial::Connect();
     }
@@ -206,13 +327,17 @@ bool SOLOMotorControllersSerial::ExeCMD(unsigned char* cmd, int& error)
     // Status = CancelIo(hSerial);
     // std::cout << "CancelIo Status: " << Status << std::endl; 
 
+#ifdef _WIN32
     //https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-writefileex
-		Status = WriteFile(hSerial,               // Handle to the Serialport
-			_cmd,            // Data to be written to the port 
-			dNoOFBytestoWrite,   // No of bytes to write into the port
-			&dNoOfBytesWritten,  // No of bytes written to the port
-			NULL);
-    //std::cout << "ExeCMD - WriteFile Status: " << Status << std::endl; 
+        Status = WriteFile(hSerial,               // Handle to the Serialport
+            _cmd,            // Data to be written to the port 
+            dNoOFBytestoWrite,   // No of bytes to write into the port
+            &dNoOfBytesWritten,  // No of bytes written to the port
+            NULL);
+#else
+        dNoOfBytesWritten = write(hSerial, _cmd, dNoOFBytestoWrite);
+        Status = (dNoOfBytesWritten == dNoOFBytestoWrite);
+#endif
 
 		//std::cout << "ExeCMD - WriteFile Status: " << Status <<" BytestoWrite: "<< dNoOFBytestoWrite <<" BytesWritten: "<< dNoOfBytesWritten << " isConnected: "<< isConnected <<" hSerial: "<<hSerial <<std::endl; 	
 		if (Status == FALSE) {
@@ -224,7 +349,6 @@ bool SOLOMotorControllersSerial::ExeCMD(unsigned char* cmd, int& error)
 		}
 
 		/*------------------------------------ Setting Receive Mask ----------------------------------------------*/
-
     Status = TRUE;
 		//Status = SetCommMask(hSerial, EV_RXCHAR); //Configure Windows to Monitor the serial device for Character Reception
 		//std::cout << "ExeCMD - SetCommMask Status: " << Status << std::endl; 
@@ -237,7 +361,12 @@ bool SOLOMotorControllersSerial::ExeCMD(unsigned char* cmd, int& error)
 		// {
 			do
 			{
-				Status = ReadFile(hSerial, &TempChar, 1, &NoBytesRecieved, NULL);
+#ifdef _WIN32
+            	Status = ReadFile(hSerial, &TempChar, 1, &NoBytesRecieved, NULL);
+#else
+				NoBytesRecieved = read(hSerial, &TempChar, 1);
+				Status = (NoBytesRecieved > 0);
+#endif
 				_readPacket[idx] = TempChar;
 				//Read messages
 				//std::cout << (long) _readPacket[idx] << " ("<<(long)idx <<"-"<< NoBytesRecieved <<")  ";

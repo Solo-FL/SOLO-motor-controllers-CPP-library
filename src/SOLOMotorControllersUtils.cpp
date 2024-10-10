@@ -121,11 +121,6 @@ bool SOLOMotorControllersUtils::SetProducerHeartbeatTimeInputValidation(long pro
 
 bool SOLOMotorControllersUtils::SetDeviceAddressInputValidation(unsigned char deviceAddress, int& error)
 {
-	if (deviceAddress < 0 || deviceAddress > 254)
-	{
-		error = SOLOMotorControllers::Error::outOfRengeSetting;
-		return false;
-	}
 	return true;
 }
 bool SOLOMotorControllersUtils::SetCurrentLimitInputValidation(float currentLimit, int& error)

@@ -16,12 +16,16 @@
 
 #pragma once
 
-#include <Windows.h>
-#include <tchar.h>
 #include <stdio.h>
 
 #include "SOLOMotorControllers.h"
 #include "SOLOMotorControllersUtils.h"
+
+#ifndef _WIN32
+#include <cstdio>
+#define sprintf_s(buffer, size, format, ...) snprintf(buffer, size, format, ##__VA_ARGS__)
+#endif
+
 
 #ifdef __cplusplus
 extern "C"
@@ -171,7 +175,11 @@ extern "C"
 		UINT8 addr = 0;
 		char* portName;
 		bool isConnected = false;
+		#ifdef _WIN32
 		HANDLE hSerial;
+		#else
+		int hSerial;
+		#endif
 		UINT32 uartBaudrate;
 		UINT32 timeout;
 		UINT32 trialCount;
